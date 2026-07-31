@@ -1,0 +1,181 @@
+# Custom Pack for dcg — Process-hygiene protection for harnessed agents
+#
+# Agent harnesses (Claude Code, Codex, and similar) spawn a helper process
+# tree for every shell call and a periodic monitor that polls background
+# tasks. The harness does not reliably reap these. A construct that forks a
+# child per loop iteration (a poll loop), a long-lived watcher the monitor
+# keeps polling (gh run watch, a backgrounded sleep), or a sleep used to
+# pace a loop accumulates monitored processes across turns and concurrent
+# agents until the per-user process limit is hit: posix_spawn returns
+# EAGAIN, the monitor's pgrep keeps failing, and the agent is force-killed,
+# taking concurrent agents' uncommitted work with it. This has happened
+# more than once.
+#
+# This pack blocks the loop, watch, and background forms that leak processes
+# while leaving a bare one-shot `sleep N` allowed (the documented short-wait
+# carve-out: a single sleep followed by a single non-looping check).
+#
+# Schema: docs/pack.schema.yaml
+# Documentation: docs/custom-packs.md
+
+schema_version: 1
+
+id: silvarbor.process_hygiene
+
+name: Process Hygiene — Harnessed Agents
+
+version: 1.1.0
+
+description: |
+  Blocks the shell constructs that leak unreaped processes under an agent
+  harness and exhaust the per-user process limit. A poll loop forks a
+  process tree per iteration; `gh run watch` and a backgrounded `sleep`
+  are long-lived children the monitor keeps polling; a sleep inside a loop
+  paces work by spawning. None are reaped reliably, and across turns and
+  concurrent agents they accumulate until posix_spawn fails and the agent
+  is force-killed.
+
+  Wait out-of-band instead: hand the wait to the runtime timer
+  (ScheduleWakeup / a recurring loop) or start a single background command
+  and let the harness notify on completion. For a short wait, run a single
+  `sleep N` then a single non-looping check — that one-shot form stays
+  allowed.
+
+  Covered:
+    - `until ...; do ...; done` poll loops (categorical)
+    - `while` / `for` loops containing `sleep` (sleep-paced / polling)
+    - `while` loops polling a network/service probe in the condition
+    - backgrounded `sleep N &`
+    - `gh run watch`
+
+  Allowed (not matched):
+    - a bare one-shot `sleep N` (and `sleep N; <single check>`)
+    - `while read ... ; do ... done` and other non-sleeping, non-probing loops
+
+keywords:
+  - sleep
+  - until
+  - while
+  - gh
+
+destructive_patterns:
+  - name: poll-loop-until
+    # Any `until` loop. The keyword is anchored to a statement boundary
+    # (start, ; && || & |, then, do) so the English word "until" inside a
+    # string or comment is not matched. `until` loops are categorically a
+    # polling wait — there is no non-polling use of `until` in agent shell.
+    pattern: '(?:^|[\n;&|(]|\bthen\b|\bdo\b)\s*until\b'
+    severity: high
+    description: "`until` loop blocked — a polling wait that forks a process tree per iteration the harness does not reap"
+    explanation: |
+      An `until <check>; do ...; done` loop re-spawns its condition and body
+      every iteration. The harness does not reliably reap those children, so
+      across turns and concurrent agents they accumulate until the per-user
+      process limit is hit and the agent is force-killed.
+
+      Wait out-of-band instead:
+        - ScheduleWakeup (or a recurring loop) to re-check on the next turn
+        - a single background command + the harness completion notification
+        - for a short wait: one `sleep N` then one non-looping check
+
+  - name: poll-loop-sleep
+    # A `while` or `for` loop that contains `sleep` anywhere in its body —
+    # the sleep-paced / polling form. Statement-anchored to avoid matching
+    # the words in prose. `[\s\S]*?` crosses newlines for multi-line loops.
+    pattern: '(?:^|[\n;&|(]|\bthen\b|\bdo\b)\s*(?:while|for)\b[\s\S]*?\bsleep\b'
+    severity: high
+    description: "loop containing `sleep` blocked — a sleep-paced or polling loop that leaks processes per iteration"
+    explanation: |
+      A `while`/`for` loop with a `sleep` in its body paces work by spawning
+      a process tree each iteration. The harness does not reliably reap them,
+      and the pile of monitored children is the pgrep storm that exhausts the
+      host.
+
+      Wait out-of-band instead:
+        - ScheduleWakeup (or a recurring loop) to re-check on the next turn
+        - a single background command + the harness completion notification
+        - for a short wait: one `sleep N` then one non-looping check
+
+  - name: poll-loop-probe
+    # A `while` loop whose condition (everything up to the first `;`) runs a
+    # network or service probe — the sleepless busy-poll form, e.g.
+    # `while ! nc -z host port; do ...; done`. `[^;]*` keeps the probe in the
+    # condition, so `while read x; do curl ...; done` (a legit batch) is not
+    # matched.
+    pattern: '(?:^|[\n;&|(]|\bthen\b|\bdo\b)\s*while\b[^;]*\b(?:curl|wget|nc|ncat|gh|ping|pg_isready|redis-cli|nslookup|dig|telnet)\b'
+    severity: high
+    description: "`while` loop polling a network/service probe blocked — a busy-poll that re-forks the probe each iteration"
+    explanation: |
+      A `while ! <probe>; do ...; done` loop re-runs the probe (curl, nc, gh,
+      ping, …) every iteration with no reliable reaping. Even without a
+      `sleep`, the per-iteration fork accumulates under the harness monitor.
+
+      Wait out-of-band instead:
+        - ScheduleWakeup (or a recurring loop) to re-check on the next turn
+        - a single background command + the harness completion notification
+        - for a short wait: one `sleep N` then one non-looping check
+
+  - name: background-sleep
+    # `sleep N &` — a detached timer the monitor keeps polling and may not
+    # reap. The negative lookahead `(?!&)` excludes `sleep N && ...`, where
+    # the `&&` is a logical AND, not a background operator.
+    pattern: '(?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}sleep\s+\S+\s*&(?!&)'
+    severity: high
+    description: "backgrounded `sleep` blocked — a detached timer the harness monitor keeps polling and may not reap"
+    explanation: |
+      `sleep N &` detaches a timer process. The harness monitor pgrep's it on
+      a timer and does not reliably reap it; backgrounded sleeps started to
+      "stay alive" or pace work are the keep-alive anti-pattern that piles up
+      monitored processes.
+
+      Wait out-of-band instead:
+        - ScheduleWakeup (or a recurring loop) to re-check on the next turn
+        - a single background command that exits on its own + the harness
+          completion notification
+
+  - name: gh-run-watch
+    # `gh run watch` (any form, with or without --exit-status) — a long-lived
+    # watcher subprocess the harness does not reliably reap.
+    pattern: '(?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}gh\s+run\s+watch\b'
+    severity: high
+    description: "`gh run watch` blocked — a long-lived watcher the harness does not reliably reap"
+    explanation: |
+      `gh run watch` polls the GitHub API in-process and holds the harness's
+      per-call process tree open until the CI run finishes — often many
+      minutes. Unlike a poll loop it does NOT fork per iteration, so the cost
+      is one long-lived tree per invocation rather than one per tick.
+
+      Be honest about the limit of this rule: `gh pr checks --watch` is also
+      a long-lived foreground watcher and is NOT blocked. Measured against
+      "unreaped process tree" alone, the two are equivalent, and this rule
+      does not rest on that distinction. The pack blocks one and permits the
+      other for three specific reasons, none of them per-iteration forking:
+
+        - poll rate: `gh run watch` defaults to `-i 3` (every 3 seconds);
+          `gh pr checks --watch` defaults to 10 and the manage-pr skill
+          mandates `--interval 30`, roughly a tenth of the API traffic
+        - termination: `--fail-fast` ends the wait at the first failing
+          check, while `--exit-status` only sets the exit code, so
+          `gh run watch` runs to completion either way
+        - fan-out: `gh run watch` follows ONE run, so a PR with N workflows
+          needs N concurrent watchers; `gh pr checks --watch` covers the
+          whole check rollup in a single process. This is the only one of
+          the three that is genuinely a process-count argument.
+
+      Several of our CI and PR skills forbid this command independently;
+      this rule is the backstop for agents that do not load them.
+
+      Check CI without watching, then re-check out-of-band:
+        - gh run view <run-id> --json status,conclusion
+        - gh run list --branch <branch> --json databaseId,status,conclusion
+        - gh pr checks <pr> --watch --fail-fast --interval 30 (allowed — the
+          single bounded foreground wait this policy standardizes on)
+        - ScheduleWakeup (or a recurring loop) to re-check on the next turn
+
+safe_patterns:
+  - name: sleep-and-logical-and
+    # `sleep N && <cmd>` is a one-shot sleep gating a single follow-up, not a
+    # background timer. The background-sleep `(?!&)` lookahead already
+    # excludes it; this documents the carve-out explicitly.
+    pattern: '\bsleep\s+\S+\s*&&'
+    description: "`sleep N && <cmd>` is a one-shot sleep before a single command, not a backgrounded timer"

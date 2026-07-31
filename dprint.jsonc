@@ -1,0 +1,73 @@
+// dprint config for dcg-plugins.
+//
+// Two exclusions matter here:
+//
+//   1. **/*.toml — the example configs are hand-formatted with 4-space indent
+//      and column-aligned trailing comments. The TOML plugin reindents to 2 and
+//      strips the alignment padding, which turns a small edit into a whole-file
+//      diff. Setting toml.indentWidth to 4 fixes the indent but not the
+//      alignment, so the files are left alone entirely.
+//
+//   2. packs/**/*.yaml — the packs carry long UNQUOTED regex scalars containing
+//      backticks, quantifiers, and lookaheads. pretty_yaml leaves them alone
+//      today, but a version that requoted or folded one of those scalars would
+//      silently alter a security rule while the pack still validated clean.
+//      That failure mode has no visible signal, so the exposure is not worth a
+//      formatting nicety.
+//
+// Markdown IS formatted. The plugin rewrites code spans — a nested-backtick
+// span in packs/readme.md had to be moved into a fenced block. Prefer fenced
+// blocks for anything containing a backtick.
+{
+  "includes": [
+    "**/*.{ts,tsx,js,jsx,json,jsonc,md,mdx,toml,py,yaml,yml,css,scss,html,vue,svelte}",
+  ],
+  "dockerfile": {},
+  // Rust is formatted with cargo fmt, not dprint.
+  "excludes": [
+    "**/node_modules",
+    "**/*-lock.json",
+    "**/semgrep_*.yaml",
+    "**/*.rs",
+    // Repo-local — see the header comment.
+    "**/*.toml",
+    "packs/**/*.yaml",
+  ],
+  "json": {
+    "trailingCommas": "jsonc",
+    "array.preferSingleLine": false,
+    "object.preferSingleLine": false,
+  },
+  "jupyter": {},
+  "malva": {},
+  "markdown": {
+    "associations": ["**/*.md", "**/*.mdx"],
+    "emphasisKind": "asterisks",
+    "strongKind": "asterisks",
+    "textWrap": "maintain",
+    "unorderedListKind": "dashes",
+    "lineWidth": 9999,
+  },
+  "markup": {
+    "associations": ["!**/*.md", "!**/layouts/**/*"],
+    "closingBracketSameLine": false,
+    "singleAttrSameLine": false,
+    "printWidth": 9999,
+  },
+  "plugins": [
+    "https://plugins.dprint.dev/typescript-0.95.13.wasm",
+    "https://plugins.dprint.dev/json-0.21.1.wasm",
+    "https://plugins.dprint.dev/markdown-0.20.0.wasm",
+    "https://plugins.dprint.dev/toml-0.7.0.wasm",
+    "https://plugins.dprint.dev/dockerfile-0.3.3.wasm",
+    "https://plugins.dprint.dev/ruff-0.6.11.wasm",
+    "https://plugins.dprint.dev/jupyter-0.2.1.wasm",
+    "https://plugins.dprint.dev/g-plane/malva-v0.15.1.wasm",
+    "https://plugins.dprint.dev/g-plane/markup_fmt-v0.25.3.wasm",
+    "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.5.1.wasm",
+  ],
+  "ruff": {},
+  "toml": {},
+  "typescript": {},
+  "yaml": {},
+}

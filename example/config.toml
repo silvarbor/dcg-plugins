@@ -1,0 +1,64 @@
+# EXAMPLE dcg config — the setup these packs are developed against.
+#
+# Copy to ~/.config/dcg/config.toml and adjust. The only line that matters for
+# installing these packs is the custom_paths entry pointing at packs/. The
+# enabled list below is our own selection of dcg's built-in packs and is not a
+# requirement.
+#
+# See also example/allowlist.toml, which is NOT optional — silvarbor.git_safety
+# permits reset, path checkout, restore, and branch deletion, but dcg's built-in
+# core.git pack blocks all four and a custom pack cannot un-block them.
+
+[general]
+# Hook evaluation budget. Default is 200ms; raised to 500ms because dcg 0.7.1's
+# shell-grammar parser costs ~7-8x on command lines with nested $(...) — a
+# 992-char line measures 3.1ms plain vs 26ms with 16 substitutions — and long
+# agent commands with many nested substitutions were exceeding the 200ms budget.
+# Env override: DCG_HOOK_TIMEOUT_MS
+hook_timeout_ms = 500
+
+[packs]
+custom_paths = [
+    "~/Code/silvarbor/dcg-plugins/packs/*.yaml",  # This repo
+    "~/.config/dcg/packs/*.yaml",      # Your own user packs
+    ".dcg/packs/*.yaml",               # Project-local packs
+]
+enabled = [
+    # Databases
+    "database.postgresql",
+    "database.redis",
+    # "database.supabase",
+
+    # Containers and orchestration
+    "containers.docker",
+    # "kubernetes",  # Enables all kubernetes sub-packs
+
+    # Cloud providers
+    # "cloud.aws",
+    # "cloud.gcp",
+
+    # Secrets management
+    # "secrets.aws_secrets",
+    # "secrets.vault",
+    "secrets.onepassword",
+
+    # CI/CD
+    # "cicd.jenkins",
+    # "cicd.gitlab_ci",
+
+    # Messaging
+    # "messaging.kafka",
+    # "messaging.sqs_sns",
+
+    # Search engines
+    # "search.elasticsearch",
+    
+    # Backup
+    # "backup.restic",
+
+    # Platform
+    "platform.github",
+
+    # Monitoring
+    # "monitoring.splunk",
+]

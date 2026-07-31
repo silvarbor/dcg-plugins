@@ -1,0 +1,7 @@
+# macOS
+.DS_Store
+
+# dcg ephemeral state — captures full command lines (including arguments and
+# cwd) for each guarded invocation, and may contain secrets if a guarded
+# command ever has one in argv. Never commit this.
+pending_exceptions.jsonl

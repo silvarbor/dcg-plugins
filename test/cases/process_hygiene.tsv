@@ -1,0 +1,29 @@
+# silvarbor.process_hygiene - case matrix
+#
+# Format: <expected>\t<label>\t<command>     (TAB separated, exactly 3 columns)
+#   expected : ALLOW or DENY
+#   label    : short identifier; the prefix conveys intent
+#              tp_ true positive (must DENY)    tn_ true negative (must ALLOW)
+#              sp_ safe-pattern carve-out       fp_ false-positive guard
+#   command  : the command line handed to `dcg explain`.
+#              A literal \n in this column becomes a real newline.
+#
+# Blank lines and lines starting with # are ignored.
+#
+# Runs against your REAL dcg config.
+DENY	tp_until_oneliner	until curl -sf localhost:8080; do echo x; done
+DENY	tp_while_true_sleep	while true; do sleep 5; done
+DENY	tp_while_probe	while ! nc -z localhost 5432; do echo waiting; done
+DENY	tp_background_sleep	sleep 30 &
+DENY	tp_multiline_until	cd /srv\nuntil curl -sf localhost:8080; do echo x; done
+DENY	tp_subshell_loop	(while true; do sleep 5; done)
+DENY	tp_gh_run_watch	gh run watch 123
+DENY	tp_gh_run_watch_exit	gh run watch 123 --exit-status
+ALLOW	fp_prose_advice	Never use shell sleep, until/while polling, or a backgrounded watcher.
+ALLOW	fp_grep_for_terms	grep -rn "until" docs/ && grep -rn "sleep 5 &" docs/
+ALLOW	fp_probe_string_arg	probe "no_poll_loop" "while true; do sleep"
+ALLOW	sp_sleep_and_and	sleep 5 && git status
+ALLOW	sp_sleep_semicolon	sleep 5; git status
+ALLOW	tn_while_read_loop	while read -r line; do echo "$line"; done < file.txt
+ALLOW	tn_gh_pr_checks	gh pr checks 42 --watch --fail-fast --interval 30
+ALLOW	tn_gh_run_view	gh run view 123 --json status,conclusion

@@ -159,10 +159,10 @@ Single quotes, double quotes, and unquoted prose are all fine.
 ## Verification
 
 Every rule is covered by a case matrix run against the real binary, not by
-inspection:
+inspection. 104 cases in total, all committed under `test/`:
 
-- **`git_safety.worktree_isolated`** — 52 cases: 23 cross-boundary operations
-  expected DENY, 23 worktree-local and routine operations expected ALLOW, and 6
+- **`git_safety.worktree_isolated`** — 51 cases: 23 cross-boundary operations
+  expected DENY, 22 worktree-local and routine operations expected ALLOW, and 6
   prose / neighbouring-command false-positive guards.
 - **`git_safety.shared_checkout`** — 37 cases covering every rule, every
   carve-out, and the prose guards, run against a throwaway config whose
@@ -174,8 +174,17 @@ inspection:
 All three packs validate clean with zero warnings under `dcg pack validate`.
 Last run against dcg 0.7.8.
 
-`packs/readme.md` carries the full scope tables, the reasoning behind each
-decision, and the notes on switching between the two git packs.
+Run them yourself:
+
+```sh
+test/run.sh          # all three suites
+test/run.sh -v       # show every case
+```
+
+`AGENTS.md` covers working on the packs, including why this repo is a published
+copy rather than the source of truth. `packs/readme.md` carries the full scope
+tables, the reasoning behind each decision, and the notes on switching between
+the two git packs.
 
 ## Status
 

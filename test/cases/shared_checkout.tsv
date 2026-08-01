@@ -1,0 +1,51 @@
+# silvarbor.git_safety.shared_checkout - case matrix
+#
+# Format: <expected>\t<label>\t<command>     (TAB separated, exactly 3 columns)
+#   expected : ALLOW or DENY
+#   label    : short identifier; the prefix conveys intent
+#              tp_ true positive (must DENY)    tn_ true negative (must ALLOW)
+#              sp_ safe-pattern carve-out       fp_ false-positive guard
+#   command  : the command line handed to `dcg explain`.
+#              A literal \n in this column becomes a real newline.
+#
+# Blank lines and lines starting with # are ignored.
+#
+# Runs against a throwaway config whose custom_paths points ONLY at
+# packs/disabled/, so the shared pack id cannot collide with the active pack.
+ALLOW	sp_clean_dryrun	git clean --dry-run -d
+ALLOW	sp_clean_n	git clean -n
+ALLOW	sp_push_includes	git push --force-if-includes origin main
+ALLOW	sp_push_lease	git push --force-with-lease origin main
+ALLOW	sp_restore_staged	git restore --staged src/main.rs
+ALLOW	sp_stash_list	git stash list
+ALLOW	sp_stash_show	git stash show -p
+ALLOW	tn_checkout_branch	git checkout main
+ALLOW	tn_echo_lease_tail	echo hint --force-with-lease
+ALLOW	tn_grep_reset	grep -rn 'reset --hard' docs/
+ALLOW	tn_log_then_ls	git log --oneline; ls stash clear
+ALLOW	tn_prose_double	echo "the git reset --hard rule"
+ALLOW	tn_prose_single	echo 'never run git clean -fdx here'
+ALLOW	tn_push_plain	git push origin main
+ALLOW	tn_status	git status --short
+ALLOW	tn_switch	git switch -c feature/x
+DENY	tp_after_andand	cd /repo && git clean -fd
+DENY	tp_after_semicolon	cd /repo; git reset --hard
+DENY	tp_branch_D	git branch -D feature/x
+DENY	tp_branch_r_d	git branch -r -d origin/x
+DENY	tp_checkout_HEAD	git checkout HEAD src/
+DENY	tp_checkout_dashdash	git checkout -- src/main.rs
+DENY	tp_checkout_dot	git checkout .
+DENY	tp_clean_f	git clean -f
+DENY	tp_clean_fdx	git clean -fdx
+DENY	tp_clean_split	git clean -d -f
+DENY	tp_env_prefix	GIT_DIR=/r git stash clear
+DENY	tp_push_force_long	git push --force origin main
+DENY	tp_push_force_short	git push -f origin main
+DENY	tp_push_force_tail	git push origin main --force
+DENY	tp_reset_hard	git reset --hard HEAD~1
+DENY	tp_reset_soft	git reset --soft HEAD~1
+DENY	tp_restore	git restore src/main.rs
+DENY	tp_stash_C_flag	git -C /repo stash drop
+DENY	tp_stash_pop	git stash pop
+DENY	tp_stash_push	git stash push -m wip
+DENY	tp_sudo_wrapper	sudo git clean -f

@@ -24,7 +24,8 @@ Files that genuinely live here and are never overwritten: `README.md`,
 ## Why the copy goes this direction
 
 A dcg `custom_paths` glob that matches nothing is a **silent, total loss of
-protection**. Measured against dcg 0.7.8 with a deliberately dead path:
+protection**. Measured against dcg 0.7.8 with a deliberately dead path (re-confirmed on
+0.8.0):
 
 ```
 silvarbor packs listed : 0
@@ -75,6 +76,11 @@ separate them. Pass document bodies by `<` redirect.
 formatter that requoted or folded one would silently alter a security rule
 while it still validated clean. Markdown is formatted and it rewrites inline
 code spans, so anything containing a backtick belongs in a fenced block.
+
+Note that these exclusions only apply to `dprint` invoked without an explicit
+`--config`. An editor or agent hook that passes `--config <global>` bypasses
+per-directory resolution and will reformat the excluded files anyway. Check
+your diffs.
 
 ## Pattern conventions
 

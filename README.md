@@ -172,7 +172,7 @@ inspection. 104 cases in total, all committed under `test/`:
   forms.
 
 All three packs validate clean with zero warnings under `dcg pack validate`.
-Last run against dcg 0.7.8.
+Last run against dcg 0.8.0.
 
 Run them yourself:
 

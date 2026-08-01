@@ -118,8 +118,9 @@ only be whitespace or the separator itself, never a quote or backtick.
 
 The two repetitions are bounded (`{0,4}`, `{0,2}`) rather than starred.
 With `*` they are nested quantifiers, and a long non-matching command line
-drove enough backtracking to overrun the hook evaluation budget — see
-`hook_timeout_ms` under Related files.
+drove enough backtracking to overrun the hook evaluation budget. See the
+`../example/config.toml` entry under Related files for the measurements and for
+why the timeout override that accompanied this fix is no longer needed.
 
 **2. Walk intervening tokens with the bounded class, not the greedy one:**
 
@@ -258,16 +259,19 @@ argument value, which is more fragile than every other rule here.
 ## Related files
 
 - `../example/config.toml` — DCG config; `custom_paths` includes this directory.
-  Also sets `[general] hook_timeout_ms = 500`, raised from the 200ms
-  default. dcg 0.7.1's shell-grammar parser costs roughly 7–8× on command
+  It sets no `hook_timeout_ms`. It briefly pinned 500 while the default was
+  200ms: dcg 0.7.1's shell-grammar parser costs roughly 7–8× on command
   lines carrying nested `$(...)` — a 992-char line measures 3.1ms plain
   against 26ms with 16 substitutions — and long agent command lines were
-  overrunning the default budget. The bounded quantifiers in the pack
-  prefixes address the pack-attributable share (~25ms); the timeout covers
-  the parser. Env override: `DCG_HOOK_TIMEOUT_MS`. Note that dcg 0.7.1 also
-  fails closed on a substitution *count* cap ("too many substitutions for
-  bounded static analysis") that no config key controls — raising the
-  timeout does not affect it.
+  overrunning the budget. dcg 0.8.0 raised the default to 1000, so the
+  override was dropped; keeping it would now *cap* the budget below the
+  shipped default. Env override if ever needed: `DCG_HOOK_TIMEOUT_MS`.
+
+  The bounded quantifiers in the pack prefixes remain the pack-attributable
+  half of that fix (~25ms) and are not affected by the default change. Note
+  also that dcg fails closed on a substitution *count* cap ("too many
+  substitutions for bounded static analysis") which no config key controls —
+  no timeout value affects it.
 - `../example/allowlist.toml` — rule-specific policy overrides. Switches off the
   built-in `core.git` rules for operations the worktree boundary already
   contains (reset, path checkout, restore, branch deletion) and hands the

@@ -194,4 +194,6 @@ a worktree pool under an agent harness. Read the charter before adopting them;
 if your agents share a working tree, the pack in `packs/disabled/` is the one
 you want, and if they are fully isolated the git pack may be more than you need.
 
-No license has been chosen yet, so default copyright applies. Ask before reuse.
+Licensed under the Apache License 2.0 — see `LICENSE` and `NOTICE`. The packs
+carry SPDX headers so provenance travels with them once they are copied into a
+`~/.config/dcg` somewhere else.

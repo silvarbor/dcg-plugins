@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 Simon Heimlicher
+# Part of https://github.com/silvarbor/dcg-plugins
+#
 # Custom Pack for dcg — Git protection for agents sharing a working tree
 #
 # Companion to silvarbor.git_safety.worktree_isolated. Enable this pack when

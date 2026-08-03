@@ -45,10 +45,20 @@ harmless — rather than a disarmed guard.
 ## Testing
 
 ```sh
-test/run.sh          # 104 cases across all three packs
+test/run.sh          # both suites (104 cases)
+test/run.sh corpus   # only dcg's official corpus harness
 test/run.sh -v       # show every case
-test/run.sh process_hygiene
+
+dcg corpus -d tests/corpus --baseline tests/baseline.json   # the official path
 ```
+
+Two suites, because one tool cannot express both. `tests/corpus/` (61 cases)
+runs under **`dcg corpus`**, dcg's own regression harness, with a `rule_id`
+asserted per case and `tests/baseline.json` turning regressions into a non-zero
+exit. `test/cases/` (43 cases) runs against `dcg explain`, because `dcg corpus`
+evaluates pack matching *without* applying `allowlist.toml` and has no
+`--config` flag — so neither the allowlist-dependent ALLOWs nor the
+shared_checkout pack can be expressed there. Verified against dcg 0.9.0.
 
 Requires `dcg` on `PATH`. The `worktree_isolated` and `process_hygiene` suites
 run against **your** dcg config, so they double as an installation check:

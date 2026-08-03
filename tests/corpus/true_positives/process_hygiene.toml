@@ -1,0 +1,47 @@
+# true positives / process hygiene
+#
+# Corpus cases for the silvarbor dcg packs, in the format documented at
+# tests/corpus/README.md upstream. Run with:
+#
+#     dcg corpus -d tests/corpus --baseline tests/baseline.json
+#
+# NOTE: `dcg corpus` evaluates PACK MATCHING and does not apply allowlist.toml.
+# Cases whose expected verdict depends on an allowlist entry cannot live here;
+# they are in test/cases/*.tsv and run by test/run.sh. See test/README.md.
+
+
+[[case]]
+description = "backgrounded sleep is a detached timer the harness may not reap"
+command = "sleep 30 &"
+expected = "deny"
+rule_id = "silvarbor.process_hygiene:background-sleep"
+
+[[case]]
+description = "gh run watch is a long-lived watcher held open per invocation"
+command = "gh run watch 123"
+expected = "deny"
+rule_id = "silvarbor.process_hygiene:gh-run-watch"
+
+[[case]]
+description = "gh run watch --exit-status still runs to completion"
+command = "gh run watch 123 --exit-status"
+expected = "deny"
+rule_id = "silvarbor.process_hygiene:gh-run-watch"
+
+[[case]]
+description = "until loop is a polling wait that forks per iteration"
+command = "until curl -sf localhost:8080; do echo x; done"
+expected = "deny"
+rule_id = "silvarbor.process_hygiene:poll-loop-until"
+
+[[case]]
+description = "while loop polling a network probe re-forks the probe each iteration"
+command = "while ! nc -z localhost 5432; do echo waiting; done"
+expected = "deny"
+rule_id = "silvarbor.process_hygiene:poll-loop-probe"
+
+[[case]]
+description = "while loop containing sleep paces work by spawning"
+command = "while true; do sleep 5; done"
+expected = "deny"
+rule_id = "silvarbor.process_hygiene:poll-loop-sleep"

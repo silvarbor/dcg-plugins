@@ -159,7 +159,20 @@ Single quotes, double quotes, and unquoted prose are all fine.
 ## Verification
 
 Every rule is covered by a case matrix run against the real binary, not by
-inspection. 104 cases in total, all committed under `test/`:
+inspection. 104 cases in total, split across dcg's official harness and a
+supplementary suite:
+
+- **`tests/corpus/`** (61 cases) runs under `dcg corpus`, dcg's own regression
+  harness, in the upstream `true_positives` / `false_positives` /
+  `bypass_attempts` taxonomy. Every case asserts a `rule_id`, so a command
+  denied by the *wrong* rule is a failure, and `tests/baseline.json` makes
+  regressions a non-zero exit rather than a judgement call.
+- **`test/cases/`** (43 cases) runs against `dcg explain`. `dcg corpus`
+  deliberately evaluates pack matching without applying `allowlist.toml`, and
+  has no `--config` flag, so the allowlist-dependent ALLOWs and the
+  shared_checkout pack cannot be expressed there.
+
+Breakdown of the older grouping, for reference:
 
 - **`git_safety.worktree_isolated`** — 51 cases: 23 cross-boundary operations
   expected DENY, 22 worktree-local and routine operations expected ALLOW, and 6

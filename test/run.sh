@@ -1,106 +1,131 @@
 #!/usr/bin/env bash
-# Case-matrix runner for the silvarbor dcg packs.
+# Full verification for the silvarbor dcg packs.
 #
-#   test/run.sh                     run every suite
-#   test/run.sh process_hygiene     run one suite
-#   test/run.sh -v                  print every case, not just failures
+#   test/run.sh              corpus + policy suites
+#   test/run.sh -v           show every case
+#   test/run.sh corpus       only the official corpus
+#   test/run.sh policy       only the effective-policy cases
 #
-# Exits non-zero if any case disagrees with its expectation. Run this after
-# ANY edit to a pack — a regex that stops matching still validates clean, so
-# `dcg pack validate` alone proves nothing about behaviour.
+# Exits non-zero if anything disagrees with expectation or baseline.
 #
-# Why the cases live in TSV files rather than inline in this script: dcg hooks
-# the agent's shell, so a command line containing `git worktree remove` or a
-# poll loop is itself blocked. Test data must stay in files and reach dcg only
-# through a variable. This is the same constraint the packs document for prose.
+# TWO SUITES, BECAUSE ONE TOOL CANNOT EXPRESS BOTH
+#
+#   tests/corpus/  - run by `dcg corpus`, the official harness. Asserts pack
+#                    MATCHING, with rule_id per case and a diffable baseline.
+#                    61 cases.
+#
+#   test/cases/    - run by the loop below against `dcg explain`. Asserts
+#                    EFFECTIVE POLICY: what the live guard actually decides,
+#                    with allowlist.toml applied. 43 cases.
+#
+# The split is forced, not stylistic. `dcg corpus` does not apply
+# allowlist.toml and has no --config flag (and ignores DCG_CONFIG), so it
+# cannot express either the allowlist-dependent ALLOWs or the shared_checkout
+# pack, which needs an isolated config because it shares a pack id with the
+# active one. Verified against dcg 0.9.0.
+#
+# Test data lives in files rather than inline because dcg hooks the shell it
+# protects: a command line containing a guarded command is blocked even when
+# you are only testing the rule that blocks it. `dcg test --stdin` exists for
+# the same reason.
 
 set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/.." && pwd)"
 CASES="$HERE/cases"
+CORPUS="$ROOT/tests/corpus"
+BASELINE="$ROOT/tests/baseline.json"
 
 VERBOSE=0
-SUITES=()
+WHICH=all
 for arg in "$@"; do
   case "$arg" in
     -v | --verbose) VERBOSE=1 ;;
+    corpus | policy) WHICH="$arg" ;;
     -*) echo "unknown option: $arg" >&2; exit 2 ;;
-    *) SUITES+=("$arg") ;;
+    *) echo "unknown suite: $arg (expected 'corpus' or 'policy')" >&2; exit 2 ;;
   esac
 done
-if [ ${#SUITES[@]} -eq 0 ]; then
-  SUITES=(worktree_isolated shared_checkout process_hygiene)
-fi
 
 command -v dcg >/dev/null 2>&1 || { echo "dcg not on PATH" >&2; exit 2; }
 
-TMPDIR_RUN="$(mktemp -d)"
-trap 'rm -rf "$TMPDIR_RUN"' EXIT
+rc_total=0
 
-# The shared-checkout pack is not loaded by the normal config — it sits in
-# packs/disabled/ and carries the same pack id as the active pack. Give it a
-# throwaway config of its own so the two can never be loaded together.
-disabled_config() {
-  local cfg="$TMPDIR_RUN/shared_checkout.toml"
-  cat > "$cfg" <<EOF
+# ---------------------------------------------------------------- corpus ----
+if [ "$WHICH" = all ] || [ "$WHICH" = corpus ]; then
+  if [ -f "$BASELINE" ]; then
+    out="$(dcg corpus -d "$CORPUS" --baseline "$BASELINE" --format pretty 2>&1)"
+  else
+    out="$(dcg corpus -d "$CORPUS" --format pretty 2>&1)"
+  fi
+  rc=$?
+  line="$(printf '%s' "$out" | grep -m1 -E '^Total:')"
+  printf '%-20s %s\n' "corpus" "${line:-no output}"
+  if [ "$rc" -ne 0 ]; then
+    printf '%s\n' "$out" | grep -E 'FAIL|Command:|expected|actual' | head -20 | sed 's/^/  /'
+    rc_total=1
+  elif [ "$VERBOSE" -eq 1 ]; then
+    printf '%s\n' "$out" | sed 's/^/  /'
+  fi
+fi
+
+# ---------------------------------------------------------------- policy ----
+if [ "$WHICH" = all ] || [ "$WHICH" = policy ]; then
+  TMPDIR_RUN="$(mktemp -d)"
+  trap 'rm -rf "$TMPDIR_RUN"' EXIT
+
+  # shared_checkout shares a pack id with the active pack, so it gets a
+  # throwaway config that loads only packs/disabled/.
+  disabled_config() {
+    local cfg="$TMPDIR_RUN/shared_checkout.toml"
+    cat > "$cfg" <<EOF
 [packs]
 custom_paths = ["$ROOT/packs/disabled/*.yaml"]
 enabled = []
 EOF
-  printf '%s' "$cfg"
-}
+    printf '%s' "$cfg"
+  }
 
-total_pass=0
-total_fail=0
+  for suite in worktree_isolated shared_checkout; do
+    tsv="$CASES/$suite.tsv"
+    [ -f "$tsv" ] || { echo "missing suite file: $tsv" >&2; exit 2; }
 
-for suite in "${SUITES[@]}"; do
-  tsv="$CASES/$suite.tsv"
-  if [ ! -f "$tsv" ]; then
-    echo "no such suite: $suite (looked for $tsv)" >&2
-    exit 2
-  fi
+    cfg=""
+    [ "$suite" = shared_checkout ] && cfg="$(disabled_config)"
 
-  cfg=""
-  [ "$suite" = "shared_checkout" ] && cfg="$(disabled_config)"
+    pass=0; fail=0
+    while IFS=$'\t' read -r expected label command; do
+      case "$expected" in '' | '#'*) continue ;; esac
+      command="$(printf '%b' "${command//\\n/$'\n'}")"
 
-  pass=0
-  fail=0
-  while IFS=$'\t' read -r expected label command; do
-    case "$expected" in '' | '#'*) continue ;; esac
+      if [ -n "$cfg" ]; then
+        out="$(DCG_CONFIG="$cfg" dcg explain -- "$command" 2>&1)"
+      else
+        out="$(dcg explain -- "$command" 2>&1)"
+      fi
+      got="$(printf '%s' "$out" | grep -m1 'Decision:' | awk '{print $2}')"
+      rule="$(printf '%s' "$out" | grep -m1 'Rule ID:' | awk '{print $3}')"
 
-    # A literal \n in the TSV becomes a real newline (multi-line cases).
-    command="$(printf '%b' "${command//\\n/$'\n'}")"
+      if [ "$got" = "$expected" ]; then
+        pass=$((pass + 1))
+        [ "$VERBOSE" -eq 1 ] && printf '  ok   %-24s %-5s %s\n' "$label" "$got" "$rule"
+      else
+        fail=$((fail + 1))
+        printf '  FAIL %-24s expected=%-5s got=%-5s %s\n' "$label" "$expected" "$got" "$rule"
+        printf '       %s\n' "$command"
+      fi
+    done < "$tsv"
 
-    if [ -n "$cfg" ]; then
-      out="$(DCG_CONFIG="$cfg" dcg explain -- "$command" 2>&1)"
-    else
-      out="$(dcg explain -- "$command" 2>&1)"
-    fi
-    got="$(printf '%s' "$out" | grep -m1 'Decision:' | awk '{print $2}')"
-    rule="$(printf '%s' "$out" | grep -m1 'Rule ID:' | awk '{print $3}')"
-
-    if [ "$got" = "$expected" ]; then
-      pass=$((pass + 1))
-      [ "$VERBOSE" -eq 1 ] && printf '  ok   %-24s %-5s %s\n' "$label" "$got" "$rule"
-    else
-      fail=$((fail + 1))
-      printf '  FAIL %-24s expected=%-5s got=%-5s %s\n' "$label" "$expected" "$got" "$rule"
-      printf '       %s\n' "$command"
-    fi
-  done < "$tsv"
-
-  printf '%-20s %2d passed' "$suite" "$pass"
-  [ "$fail" -gt 0 ] && printf ', %d FAILED' "$fail"
-  printf '\n'
-
-  total_pass=$((total_pass + pass))
-  total_fail=$((total_fail + fail))
-done
+    printf '%-20s %2d passed' "policy:$suite" "$pass"
+    [ "$fail" -gt 0 ] && { printf ', %d FAILED' "$fail"; rc_total=1; }
+    printf '\n'
+  done
+fi
 
 echo "---"
-if [ "$total_fail" -gt 0 ]; then
-  echo "$total_pass passed, $total_fail FAILED"
+if [ "$rc_total" -ne 0 ]; then
+  echo "FAILURES"
   exit 1
 fi
-echo "$total_pass passed, 0 failed"
+echo "all suites green"

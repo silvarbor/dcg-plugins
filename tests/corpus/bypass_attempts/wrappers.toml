@@ -1,0 +1,35 @@
+# bypass attempts / wrappers
+#
+# Corpus cases for the silvarbor dcg packs, in the format documented at
+# tests/corpus/README.md upstream. Run with:
+#
+#     dcg corpus -d tests/corpus --baseline tests/baseline.json
+#
+# NOTE: `dcg corpus` evaluates PACK MATCHING and does not apply allowlist.toml.
+# Cases whose expected verdict depends on an allowlist entry cannot live here;
+# they are in test/cases/*.tsv and run by test/run.sh. See test/README.md.
+
+
+[[case]]
+description = "git -C <path> must not evade the guard"
+command = "git -C /r worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-destroy"
+
+[[case]]
+description = "a guarded command after ; must still match"
+command = "cd /r; git stash clear"
+expected = "deny"
+rule_id = "core.git:stash-clear"
+
+[[case]]
+description = "environment-assignment prefix must not evade the guard"
+command = "GIT_DIR=/r git reflog expire --all"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-shared-object-store-destroy"
+
+[[case]]
+description = "sudo prefix must not evade the guard"
+command = "sudo git worktree prune"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-destroy"

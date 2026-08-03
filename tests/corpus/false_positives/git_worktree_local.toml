@@ -1,0 +1,121 @@
+# false positives / git worktree local
+#
+# Corpus cases for the silvarbor dcg packs, in the format documented at
+# tests/corpus/README.md upstream. Run with:
+#
+#     dcg corpus -d tests/corpus --baseline tests/baseline.json
+#
+# NOTE: `dcg corpus` evaluates PACK MATCHING and does not apply allowlist.toml.
+# Cases whose expected verdict depends on an allowlist entry cannot live here;
+# they are in test/cases/*.tsv and run by test/run.sh. See test/README.md.
+
+
+[[case]]
+description = "fp echo double"
+command = "echo \"the git stash drop hazard\""
+expected = "allow"
+
+[[case]]
+description = "fp echo lease tail"
+command = "echo hint --force-with-lease"
+expected = "allow"
+
+[[case]]
+description = "fp echo single"
+command = "echo 'do not run git worktree prune'"
+expected = "allow"
+
+[[case]]
+description = "fp grep prose"
+command = "grep -rn 'worktree prune' docs/"
+expected = "allow"
+
+[[case]]
+description = "fp log then ls"
+command = "git log --oneline; ls stash clear"
+expected = "allow"
+
+[[case]]
+description = "fp word in path"
+command = "ls /var/log/git-prune-report.txt"
+expected = "allow"
+
+[[case]]
+description = "tn gc default"
+command = "git gc"
+expected = "allow"
+
+[[case]]
+description = "tn prune packed"
+command = "git prune-packed"
+expected = "allow"
+
+[[case]]
+description = "tn push delete"
+command = "git push origin --delete feature/x"
+expected = "allow"
+
+[[case]]
+description = "tn push includes"
+command = "git push --force-if-includes origin main"
+expected = "allow"
+
+[[case]]
+description = "tn push lease"
+command = "git push --force-with-lease origin main"
+expected = "allow"
+
+[[case]]
+description = "tn push plain"
+command = "git push origin main"
+expected = "allow"
+
+[[case]]
+description = "tn reflog show"
+command = "git reflog show HEAD"
+expected = "allow"
+
+[[case]]
+description = "tn remote add"
+command = "git remote add upstream https://x/y.git"
+expected = "allow"
+
+[[case]]
+description = "tn remote v"
+command = "git remote -v"
+expected = "allow"
+
+[[case]]
+description = "tn reset soft"
+command = "git reset --soft HEAD~1"
+expected = "allow"
+
+[[case]]
+description = "tn stash apply"
+command = "git stash apply"
+expected = "allow"
+
+[[case]]
+description = "tn stash list"
+command = "git stash list"
+expected = "allow"
+
+[[case]]
+description = "tn stash push"
+command = "git stash push -m wip"
+expected = "allow"
+
+[[case]]
+description = "tn update ref set"
+command = "git update-ref refs/heads/x abc123"
+expected = "allow"
+
+[[case]]
+description = "tn worktree add"
+command = "git worktree add ../peer -b feature/x"
+expected = "allow"
+
+[[case]]
+description = "tn worktree list"
+command = "git worktree list"
+expected = "allow"

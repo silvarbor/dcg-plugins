@@ -1,68 +1,38 @@
-# silvarbor.git_safety.worktree_isolated - case matrix
+# silvarbor.git_safety.worktree_isolated - ALLOWLIST-DEPENDENT cases only
 #
 # Format: <expected>\t<label>\t<command>     (TAB separated, exactly 3 columns)
 #   expected : ALLOW or DENY
-#   label    : short identifier; the prefix conveys intent
-#              tp_ true positive (must DENY)    tn_ true negative (must ALLOW)
-#              sp_ safe-pattern carve-out       fp_ false-positive guard
 #   command  : the command line handed to `dcg explain`.
 #              A literal \n in this column becomes a real newline.
 #
 # Blank lines and lines starting with # are ignored.
 #
-# Runs against your REAL dcg config. Several ALLOW expectations depend on
-# allowlist.toml disabling the corresponding core.git rule (reset, path
-# checkout, restore, branch delete). If those entries are missing this suite
-# fails - which is the point: the pack alone does not produce the documented
-# behaviour.
-ALLOW	fp_echo_double	echo "the git stash drop hazard"
-ALLOW	fp_echo_lease_tail	echo hint --force-with-lease
-ALLOW	fp_echo_single	echo 'do not run git worktree prune'
-ALLOW	fp_grep_prose	grep -rn 'worktree prune' docs/
-ALLOW	fp_log_then_ls	git log --oneline; ls stash clear
-ALLOW	fp_word_in_path	ls /var/log/git-prune-report.txt
+# WHY ONLY SIX CASES ARE LEFT HERE
+#
+# The other 45 moved to tests/corpus/, which dcg evaluates natively via
+# `dcg corpus` with rule_id assertions and baseline diffing.
+#
+# These six cannot move. `dcg corpus` evaluates PACK MATCHING and does not
+# apply allowlist.toml. Each command below is blocked by a built-in core.git
+# rule and is permitted only because ../allowlist.toml switches that rule off.
+# Under corpus every one reports "deny"; against the live guard every one is
+# ALLOW:
+#
+#   git reset --hard HEAD~1       corpus: deny (core.git:reset-hard)          live: ALLOW
+#   git reset --merge             corpus: deny (core.git:reset-merge)         live: ALLOW
+#   git checkout -- src/main.rs   corpus: deny (core.git:checkout-discard)    live: ALLOW
+#   git restore src/main.rs       corpus: deny (core.git:restore-worktree)    live: ALLOW
+#   git branch -d feature/x       corpus: deny (core.git:branch-force-delete) live: ALLOW
+#   git branch -D feature/x       corpus: deny (core.git:branch-force-delete) live: ALLOW
+#
+# These are the charter's signature claims - the operations deliberately
+# permitted because they cannot cross the worktree boundary. They are exactly
+# the assertions the corpus cannot make, so they are tested here against
+# effective policy. If allowlist.toml is ever trimmed, this suite fails while
+# the corpus stays green.
 ALLOW	tn_branch_delete	git branch -d feature/x
 ALLOW	tn_branch_delete_force	git branch -D feature/x
 ALLOW	tn_checkout_path	git checkout -- src/main.rs
-ALLOW	tn_gc_default	git gc
-ALLOW	tn_prune_packed	git prune-packed
-ALLOW	tn_push_delete	git push origin --delete feature/x
-ALLOW	tn_push_includes	git push --force-if-includes origin main
-ALLOW	tn_push_lease	git push --force-with-lease origin main
-ALLOW	tn_push_plain	git push origin main
-ALLOW	tn_reflog_show	git reflog show HEAD
-ALLOW	tn_remote_add	git remote add upstream https://x/y.git
-ALLOW	tn_remote_v	git remote -v
 ALLOW	tn_reset_hard	git reset --hard HEAD~1
 ALLOW	tn_reset_merge	git reset --merge
-ALLOW	tn_reset_soft	git reset --soft HEAD~1
 ALLOW	tn_restore	git restore src/main.rs
-ALLOW	tn_stash_apply	git stash apply
-ALLOW	tn_stash_list	git stash list
-ALLOW	tn_stash_push	git stash push -m wip
-ALLOW	tn_update_ref_set	git update-ref refs/heads/x abc123
-ALLOW	tn_worktree_add	git worktree add ../peer -b feature/x
-ALLOW	tn_worktree_list	git worktree list
-DENY	tp_C_flag	git -C /r worktree remove ../peer
-DENY	tp_after_semicolon	cd /r; git stash clear
-DENY	tp_env_prefix	GIT_DIR=/r git reflog expire --all
-DENY	tp_gc_prune_all	git gc --aggressive --prune=all
-DENY	tp_gc_prune_now	git gc --prune=now
-DENY	tp_prune	git prune
-DENY	tp_push_force_long	git push --force origin main
-DENY	tp_push_force_short	git push -f origin main
-DENY	tp_push_mirror	git push --mirror origin
-DENY	tp_push_plus_refspec	git push origin +main:main
-DENY	tp_reflog_expire	git reflog expire --expire=now --all
-DENY	tp_remote_remove	git remote remove origin
-DENY	tp_remote_rm	git remote rm origin
-DENY	tp_remote_set_url	git remote set-url origin git@x:y.git
-DENY	tp_stash_clear	git stash clear
-DENY	tp_stash_drop	git stash drop
-DENY	tp_stash_pop	git stash pop
-DENY	tp_sudo_wrapper	sudo git worktree prune
-DENY	tp_update_ref_d	git update-ref -d refs/heads/x
-DENY	tp_update_ref_stdin	git update-ref --stdin
-DENY	tp_worktree_prune	git worktree prune
-DENY	tp_worktree_remove	git worktree remove ../peer
-DENY	tp_worktree_rm_force	git worktree remove --force ../peer

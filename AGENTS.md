@@ -77,10 +77,13 @@ formatter that requoted or folded one would silently alter a security rule
 while it still validated clean. Markdown is formatted and it rewrites inline
 code spans, so anything containing a backtick belongs in a fenced block.
 
-Note that these exclusions only apply to `dprint` invoked without an explicit
-`--config`. An editor or agent hook that passes `--config <global>` bypasses
-per-directory resolution and will reformat the excluded files anyway. Check
-your diffs.
+These exclusions only apply to `dprint` invoked without an explicit `--config`.
+An editor or agent hook that passes `--config <global>` bypasses per-directory
+resolution and reformats the excluded files anyway — and `dprint check` will
+still report them out of scope while it happens, so it is not a reliable
+signal. Prefer `(cd "$(dirname "$FILE")" && dprint fmt "$FILE")` in such hooks,
+which resolves upward from the file and falls back to the global config on its
+own.
 
 ## Pattern conventions
 

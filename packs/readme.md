@@ -17,7 +17,7 @@ packs/
 ```
 
 DCG auto-loads `*.yaml` files from this directory via the `custom_paths`
-glob in `../example/config.toml`. The glob does not cross into subdirectories,
+glob in the dcg `config.toml`. The glob does not cross into subdirectories,
 so files under `disabled/` are not picked up. The two `git_safety` packs
 are mutually exclusive — exactly one is active at a time — and
 `process_hygiene` is always active alongside whichever git pack is loaded.
@@ -119,7 +119,7 @@ only be whitespace or the separator itself, never a quote or backtick.
 The two repetitions are bounded (`{0,4}`, `{0,2}`) rather than starred.
 With `*` they are nested quantifiers, and a long non-matching command line
 drove enough backtracking to overrun the hook evaluation budget. See the
-`../example/config.toml` entry under Related files for the measurements and for
+`config.toml` entry under Related files for the measurements and for
 why the timeout override that accompanied this fix is no longer needed.
 
 **2. Walk intervening tokens with the bounded class, not the greedy one:**
@@ -131,7 +131,7 @@ unbounded (avoid):    (?:\S+\s+)*   and   .*
 
 `\S+` and `.*` span `&&`, `;`, and `|` into unrelated commands — the
 harmless `git log --oneline; ls stash clear` matched a stash rule built
-that way. This is the same defect `../example/allowlist.toml` cites when disabling
+that way. This is the same defect `allowlist.toml` cites when disabling
 several built-in `core.git` rules, so custom rules must not reintroduce it.
 
 The overreach is worse in a *safe* pattern, because there it fails **open**
@@ -176,7 +176,7 @@ mv ~/.config/dcg/packs/silvarbor.git_safety.worktree_isolated.yaml ~/.config/dcg
 mv ~/.config/dcg/packs/disabled/silvarbor.git_safety.shared_checkout.yaml ~/.config/dcg/packs/
 ```
 
-Also revisit `../example/allowlist.toml`: its entries switch off the built-in
+Also revisit `allowlist.toml`: its entries switch off the built-in
 `core.git` rules for reset, checkout, restore, and branch deletion on the
 grounds that the worktree boundary contains them. Under a shared checkout
 that reasoning does not hold. The shared-checkout pack carries its own
@@ -258,7 +258,9 @@ argument value, which is more fragile than every other rule here.
 
 ## Related files
 
-- `../example/config.toml` — DCG config; `custom_paths` includes this directory.
+- **`config.toml`** — dcg config; `custom_paths` includes this directory.
+  Lives at `~/.config/dcg/config.toml`; the plugins repo ships a copy of it
+  under `example/`.
   It sets no `hook_timeout_ms`. It briefly pinned 500 while the default was
   200ms: dcg 0.7.1's shell-grammar parser costs roughly 7–8× on command
   lines carrying nested `$(...)` — a 992-char line measures 3.1ms plain
@@ -272,11 +274,12 @@ argument value, which is more fragile than every other rule here.
   also that dcg fails closed on a substitution *count* cap ("too many
   substitutions for bounded static analysis") which no config key controls —
   no timeout value affects it.
-- `../example/allowlist.toml` — rule-specific policy overrides. Switches off the
+- **`allowlist.toml`** — rule-specific policy overrides, alongside
+  `config.toml` and mirrored under `example/`. Switches off the
   built-in `core.git` rules for operations the worktree boundary already
   contains (reset, path checkout, restore, branch deletion) and hands the
   stash rules to the cross-worktree custom rule. Each entry records why
   the operation cannot cross the boundary.
-- `pending_exceptions.jsonl` — dcg writes queued one-off exception requests
-  next to your config. Gitignored here and in the config repo: it captures
-  full command lines including arguments and cwd.
+- **`pending_exceptions.jsonl`** — dcg writes queued one-off exception
+  requests next to your config. Gitignored in both repos: it captures full
+  command lines including arguments and cwd.

@@ -4,23 +4,26 @@ Custom packs for [dcg](https://github.com/Dicklesworthstone/destructive_command_
 the Destructive Command Guard. `README.md` explains what the packs do and why;
 this file is about working on them.
 
-## Read this before editing anything
+## This repo is where the packs actually live
 
-**This repository is a published copy, not the source of truth.**
+The maintainer's dcg config at `~/.config/dcg` **symlinks** into this checkout:
 
-The packs are authored in the maintainer's dcg config repo (`~/.config/dcg`)
-and copied here by `bin/publish-packs` there. Everything under `packs/`,
-`example/`, `test/`, and `tests/` is overwritten wholesale on the next publish.
+```
+~/.config/dcg/packs  ->  ~/Code/silvarbor/dcg-plugins/packs
+~/.config/dcg/tests  ->  ~/Code/silvarbor/dcg-plugins/tests
+~/.config/dcg/test   ->  ~/Code/silvarbor/dcg-plugins/test
+```
 
-An edit made here is not merely unshared — it is *silently reverted* on the
-next publish, and because a pack that stops matching still validates clean, the
-loss can go unnoticed. Open an issue or a PR and expect it to be applied
-upstream first.
+Editing a pack here edits the live guard directly. There is no publish step and
+no second copy to fall out of sync, which also means a bad edit takes effect
+immediately — run the tests before you commit.
 
-Files that live here and are never overwritten: `README.md`, `AGENTS.md`,
-`CLAUDE.md`, `LICENSE`, `NOTICE`, `.gitignore`, `dprint.jsonc`.
+`example/config.toml` and `example/allowlist.toml` are the exception. They are
+generated from the maintainer's real config with an explanatory header
+prepended, so edits to them here are overwritten by `bin/publish-examples`
+upstream. Everything else in this repo is authoritative.
 
-## Why the copy goes this direction
+## Why a dangling symlink is dangerous
 
 A dcg `custom_paths` glob that matches nothing is a **silent, total loss of
 protection**:
@@ -35,10 +38,13 @@ git stash drop               ->  ALLOW
 git reflog expire --all      ->  ALLOW
 ```
 
-dcg reports healthy while every cross-boundary rule has vanished. A live config
-must therefore never source its packs from a checkout that might not exist.
-Making this repo the copy means the worst case is a stale mirror — visible and
-harmless — rather than a disarmed guard.
+dcg reports healthy while every rule has vanished. Moving or renaming this
+checkout does exactly that to anyone symlinked into it, with no error anywhere.
+
+The mitigation is a startup canary that asserts a known-destructive command
+still DENYs — `bin/verify-guard.sh` in the config repo, wired into shell
+startup, throttled to once an hour, stamping only on success so a broken guard
+nags every new shell. If you adopt these packs by symlink, adopt that too.
 
 ## Testing
 

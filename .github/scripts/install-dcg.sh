@@ -33,7 +33,9 @@ tar -xJf "$tmp/$tarball" -C "$tmp"
 mkdir -p "$dest"
 install -m 0755 "$tmp/dcg" "$dest/dcg"
 
-got="$("$dest/dcg" --version 2>&1 | tr -d '[:space:]')"
+# `dcg --version` prints the bare version on the first line and then a boxed
+# banner, so take the first line only.
+got="$("$dest/dcg" --version 2>&1 | head -n 1 | tr -d '[:space:]')"
 want="${DCG_VERSION#v}"
 if [ "$got" != "$want" ]; then
   echo "expected dcg $want but installed '$got'" >&2

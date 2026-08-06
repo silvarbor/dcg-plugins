@@ -1,40 +1,160 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-03T19:39:45.555587+00:00",
-  "binary_version": "0.9.0",
+  "generated_at": "2026-08-05T19:17:56.618076+00:00",
+  "binary_version": "0.9.2",
   "corpus_dir": "tests/corpus",
-  "total_cases": 61,
-  "total_passed": 61,
+  "total_cases": 92,
+  "total_passed": 92,
   "total_failed": 0,
   "summary": {
     "decision": {
-      "allow": 30,
-      "deny": 31
+      "deny": 49,
+      "allow": 43
     },
     "pack": {
-      "silvarbor.process_hygiene": 8,
+      "silvarbor.access_boundary": 18,
       "silvarbor.git_safety": 18,
-      "core.git": 5
+      "core.git": 5,
+      "silvarbor.process_hygiene": 8
     },
     "category": {
+      "false_positives": {
+        "total": 43,
+        "passed": 43,
+        "failed": 0
+      },
       "true_positives": {
-        "total": 25,
-        "passed": 25,
+        "total": 36,
+        "passed": 36,
         "failed": 0
       },
       "bypass_attempts": {
-        "total": 6,
-        "passed": 6,
-        "failed": 0
-      },
-      "false_positives": {
-        "total": 30,
-        "passed": 30,
+        "total": 13,
+        "passed": 13,
         "failed": 0
       }
     }
   },
   "cases": [
+    {
+      "id": "bypass_attempts/access_boundary.toml:0",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "a guarded command after ; must still match",
+      "command": "cd /r; gh pr create --fill",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "actual_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-pr-create-implicit-target",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 113
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:1",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "a subshell must not hide the command",
+      "command": "(gh pr create --fill)",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "actual_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-pr-create-implicit-target",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 89
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:2",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "env assignments must not hide the command",
+      "command": "GH_TOKEN=x GH_HOST=github.com gh pr create --fill",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "actual_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-pr-create-implicit-target",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 77
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:3",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "a command wrapper must not hide the command",
+      "command": "command gh pr create --fill",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "actual_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-pr-create-implicit-target",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 66
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:4",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "after && must still match",
+      "command": "git push -u origin HEAD && gh pr create --fill",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "actual_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-pr-create-implicit-target",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 259
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:5",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "a --repo in a later command must not carve out an earlier create",
+      "command": "gh pr create --fill; echo --repo acme/x",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "actual_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-pr-create-implicit-target",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 109
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:6",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "sudo wrapper on a registry publish",
+      "command": "sudo npm publish",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:registry-publish",
+      "actual_rule_id": "silvarbor.access_boundary:registry-publish",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "registry-publish",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 52
+    },
     {
       "id": "bypass_attempts/loop_forms.toml:0",
       "category": "bypass_attempts",
@@ -50,7 +170,7 @@
       "pattern_name": "poll-loop-until",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 108
+      "duration_us": 119
     },
     {
       "id": "bypass_attempts/loop_forms.toml:1",
@@ -67,7 +187,7 @@
       "pattern_name": "poll-loop-sleep",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 79
+      "duration_us": 89
     },
     {
       "id": "bypass_attempts/wrappers.toml:0",
@@ -84,7 +204,7 @@
       "pattern_name": "git-worktree-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 114
+      "duration_us": 108
     },
     {
       "id": "bypass_attempts/wrappers.toml:1",
@@ -101,7 +221,7 @@
       "pattern_name": "stash-clear",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 100
+      "duration_us": 108
     },
     {
       "id": "bypass_attempts/wrappers.toml:2",
@@ -135,7 +255,163 @@
       "pattern_name": "git-worktree-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 81
+      "duration_us": 85
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:0",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "gh pr create --repo names its target",
+      "command": "gh pr create --repo silvarbor/prowl --fill",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 117
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:1",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "--repo followed by more flags still carves out",
+      "command": "gh pr create --repo acme/x --title t --body b",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 90
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:10",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "prose mentioning gh pr create, single-quoted",
+      "command": "echo 'run gh pr create to open one'",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": true,
+      "duration_us": 20
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:11",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "prose mentioning npm publish, double-quoted",
+      "command": "echo \"never run npm publish from a laptop\"",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": true,
+      "duration_us": 15
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:12",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "prose mentioning npm publish, unquoted in a commit message",
+      "command": "git commit -m do not npm publish from a laptop",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 172
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:2",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "gh pr list",
+      "command": "gh pr list --state open",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 152
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:3",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "gh pr view",
+      "command": "gh pr view 680 --json state",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 74
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:4",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "gh pr merge is not pull request creation",
+      "command": "gh pr merge 42 --squash",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 85
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:5",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "gh release create is not a registry publish",
+      "command": "gh release create v1.0.0 --generate-notes",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 87
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:6",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "gh secret list reads, it does not write",
+      "command": "gh secret list",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 51
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:7",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "gh repo edit without --visibility",
+      "command": "gh repo edit --description hello",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 83
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:8",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "npm install is not npm publish",
+      "command": "npm install --frozen-lockfile",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 82
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:9",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "cargo build is not cargo publish",
+      "command": "cargo build --release",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 63
     },
     {
       "id": "false_positives/git_worktree_local.toml:0",
@@ -147,7 +423,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 20
+      "duration_us": 14
     },
     {
       "id": "false_positives/git_worktree_local.toml:1",
@@ -171,7 +447,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 123
+      "duration_us": 127
     },
     {
       "id": "false_positives/git_worktree_local.toml:11",
@@ -183,7 +459,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 90
+      "duration_us": 74
     },
     {
       "id": "false_positives/git_worktree_local.toml:12",
@@ -195,7 +471,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 101
+      "duration_us": 107
     },
     {
       "id": "false_positives/git_worktree_local.toml:13",
@@ -207,7 +483,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 12078
+      "duration_us": 11183
     },
     {
       "id": "false_positives/git_worktree_local.toml:14",
@@ -219,7 +495,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 151
+      "duration_us": 117
     },
     {
       "id": "false_positives/git_worktree_local.toml:15",
@@ -231,7 +507,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 195
+      "duration_us": 106
     },
     {
       "id": "false_positives/git_worktree_local.toml:16",
@@ -243,7 +519,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 80
+      "duration_us": 76
     },
     {
       "id": "false_positives/git_worktree_local.toml:17",
@@ -255,7 +531,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 69
+      "duration_us": 63
     },
     {
       "id": "false_positives/git_worktree_local.toml:18",
@@ -267,7 +543,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 110
+      "duration_us": 102
     },
     {
       "id": "false_positives/git_worktree_local.toml:19",
@@ -279,7 +555,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 111
+      "duration_us": 146
     },
     {
       "id": "false_positives/git_worktree_local.toml:2",
@@ -291,7 +567,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 19
+      "duration_us": 16
     },
     {
       "id": "false_positives/git_worktree_local.toml:20",
@@ -303,7 +579,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 154
+      "duration_us": 141
     },
     {
       "id": "false_positives/git_worktree_local.toml:21",
@@ -315,7 +591,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 71
+      "duration_us": 65
     },
     {
       "id": "false_positives/git_worktree_local.toml:3",
@@ -327,7 +603,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 28
+      "duration_us": 29
     },
     {
       "id": "false_positives/git_worktree_local.toml:4",
@@ -339,7 +615,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 204
+      "duration_us": 177
     },
     {
       "id": "false_positives/git_worktree_local.toml:5",
@@ -351,7 +627,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 125
+      "duration_us": 117
     },
     {
       "id": "false_positives/git_worktree_local.toml:6",
@@ -363,7 +639,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 56
+      "duration_us": 155
     },
     {
       "id": "false_positives/git_worktree_local.toml:7",
@@ -375,7 +651,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 66
+      "duration_us": 106
     },
     {
       "id": "false_positives/git_worktree_local.toml:8",
@@ -387,7 +663,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 1581
+      "duration_us": 1397
     },
     {
       "id": "false_positives/git_worktree_local.toml:9",
@@ -399,7 +675,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 127
+      "duration_us": 131
     },
     {
       "id": "false_positives/process_hygiene_safe.toml:0",
@@ -411,7 +687,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 189
+      "duration_us": 175
     },
     {
       "id": "false_positives/process_hygiene_safe.toml:1",
@@ -423,7 +699,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 35
+      "duration_us": 39
     },
     {
       "id": "false_positives/process_hygiene_safe.toml:2",
@@ -435,7 +711,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 153
+      "duration_us": 178
     },
     {
       "id": "false_positives/process_hygiene_safe.toml:3",
@@ -447,7 +723,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 206
+      "duration_us": 217
     },
     {
       "id": "false_positives/process_hygiene_safe.toml:4",
@@ -459,7 +735,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 132
+      "duration_us": 114
     },
     {
       "id": "false_positives/process_hygiene_safe.toml:5",
@@ -471,7 +747,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 131
+      "duration_us": 212
     },
     {
       "id": "false_positives/process_hygiene_safe.toml:6",
@@ -483,7 +759,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 88
+      "duration_us": 93
     },
     {
       "id": "false_positives/process_hygiene_safe.toml:7",
@@ -495,7 +771,194 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 192
+      "duration_us": 233
+    },
+    {
+      "id": "true_positives/access_boundary.toml:0",
+      "category": "true_positives",
+      "file": "true_positives/access_boundary.toml",
+      "description": "gh pr create with no --repo targets a fork's parent",
+      "command": "gh pr create --fill",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "actual_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-pr-create-implicit-target",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 16036
+    },
+    {
+      "id": "true_positives/access_boundary.toml:1",
+      "category": "true_positives",
+      "file": "true_positives/access_boundary.toml",
+      "description": "--base and --head do not name the target repository",
+      "command": "gh pr create --base main --head feature/x",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "actual_rule_id": "silvarbor.access_boundary:gh-pr-create-implicit-target",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-pr-create-implicit-target",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 176
+    },
+    {
+      "id": "true_positives/access_boundary.toml:10",
+      "category": "true_positives",
+      "file": "true_positives/access_boundary.toml",
+      "description": "gem push — keyword pre-filter regression guard",
+      "command": "gem push mygem-1.0.gem",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:registry-publish",
+      "actual_rule_id": "silvarbor.access_boundary:registry-publish",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "registry-publish",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 108
+    },
+    {
+      "id": "true_positives/access_boundary.toml:2",
+      "category": "true_positives",
+      "file": "true_positives/access_boundary.toml",
+      "description": "gh repo edit --visibility",
+      "command": "gh repo edit --visibility public",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-repo-visibility-change",
+      "actual_rule_id": "silvarbor.access_boundary:gh-repo-visibility-change",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-repo-visibility-change",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 336
+    },
+    {
+      "id": "true_positives/access_boundary.toml:3",
+      "category": "true_positives",
+      "file": "true_positives/access_boundary.toml",
+      "description": "gh repo edit --visibility with a repo argument",
+      "command": "gh repo edit acme/x --visibility private",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-repo-visibility-change",
+      "actual_rule_id": "silvarbor.access_boundary:gh-repo-visibility-change",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-repo-visibility-change",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 113
+    },
+    {
+      "id": "true_positives/access_boundary.toml:4",
+      "category": "true_positives",
+      "file": "true_positives/access_boundary.toml",
+      "description": "gh secret set",
+      "command": "gh secret set TOKEN --body value",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-secret-write",
+      "actual_rule_id": "silvarbor.access_boundary:gh-secret-write",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-secret-write",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 305
+    },
+    {
+      "id": "true_positives/access_boundary.toml:5",
+      "category": "true_positives",
+      "file": "true_positives/access_boundary.toml",
+      "description": "npm publish",
+      "command": "npm publish",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:registry-publish",
+      "actual_rule_id": "silvarbor.access_boundary:registry-publish",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "registry-publish",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 318
+    },
+    {
+      "id": "true_positives/access_boundary.toml:6",
+      "category": "true_positives",
+      "file": "true_positives/access_boundary.toml",
+      "description": "pnpm publish",
+      "command": "pnpm publish --access public",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:registry-publish",
+      "actual_rule_id": "silvarbor.access_boundary:registry-publish",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "registry-publish",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 106
+    },
+    {
+      "id": "true_positives/access_boundary.toml:7",
+      "category": "true_positives",
+      "file": "true_positives/access_boundary.toml",
+      "description": "cargo publish",
+      "command": "cargo publish",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:registry-publish",
+      "actual_rule_id": "silvarbor.access_boundary:registry-publish",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "registry-publish",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 66
+    },
+    {
+      "id": "true_positives/access_boundary.toml:8",
+      "category": "true_positives",
+      "file": "true_positives/access_boundary.toml",
+      "description": "poetry publish",
+      "command": "poetry publish",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:registry-publish",
+      "actual_rule_id": "silvarbor.access_boundary:registry-publish",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "registry-publish",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 68
+    },
+    {
+      "id": "true_positives/access_boundary.toml:9",
+      "category": "true_positives",
+      "file": "true_positives/access_boundary.toml",
+      "description": "twine upload — keyword pre-filter regression guard",
+      "command": "twine upload dist/pkg-1.0.tar.gz",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:registry-publish",
+      "actual_rule_id": "silvarbor.access_boundary:registry-publish",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "registry-publish",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 34334
     },
     {
       "id": "true_positives/git_cross_boundary.toml:0",
@@ -512,7 +975,7 @@
       "pattern_name": "git-shared-object-store-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 6043
+      "duration_us": 5395
     },
     {
       "id": "true_positives/git_cross_boundary.toml:1",
@@ -529,7 +992,7 @@
       "pattern_name": "git-shared-object-store-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 104
+      "duration_us": 133
     },
     {
       "id": "true_positives/git_cross_boundary.toml:10",
@@ -546,7 +1009,7 @@
       "pattern_name": "git-remote-repoint",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 240
+      "duration_us": 235
     },
     {
       "id": "true_positives/git_cross_boundary.toml:11",
@@ -563,7 +1026,7 @@
       "pattern_name": "stash-clear",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 89
+      "duration_us": 94
     },
     {
       "id": "true_positives/git_cross_boundary.toml:12",
@@ -580,7 +1043,7 @@
       "pattern_name": "stash-drop",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 78
+      "duration_us": 79
     },
     {
       "id": "true_positives/git_cross_boundary.toml:13",
@@ -597,7 +1060,7 @@
       "pattern_name": "git-stash-shared-stack-mutation",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 1007
+      "duration_us": 975
     },
     {
       "id": "true_positives/git_cross_boundary.toml:14",
@@ -614,7 +1077,7 @@
       "pattern_name": "git-ref-delete-plumbing",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 145
+      "duration_us": 137
     },
     {
       "id": "true_positives/git_cross_boundary.toml:15",
@@ -631,7 +1094,7 @@
       "pattern_name": "git-ref-delete-plumbing",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 89
+      "duration_us": 102
     },
     {
       "id": "true_positives/git_cross_boundary.toml:16",
@@ -648,7 +1111,7 @@
       "pattern_name": "git-worktree-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 105
+      "duration_us": 112
     },
     {
       "id": "true_positives/git_cross_boundary.toml:17",
@@ -665,7 +1128,7 @@
       "pattern_name": "git-worktree-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 282
+      "duration_us": 111
     },
     {
       "id": "true_positives/git_cross_boundary.toml:18",
@@ -682,7 +1145,7 @@
       "pattern_name": "git-worktree-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 222
+      "duration_us": 83
     },
     {
       "id": "true_positives/git_cross_boundary.toml:2",
@@ -699,7 +1162,7 @@
       "pattern_name": "git-shared-object-store-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 65
+      "duration_us": 73
     },
     {
       "id": "true_positives/git_cross_boundary.toml:3",
@@ -716,7 +1179,7 @@
       "pattern_name": "push-force-long",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 150
+      "duration_us": 130
     },
     {
       "id": "true_positives/git_cross_boundary.toml:4",
@@ -733,7 +1196,7 @@
       "pattern_name": "push-force-short",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 116
+      "duration_us": 111
     },
     {
       "id": "true_positives/git_cross_boundary.toml:5",
@@ -750,7 +1213,7 @@
       "pattern_name": "git-push-refspec-force",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 2160
+      "duration_us": 1773
     },
     {
       "id": "true_positives/git_cross_boundary.toml:6",
@@ -767,7 +1230,7 @@
       "pattern_name": "git-push-refspec-force",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 146
+      "duration_us": 113
     },
     {
       "id": "true_positives/git_cross_boundary.toml:7",
@@ -784,7 +1247,7 @@
       "pattern_name": "git-shared-object-store-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 105
+      "duration_us": 118
     },
     {
       "id": "true_positives/git_cross_boundary.toml:8",
@@ -801,7 +1264,7 @@
       "pattern_name": "git-remote-repoint",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 135
+      "duration_us": 150
     },
     {
       "id": "true_positives/git_cross_boundary.toml:9",
@@ -818,7 +1281,7 @@
       "pattern_name": "git-remote-repoint",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 37541
+      "duration_us": 220
     },
     {
       "id": "true_positives/process_hygiene.toml:0",
@@ -835,7 +1298,7 @@
       "pattern_name": "background-sleep",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 1294
+      "duration_us": 1047
     },
     {
       "id": "true_positives/process_hygiene.toml:1",
@@ -852,7 +1315,7 @@
       "pattern_name": "gh-run-watch",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 15088
+      "duration_us": 276
     },
     {
       "id": "true_positives/process_hygiene.toml:2",
@@ -869,7 +1332,7 @@
       "pattern_name": "gh-run-watch",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 119
+      "duration_us": 112
     },
     {
       "id": "true_positives/process_hygiene.toml:3",
@@ -886,7 +1349,7 @@
       "pattern_name": "poll-loop-until",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 113
+      "duration_us": 111
     },
     {
       "id": "true_positives/process_hygiene.toml:4",
@@ -903,7 +1366,7 @@
       "pattern_name": "poll-loop-probe",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 124
+      "duration_us": 126
     },
     {
       "id": "true_positives/process_hygiene.toml:5",
@@ -920,7 +1383,7 @@
       "pattern_name": "poll-loop-sleep",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 104
+      "duration_us": 102
     }
   ]
 }

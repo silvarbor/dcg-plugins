@@ -1,9 +1,10 @@
 # DCG custom packs
 
-Custom DCG packs for multi-agent workflows. Two concerns: cross-boundary
-protection for git (the `git_safety` packs), and process-hygiene
-protection against process-leaking shell constructs (the `process_hygiene`
-pack).
+Custom DCG packs for multi-agent workflows. Three concerns: cross-boundary
+protection for git (the `git_safety` packs), process-hygiene protection
+against process-leaking shell constructs (the `process_hygiene` pack), and
+protection against outward actions that cannot be undone (the
+`access_boundary` pack).
 
 ## Layout
 
@@ -11,6 +12,7 @@ pack).
 packs/
 ├── silvarbor.git_safety.worktree_isolated.yaml     # active
 ├── silvarbor.process_hygiene.yaml                  # active
+├── silvarbor.access_boundary.yaml                  # active
 ├── disabled/
 │   └── silvarbor.git_safety.shared_checkout.yaml   # staged, not loaded
 └── readme.md                                       # this file
@@ -255,6 +257,77 @@ bounded foreground wait this policy standardizes on. It is deliberately
 left unenforced: the skills mandate the interval, the pack does not check
 it. Enforcing a numeric flag bound would need a regex that reads an
 argument value, which is more fragile than every other rule here.
+
+## Access-boundary pack
+
+`silvarbor.access_boundary` blocks the outward actions a harnessed agent
+cannot undo. Each is reversible in *state* and irreversible in *effect*:
+closing a pull request leaves the notification in every watcher's inbox,
+unpublishing a package is time-limited on npm and impossible on PyPI, and a
+repository made public is crawled before it can be made private again.
+
+| Blocks                                                           | Rule                           |
+| ---------------------------------------------------------------- | ------------------------------ |
+| `gh pr create` with no `--repo`                                  | `gh-pr-create-implicit-target` |
+| `gh repo edit --visibility`                                      | `gh-repo-visibility-change`    |
+| `gh secret set`                                                  | `gh-secret-write`              |
+| npm/pnpm/yarn/poetry/cargo `publish`, `twine upload`, `gem push` | `registry-publish`             |
+
+`gh repo delete` is **not** here — `platform.github:gh-repo-delete` already
+covers it, and duplicating a built-in produces two messages for one action.
+
+### The charter, and what a pack cannot enforce
+
+An agent's permitted area is the working directory the harness declares for
+the session. Most of that boundary is **not expressible in a pack**: a rule
+matches a static regex against command text and cannot see the session's cwd,
+so no pattern can compare a path argument against it. Verified empirically —
+the same three cwd-sensitive commands were fed to dcg 0.9.0 with cwd set to
+`/tmp/sandbox`, `/Users/shz`, and a repository checkout; all nine verdicts
+were identical.
+
+So `find ~`, `grep -r ~/`, and `git -C <elsewhere>` are out of scope here and
+live in agent instructions and Claude Code's `permissions.deny`. What is in
+scope is the set of actions whose blast radius does not depend on cwd at all.
+
+### Why the pull-request rule exists
+
+On 2026-08-05 three pull requests were opened against a third-party upstream
+from a fork. No command named the target. `gh` resolves the base repository
+of a fork to its **parent**, so `gh pr create` in a checkout with an
+`upstream` remote opens against the parent, and nothing in the command says
+so. The operator had `READ` there and `ADMIN` on the fork.
+
+The permission level is not knowable from command text. The **missing**
+`--repo` is. The rule checks only that a target was named — a wrong `--repo`
+still passes, a wrong default no longer does.
+
+Stated plainly because it is a policy choice, not a technical one: this costs
+friction in every ordinary repository, where `gh pr create` is unremarkable
+and the default base is correct. Every PR now needs one extra flag. The trade
+is deliberate — the failure is silent, reaches strangers, and cannot be
+recalled, while the fix documents itself.
+
+### Keywords are a pre-filter, not documentation
+
+`keywords` is evaluated **before** any pattern. A command containing none of
+them never reaches this pack. `twine upload` and `gem push` silently matched
+nothing until `twine`, `gem`, and `upload` were listed, while `npm publish`
+and `cargo publish` worked from the start because both carry a listed word.
+Nothing warns about this: the pack validates clean, loads clean, and returns
+ALLOW. Every command name a pattern can match must appear in `keywords`, and
+`tests/corpus/true_positives/access_boundary.toml` carries a case per
+keyword-only ecosystem to catch a regression.
+
+### Residual false positive in a built-in rule
+
+`platform.github:gh-repo-delete` carries the old unanchored prefix and matches
+prose. A shell loop containing the string `"gh repo delete acme/x"` as a
+double-quoted list element was blocked on 2026-08-05 while probing existing
+coverage. This is the same class as the three `core.git` rules noted above,
+and the same reasoning applies: allowlisting it would remove real protection,
+so it is left as-is. Pass command text by file rather than inline, as
+`test/run.sh` does.
 
 ## Related files
 

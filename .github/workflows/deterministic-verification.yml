@@ -1,0 +1,61 @@
+name: Deterministic Verification
+
+# Every rule in this repo is a security decision that a regex edit can silently
+# reverse, and the two failure modes it guards against are both invisible:
+# a pack that validates clean but matches nothing, and a custom_paths glob that
+# resolves to zero files while dcg reports healthy. So CI installs the packs the
+# way README.md tells an adopter to, asserts they loaded, and then runs both
+# case matrices against the real binary.
+#
+# Runner selection goes through the org-level `RUNNER_X2` variable so a provider
+# outage is a variable flip, not a pull request. Unset it to fall back to
+# GitHub-hosted `ubuntu-latest`.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: &unverified
+      - LICENSE
+      - NOTICE
+  pull_request:
+    branches: [main]
+    paths-ignore: *unverified
+  workflow_dispatch:
+
+# README.md, AGENTS.md and CLAUDE.md are NOT in paths-ignore: dprint formats
+# markdown, so a prose-only commit can still break the formatting check.
+
+# Deny all permissions by default — grant per-job
+permissions: {}
+
+jobs:
+  verify:
+    name: Verification
+    runs-on: ${{ vars.RUNNER_X2 || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    env:
+      # Pinned together with tests/baseline.json, which records the binary that
+      # produced it. A newer dcg can change a built-in pack's verdict with no
+      # change in this repo.
+      DCG_VERSION: v0.9.2
+      DCG_SHA256: c89d58a8442e9e24cc1b77e1c535ecbc699d8ee28f217bca978aac3f465f6121
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Install dcg
+        run: |
+          .github/scripts/install-dcg.sh "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >>"$GITHUB_PATH"
+
+      - name: Install packs and assert they load
+        run: .github/scripts/install-packs.sh "$GITHUB_WORKSPACE"
+
+      - name: Pack validation
+        run: .github/scripts/validate-packs.sh "$GITHUB_WORKSPACE"
+
+      - name: Case matrices
+        run: test/run.sh
+
+      - name: Formatting
+        uses: dprint/check@9cb3a2b17a8e606d37aae341e49df3654933fc23 # v2.3

@@ -1,0 +1,79 @@
+# true positives / silvarbor.access_boundary
+#
+# Corpus cases for the access-boundary pack, in the format documented at
+# tests/corpus/README.md upstream. Run with:
+#
+#     dcg corpus -d tests/corpus --baseline tests/baseline.json
+#
+# NOTE: `dcg corpus` evaluates PACK MATCHING and does not apply allowlist.toml.
+# Every case here is allowlist-independent.
+
+[[case]]
+description = "gh pr create with no --repo targets a fork's parent"
+command = "gh pr create --fill"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:gh-pr-create-implicit-target"
+
+[[case]]
+description = "--base and --head do not name the target repository"
+command = "gh pr create --base main --head feature/x"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:gh-pr-create-implicit-target"
+
+[[case]]
+description = "gh repo edit --visibility"
+command = "gh repo edit --visibility public"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:gh-repo-visibility-change"
+
+[[case]]
+description = "gh repo edit --visibility with a repo argument"
+command = "gh repo edit acme/x --visibility private"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:gh-repo-visibility-change"
+
+[[case]]
+description = "gh secret set"
+command = "gh secret set TOKEN --body value"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:gh-secret-write"
+
+[[case]]
+description = "npm publish"
+command = "npm publish"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
+description = "pnpm publish"
+command = "pnpm publish --access public"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
+description = "cargo publish"
+command = "cargo publish"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
+description = "poetry publish"
+command = "poetry publish"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+# twine and gem carry no keyword shared with the other publish commands.
+# Both were silently unmatched until `twine`, `gem` and `upload` were added
+# to the pack's keywords, which dcg uses as a pre-filter before it evaluates
+# any pattern. These two cases exist to catch a keyword list that regresses.
+[[case]]
+description = "twine upload — keyword pre-filter regression guard"
+command = "twine upload dist/pkg-1.0.tar.gz"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
+description = "gem push — keyword pre-filter regression guard"
+command = "gem push mygem-1.0.gem"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"

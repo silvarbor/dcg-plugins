@@ -50,14 +50,14 @@ nags every new shell. If you adopt these packs by symlink, adopt that too.
 
 ```sh
 dcg corpus -d tests/corpus --baseline tests/baseline.json   # the official path
-test/run.sh          # both suites (104 cases)
+test/run.sh          # both suites (135 cases)
 test/run.sh corpus   # corpus only
 test/run.sh -v       # show every case
 ```
 
 Two suites, because one tool cannot express both:
 
-- **`tests/corpus/`** (61) runs under `dcg corpus`, dcg's own regression
+- **`tests/corpus/`** (92) runs under `dcg corpus`, dcg's own regression
   harness, in the upstream `true_positives` / `false_positives` /
   `bypass_attempts` taxonomy. Each case asserts a `rule_id`, so a command
   denied by the *wrong* rule is a failure, and `tests/baseline.json` turns
@@ -72,9 +72,16 @@ not tell you the allowlist is installed**, and without it the git pack does not
 behave as this repo documents.
 
 `dcg pack validate` proves a pack parses, not that a rule still matches. Always
-run the matrices. Verified against dcg 0.9.0.
+run the matrices. Verified against dcg 0.9.2.
 
-## Two things that will trip you up
+CI runs both suites on every push and pull request. It pins the dcg version and
+the release tarball's checksum in
+`.github/workflows/deterministic-verification.yml`, because a newer dcg can
+change a built-in pack's verdict with no change in this repo, and because
+`tests/baseline.json` records the binary that produced it. Bump the version, the
+checksum and the baseline together.
+
+## Three things that will trip you up
 
 **dcg hooks your own shell.** A command line containing `git worktree remove`
 or a poll loop is blocked *for you*, including when testing the rule that
@@ -95,6 +102,14 @@ passing an explicit `--config` bypasses that and reformats the excluded files
 anyway — and `dprint check` still reports them out of scope while it happens,
 so it is not a reliable signal. Prefer
 `(cd "$(dirname "$FILE")" && dprint fmt "$FILE")`.
+
+**A pack's `keywords` list is a pre-filter, not documentation.** dcg evaluates
+it *before* any pattern, so a command containing none of the listed words never
+reaches the pack at all. A correct regex over a missing keyword returns ALLOW
+while the pack validates clean and loads clean, with no warning anywhere. Every
+command name a pattern can match belongs in `keywords`. This cost
+`silvarbor.access_boundary` two live ecosystems — `packs/readme.md` records
+which ones and how they were caught.
 
 ## Pattern conventions
 

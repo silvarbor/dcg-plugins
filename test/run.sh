@@ -12,7 +12,7 @@
 #
 #   tests/corpus/  - run by `dcg corpus`, the official harness. Asserts pack
 #                    MATCHING, with rule_id per case and a diffable baseline.
-#                    61 cases.
+#                    92 cases.
 #
 #   test/cases/    - run by the loop below against `dcg explain`. Asserts
 #                    EFFECTIVE POLICY: what the live guard actually decides,

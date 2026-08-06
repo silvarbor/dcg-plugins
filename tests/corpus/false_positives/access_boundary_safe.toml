@@ -1,0 +1,73 @@
+# false positives / silvarbor.access_boundary
+#
+# Two classes: commands that name their target or do not publish, and prose
+# that mentions a guarded command without performing one. The prose cases are
+# the ones the anchoring convention in packs/readme.md exists for.
+
+[[case]]
+description = "gh pr create --repo names its target"
+command = "gh pr create --repo silvarbor/prowl --fill"
+expected = "allow"
+
+[[case]]
+description = "--repo followed by more flags still carves out"
+command = "gh pr create --repo acme/x --title t --body b"
+expected = "allow"
+
+[[case]]
+description = "gh pr list"
+command = "gh pr list --state open"
+expected = "allow"
+
+[[case]]
+description = "gh pr view"
+command = "gh pr view 680 --json state"
+expected = "allow"
+
+[[case]]
+description = "gh pr merge is not pull request creation"
+command = "gh pr merge 42 --squash"
+expected = "allow"
+
+[[case]]
+description = "gh release create is not a registry publish"
+command = "gh release create v1.0.0 --generate-notes"
+expected = "allow"
+
+[[case]]
+description = "gh secret list reads, it does not write"
+command = "gh secret list"
+expected = "allow"
+
+[[case]]
+description = "gh repo edit without --visibility"
+command = "gh repo edit --description hello"
+expected = "allow"
+
+[[case]]
+description = "npm install is not npm publish"
+command = "npm install --frozen-lockfile"
+expected = "allow"
+
+[[case]]
+description = "cargo build is not cargo publish"
+command = "cargo build --release"
+expected = "allow"
+
+# Prose. A document or message that names a guarded command must not block.
+# packs/readme.md records a handoff document blocked on 2026-07-27 for
+# containing the words, which is what the command-position anchor prevents.
+[[case]]
+description = "prose mentioning gh pr create, single-quoted"
+command = "echo 'run gh pr create to open one'"
+expected = "allow"
+
+[[case]]
+description = "prose mentioning npm publish, double-quoted"
+command = "echo \"never run npm publish from a laptop\""
+expected = "allow"
+
+[[case]]
+description = "prose mentioning npm publish, unquoted in a commit message"
+command = "git commit -m do not npm publish from a laptop"
+expected = "allow"

@@ -50,19 +50,19 @@ nags every new shell. If you adopt these packs by symlink, adopt that too.
 
 ```sh
 dcg corpus -d tests/corpus --baseline tests/baseline.json   # the official path
-test/run.sh          # both suites (135 cases)
+test/run.sh          # both suites, with per-suite totals
 test/run.sh corpus   # corpus only
 test/run.sh -v       # show every case
 ```
 
 Two suites, because one tool cannot express both:
 
-- **`tests/corpus/`** (92) runs under `dcg corpus`, dcg's own regression
+- **`tests/corpus/`** runs under `dcg corpus`, dcg's own regression
   harness, in the upstream `true_positives` / `false_positives` /
   `bypass_attempts` taxonomy. Each case asserts a `rule_id`, so a command
   denied by the *wrong* rule is a failure, and `tests/baseline.json` turns
   regressions into a non-zero exit.
-- **`test/cases/`** (43) runs against `dcg explain`. `dcg corpus` evaluates pack
+- **`test/cases/`** runs against `dcg explain`. `dcg corpus` evaluates pack
   matching *without* applying `allowlist.toml` and has no `--config` flag, so
   neither the allowlist-dependent ALLOWs nor the shared_checkout pack can be
   expressed there.

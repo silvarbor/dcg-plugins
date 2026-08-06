@@ -190,9 +190,9 @@ Both packs block `git push --force`, so the swap never reduces remote
 protection. The disabled pack is kept current rather than left to rot: it
 carries the same anchoring and bounded-walker conventions as the active
 one, so enabling it is a file move and nothing else. It is verified the
-same way — 37 cases covering every rule, every carve-out, and the prose
-false-positive guards, run against a throwaway config whose `custom_paths`
-points only at `disabled/`.
+same way — every rule, every carve-out, and the prose false-positive
+guards, run against a throwaway config whose `custom_paths` points only at
+`disabled/`.
 
 ## Process-hygiene pack
 

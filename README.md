@@ -195,33 +195,34 @@ Single quotes, double quotes, and unquoted prose are all fine.
 ## Verification
 
 Every rule is covered by a case matrix run against the real binary, not by
-inspection. 135 cases in total, split across dcg's official harness and a
-supplementary suite:
+inspection, across dcg's official harness and a supplementary suite:
 
-- **`tests/corpus/`** (92 cases) runs under `dcg corpus`, dcg's own regression
-  harness, in the upstream `true_positives` / `false_positives` /
-  `bypass_attempts` taxonomy. Every case asserts a `rule_id`, so a command
-  denied by the *wrong* rule is a failure, and `tests/baseline.json` makes
-  regressions a non-zero exit rather than a judgement call.
-- **`test/cases/`** (43 cases) runs against `dcg explain`. `dcg corpus`
-  deliberately evaluates pack matching without applying `allowlist.toml`, and
-  has no `--config` flag, so the allowlist-dependent ALLOWs and the
-  shared_checkout pack cannot be expressed there.
+- **`tests/corpus/`** runs under `dcg corpus`, dcg's own regression harness, in
+  the upstream `true_positives` / `false_positives` / `bypass_attempts`
+  taxonomy. Every case asserts a `rule_id`, so a command denied by the *wrong*
+  rule is a failure, and `tests/baseline.json` makes regressions a non-zero exit
+  rather than a judgement call.
+- **`test/cases/`** runs against `dcg explain`. `dcg corpus` deliberately
+  evaluates pack matching without applying `allowlist.toml`, and has no
+  `--config` flag, so the allowlist-dependent ALLOWs and the shared_checkout
+  pack cannot be expressed there.
 
-Breakdown of the older grouping, for reference:
+What each pack's cases cover:
 
-- **`git_safety.worktree_isolated`** — 51 cases: 23 cross-boundary operations
-  expected DENY, 22 worktree-local and routine operations expected ALLOW, and 6
-  prose / neighbouring-command false-positive guards.
-- **`git_safety.shared_checkout`** — 37 cases covering every rule, every
-  carve-out, and the prose guards, run against a throwaway config whose
-  `custom_paths` points only at `disabled/` so the shared pack id cannot
-  collide with the active pack.
+- **`git_safety.worktree_isolated`** — cross-boundary operations expected DENY,
+  worktree-local and routine operations expected ALLOW, and prose /
+  neighbouring-command false-positive guards.
+- **`git_safety.shared_checkout`** — every rule, every carve-out, and the prose
+  guards, run against a throwaway config whose `custom_paths` points only at
+  `disabled/` so the shared pack id cannot collide with the active pack.
 - **`process_hygiene`** — subshell-wrapped, multi-line, prose, and carve-out
   forms.
-- **`access_boundary`** — 31 cases: every blocked action, the `--repo`
-  carve-out, prose guards, and one case per registry whose command name shares
-  no keyword with the others.
+- **`access_boundary`** — every blocked action, the `--repo` carve-out, prose
+  guards, and one case per registry whose command name shares no keyword with
+  the others.
+
+`test/run.sh` prints the totals. They are not repeated in prose here, because
+a number in a document is a number that goes stale.
 
 All four pack files validate clean with zero warnings under `dcg pack
 validate`. Last run against dcg 0.9.2.

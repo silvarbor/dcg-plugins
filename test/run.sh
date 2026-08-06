@@ -12,11 +12,10 @@
 #
 #   tests/corpus/  - run by `dcg corpus`, the official harness. Asserts pack
 #                    MATCHING, with rule_id per case and a diffable baseline.
-#                    92 cases.
 #
 #   test/cases/    - run by the loop below against `dcg explain`. Asserts
 #                    EFFECTIVE POLICY: what the live guard actually decides,
-#                    with allowlist.toml applied. 43 cases.
+#                    with allowlist.toml applied.
 #
 # The split is forced, not stylistic. `dcg corpus` does not apply
 # allowlist.toml and has no --config flag (and ignores DCG_CONFIG), so it

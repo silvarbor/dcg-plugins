@@ -67,3 +67,9 @@ rule = "core.git:reset-merge"
 reason = "Worktree-pool policy permits reset in every mode; --merge is worktree-local for the same reason as --hard. See the core.git:reset-hard entry above."
 added_by = "shz"
 added_at = "2026-07-27T00:00:00Z"
+
+[[allow]]
+rule = "silvarbor.process_hygiene:poll-loop-sleep"
+reason = "Temporarily disabled because the regex mistakes transported prompt text for a locally executed sleep loop. Restore when dcg exposes execution-context matching to custom packs or a real sleep-loop incident demonstrates that the protection outweighs the false-positive cost."
+added_by = "shz"
+added_at = "2026-08-07T11:12:34Z"

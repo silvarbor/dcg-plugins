@@ -51,7 +51,7 @@ enabled = [
 
     # Search engines
     # "search.elasticsearch",
-    
+
     # Backup
     # "backup.restic",
 

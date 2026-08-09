@@ -1,51 +1,13 @@
 # bypass attempts / silvarbor.access_boundary
-#
-# Command-position anchoring and the bounded walker, exercised against the
-# forms that defeated earlier versions of the sibling packs.
 
 [[case]]
-description = "a guarded command after ; must still match"
-command = "cd /r; gh pr create --fill"
+description = "a publish help command must not protect a neighbouring publish"
+command = "npm publish --help; npm publish"
 expected = "deny"
-rule_id = "silvarbor.access_boundary:gh-pr-create-implicit-target"
+rule_id = "silvarbor.access_boundary:registry-publish"
 
 [[case]]
-description = "a subshell must not hide the command"
-command = "(gh pr create --fill)"
-expected = "deny"
-rule_id = "silvarbor.access_boundary:gh-pr-create-implicit-target"
-
-[[case]]
-description = "env assignments must not hide the command"
-command = "GH_TOKEN=x GH_HOST=github.com gh pr create --fill"
-expected = "deny"
-rule_id = "silvarbor.access_boundary:gh-pr-create-implicit-target"
-
-[[case]]
-description = "a command wrapper must not hide the command"
-command = "command gh pr create --fill"
-expected = "deny"
-rule_id = "silvarbor.access_boundary:gh-pr-create-implicit-target"
-
-[[case]]
-description = "after && must still match"
-command = "git push -u origin HEAD && gh pr create --fill"
-expected = "deny"
-rule_id = "silvarbor.access_boundary:gh-pr-create-implicit-target"
-
-# The safe pattern must not reach across a command separator. With `.*`
-# instead of the bounded walker, the --repo in the SECOND command would carve
-# out the first — a safe pattern fails OPEN, so this is the dangerous
-# direction. packs/readme.md records the same defect in the
-# --force-with-lease carve-out.
-[[case]]
-description = "a --repo in a later command must not carve out an earlier create"
-command = "gh pr create --fill; echo --repo acme/x"
-expected = "deny"
-rule_id = "silvarbor.access_boundary:gh-pr-create-implicit-target"
-
-[[case]]
-description = "sudo wrapper on a registry publish"
+description = "a wrapper must not hide a registry publish"
 command = "sudo npm publish"
 expected = "deny"
 rule_id = "silvarbor.access_boundary:registry-publish"

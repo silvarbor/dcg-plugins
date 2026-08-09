@@ -41,7 +41,7 @@ cp "$root/example/allowlist.toml" "$cfg_dir/allowlist.toml"
 # that already has a live config it must not touch.
 listing="$(DCG_CONFIG="$cfg_dir/config.toml" dcg packs 2>&1)"
 missing=0
-for id in silvarbor.git_safety silvarbor.process_hygiene silvarbor.access_boundary; do
+for id in silvarbor.git_safety silvarbor.access_boundary; do
   if ! printf '%s' "$listing" | grep -qF "✓ $id "; then
     echo "pack not loaded or not enabled: $id" >&2
     missing=1
@@ -53,4 +53,4 @@ if [ "$missing" -ne 0 ]; then
   exit 1
 fi
 
-echo "3 silvarbor packs loaded from $root/packs"
+echo "2 silvarbor packs loaded from $root/packs"

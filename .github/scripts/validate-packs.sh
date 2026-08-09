@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Validate every pack file, including the disabled one, and fail on warnings.
+# Validate every pack file, including disabled historical packs, and fail on
+# warnings.
 #
 # README.md claims all packs validate clean with zero warnings. dcg exits 0 on
 # a pack that parses but warns, so the exit code alone does not carry that

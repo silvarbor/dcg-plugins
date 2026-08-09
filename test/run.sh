@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Full verification for the silvarbor dcg packs.
 #
-#   test/run.sh              corpus + policy suites
+#   test/run.sh              corpus + effective-policy suite
 #   test/run.sh -v           show every case
 #   test/run.sh corpus       only the official corpus
 #   test/run.sh policy       only the effective-policy cases
@@ -14,14 +14,12 @@
 #                    MATCHING, with rule_id per case and a diffable baseline.
 #
 #   test/cases/    - run by the loop below against `dcg explain`. Asserts
-#                    EFFECTIVE POLICY: what the live guard actually decides,
+#                    EFFECTIVE POLICY: what the live POSIX guard decides,
 #                    with allowlist.toml applied.
 #
 # The split is forced, not stylistic. `dcg corpus` does not apply
 # allowlist.toml and has no --config flag (and ignores DCG_CONFIG), so it
-# cannot express either the allowlist-dependent ALLOWs or the shared_checkout
-# pack, which needs an isolated config because it shares a pack id with the
-# active one. Verified against dcg 0.9.0.
+# cannot express the allowlist-dependent ALLOWs. Verified against dcg 0.10.0.
 #
 # Test data lives in files rather than inline because dcg hooks the shell it
 # protects: a command line containing a guarded command is blocked even when
@@ -71,38 +69,16 @@ fi
 
 # ---------------------------------------------------------------- policy ----
 if [ "$WHICH" = all ] || [ "$WHICH" = policy ]; then
-  TMPDIR_RUN="$(mktemp -d)"
-  trap 'rm -rf "$TMPDIR_RUN"' EXIT
-
-  # shared_checkout shares a pack id with the active pack, so it gets a
-  # throwaway config that loads only packs/disabled/.
-  disabled_config() {
-    local cfg="$TMPDIR_RUN/shared_checkout.toml"
-    cat > "$cfg" <<EOF
-[packs]
-custom_paths = ["$ROOT/packs/disabled/*.yaml"]
-enabled = []
-EOF
-    printf '%s' "$cfg"
-  }
-
-  for suite in worktree_isolated shared_checkout; do
+  for suite in worktree_isolated; do
     tsv="$CASES/$suite.tsv"
     [ -f "$tsv" ] || { echo "missing suite file: $tsv" >&2; exit 2; }
-
-    cfg=""
-    [ "$suite" = shared_checkout ] && cfg="$(disabled_config)"
 
     pass=0; fail=0
     while IFS=$'\t' read -r expected label command; do
       case "$expected" in '' | '#'*) continue ;; esac
       command="$(printf '%b' "${command//\\n/$'\n'}")"
 
-      if [ -n "$cfg" ]; then
-        out="$(DCG_CONFIG="$cfg" dcg explain -- "$command" 2>&1)"
-      else
-        out="$(dcg explain -- "$command" 2>&1)"
-      fi
+      out="$(dcg explain --dialect posix -- "$command" 2>&1)"
       got="$(printf '%s' "$out" | grep -m1 'Decision:' | awk '{print $2}')"
       rule="$(printf '%s' "$out" | grep -m1 'Rule ID:' | awk '{print $3}')"
 

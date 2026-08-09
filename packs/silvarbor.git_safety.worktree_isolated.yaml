@@ -2,56 +2,16 @@
 # SPDX-FileCopyrightText: 2026 Simon Heimlicher
 # Part of https://github.com/silvarbor/dcg-plugins
 #
-# Custom Pack for dcg — Cross-boundary protection for worktree-isolated agents
+# Custom Pack for dcg - cross-boundary protection for worktree-isolated agents
 #
-# Companion to silvarbor.git_safety.shared_checkout. Enable this pack when each
-# agent runs in its own git worktree.
+# Each agent runs in its own Git worktree. HEAD, the index, and the working
+# tree belong to that worktree. The common Git directory and remotes remain
+# shared. This pack blocks only operations that can destroy those shared
+# resources or delete a peer worktree.
 #
-# Charter: block ONLY what escapes the worktree boundary. Everything a
-# command can reach inside its own worktree — HEAD, the index, the working
-# tree — is the calling agent's own business. Two things are shared and
-# therefore in scope:
-#
-#   1. The common git dir  — refs/stash, the object store, reflogs,
-#                            refs/heads, and repo config are shared by
-#                            every worktree in the pool.
-#   2. The remote          — no per-agent isolation, no client-side reflog
-#                            for force-pushed history.
-#
-# Verified against git in a two-worktree lab repo:
-#   - a stash pushed in worktree A is visible from worktree B (shared)
-#   - `git branch -d/-D` and `git branch -f` REFUSE to touch a branch
-#     checked out in another worktree (git guards this itself)
-#   - `git reset --hard` in A leaves B's HEAD and working tree untouched
-#   - `git worktree remove --force` DESTROYS a peer worktree including its
-#     staged uncommitted work
-#
-# Pattern conventions — every destructive_pattern below opens with:
-#
-#   (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*       <- real command position
-#   (?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}     <- env assignments
-#   (?:(?:sudo|command|nohup|time)\s+){0,2}       <- command wrappers
-#   git\s+
-#
-# A quote lookbehind is NOT needed and was removed: after a command-position
-# character plus \s*, the character immediately preceding `git` can only be
-# whitespace or the separator itself, never a quote or backtick. The
-# repetitions are bounded ({0,4}, {0,2}) rather than starred so a long
-# non-matching command line cannot drive nested-quantifier backtracking.
-#
-# and walks intervening tokens with the bounded class [^\s&;|`()<>]+ rather
-# than \S+. The earlier prefix (?:^|[^[:alnum:]_-]) accepted ANY non-word
-# character before `git`, so ordinary prose describing a hazard matched as
-# if it performed it — a handoff document about worktree pruning was blocked
-# on 2026-07-27. The anchor requires the match to sit where a command could
-# actually begin.
-#
-# KNOWN LIMIT: this cannot fix backtick-delimited prose. In shell, `cmd` IS
-# command substitution, so dcg extracts the span and scans it as a command;
-# the extracted text starts at ^ and legitimately matches. Markdown code
-# spans and shell command substitution are byte-identical, so no pack-level
-# regex can separate them. Pass prose bodies by redirect or file argument
-# rather than inline on the command line. Single and double quotes are fine.
+# Destructive patterns use dcg 0.10 executable scoping. The scope resolves
+# wrappers, assignments, and executable paths. Bounded token walkers remain
+# because a custom regex can still participate in whole-command evaluation.
 #
 # Schema: docs/pack.schema.yaml
 # Documentation: docs/custom-packs.md
@@ -60,234 +20,94 @@ schema_version: 1
 
 id: silvarbor.git_safety
 
-name: Git Safety — Worktree-Isolated Agents
+name: Git Safety - Worktree-Isolated Agents
 
-version: 1.3.1
+version: 2.0.0
 
 description: |
-  Cross-boundary git protection for setups where each agent runs in its
-  own git worktree. Worktrees isolate HEAD, the index, and the working
-  tree, so commands confined to those cannot reach another agent. This
-  pack guards only the two shared resources: the common git dir and the
-  remote.
+  Protects resources that remain shared when each agent uses a separate Git
+  worktree. The pack blocks peer worktree removal, immediate object or reflog
+  expiration, ref deletion through update-ref, and remote force updates that
+  do not use the ordinary force flags.
 
-  For shared working trees, use the companion pack in
-  disabled/silvarbor.git_safety.shared_checkout.yaml, which blocks the full
-  original set because no boundary exists there to contain anything.
+  The built-in core.git pack handles plain force pushes, stash deletion, and
+  destructive commands inside one worktree. The user allowlist permits the
+  worktree-local commands that cannot cross this pack's boundary.
 
-  Covered — cross-worktree (common git dir):
-    - git worktree remove / prune   (destroys a peer worktree outright)
-    - git stash drop / pop / clear  (refs/stash is shared)
-    - git gc --prune=now / git prune / git reflog expire
-                                    (shared object store and reflogs)
-    - git update-ref -d / --stdin   (deletes shared refs via plumbing,
-                                     bypassing git's own worktree guard)
-    - git remote remove / rm / set-url
-                                    (repoints every worktree's remote)
+  Covered:
+    - git worktree remove
+    - git gc --prune=now or --prune=all
+    - git prune, except dry runs
+    - git reflog expire with immediate expiration
+    - git update-ref -d or --stdin
+    - git push +<refspec> or --mirror
 
-  Covered — remote:
-    - git push --force / -f
-    - git push +<refspec> / --mirror
-
-  Allowed — worktree-local, cannot cross the boundary:
-    - git reset (all modes, including --hard)
-    - git checkout -- <path> / git checkout <ref> -- <path>
-    - git restore (all path-discard forms)
-    - git branch -d / -D  (git refuses when checked out elsewhere)
-    The corresponding built-in core.git rules are switched off via
-    rule-specific entries in ../allowlist.toml.
-
-  Allowed (via safe_patterns):
-    - git push --force-with-lease / --force-if-includes
+  Allowed:
+    - git worktree add, list, prune, and prune --dry-run
+    - git remote remove, rm, and set-url
+    - git stash pop; core.git still guards stash drop and clear
+    - git push --force-with-lease and --force-if-includes
+    - worktree-local reset, checkout, restore, and branch deletion
 
 keywords:
   - git
 
 destructive_patterns:
-  - name: git-worktree-destroy
-    # The single most direct cross-worktree violation: `git worktree
-    # remove --force` deletes a peer agent's worktree directory along
-    # with any uncommitted or staged work in it. `prune` removes the
-    # admin records of worktrees whose directories are temporarily
-    # unavailable. `git worktree add` and `list` are not matched.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}git\s+(?:[^\s&;|`()<>]+\s+)*worktree\s+(?:remove|prune)\b
+  - name: git-worktree-remove
+    pattern: \bgit\s+(?:-(?:C|c)\s+[^\s&;|`()<>]+\s+|-C[^\s&;|`()<>]+\s+|--(?:git-dir|work-tree|namespace|super-prefix|config-env|exec-path)=[^\s&;|`()<>]+\s+|--exec-path\s+[^\s&;|`()<>]+\s+|-(?:p|P)\s+|--(?:no-pager|paginate|literal-pathspecs|no-literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-replace-objects|bare)\s+){0,16}worktree\s+(?:[^\s&;|`()<>]+\s+)*remove\b
+    executables:
+      - git
     severity: critical
-    description: git worktree remove/prune blocked — destroys another agent's worktree and its uncommitted work
+    description: git worktree remove blocked - can delete another agent's worktree and its uncommitted files
     explanation: |
-      `git worktree remove --force <path>` deletes the target worktree's
-      directory outright. Verified in a lab repo: a peer worktree holding
-      staged, uncommitted work was removed with no prompt and no recovery
-      path — the files were never in the object store, so no reflog helps.
+      `git worktree remove --force <path>` deletes the target directory. Files
+      that were never committed do not exist in the object store or a reflog.
 
-      `git worktree prune` deletes the administrative records of worktrees
-      whose directories are momentarily missing (an unmounted volume, a
-      peer mid-move), silently detaching them from the pool.
+      Inspect the target first:
+        - git worktree list
+        - git -C <path> status --short
 
-      In a worktree-per-agent pool, the target directory almost always
-      belongs to a different agent than the one running the command.
+      Ask the user to remove a worktree after they confirm that it is idle.
 
-      Safe alternatives:
-        - `git worktree list` to inspect the pool
-        - `git -C <path> status --short` to check whether the target
-          worktree holds uncommitted work before proposing removal
-        - Ask the user to remove a worktree they have confirmed is idle
-        - `git worktree add` (allowed) — creating never destroys
-
-  - name: git-stash-shared-stack-mutation
-    # refs/stash lives in the common git dir and is shared by every
-    # worktree (verified: a stash pushed in worktree A lists in B).
-    # Position-only drop/pop is unsafe because another worktree can push
-    # and shift stash@{N} first. `clear` always removes the whole stack.
-    #
-    # The token walker uses the bounded class [^\s&;|`()<>]+ rather than
-    # \S+ so it cannot span `&&`, `;`, or `|` into an unrelated command —
-    # the same defect ../allowlist.toml cites when disabling the built-in
-    # core.git stash rules.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}git\s+(?:[^\s&;|`()<>]+\s+)*stash\s+(?:drop|pop|clear)\b
+  - name: git-shared-recovery-data-destroy
+    pattern: \bgit\s+(?:-(?:C|c)\s+[^\s&;|`()<>]+\s+|-C[^\s&;|`()<>]+\s+|--(?:git-dir|work-tree|namespace|super-prefix|config-env|exec-path)=[^\s&;|`()<>]+\s+|--exec-path\s+[^\s&;|`()<>]+\s+|-(?:p|P)\s+|--(?:no-pager|paginate|literal-pathspecs|no-literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-replace-objects|bare)\s+){0,16}(?:gc\s+(?:[^\s&;|`()<>]+\s+)*--prune=(?:now|all)\b|prune\b(?!-)(?!(?:\s+[^\s&;|`()<>]+){0,64}\s+(?:-n|--dry-run)\b)|reflog\s+expire\s+(?:[^\s&;|`()<>]+\s+)*--expire(?:-unreachable)?=now\b)
+    executables:
+      - git
     severity: critical
-    description: git stash drop/pop/clear blocked — mutates the shared worktree-pool stash stack
+    description: immediate Git object or reflog expiration blocked - destroys recovery data shared by every worktree
     explanation: |
-      All worktrees use the same refs/stash in the common git directory.
-      `stash@{N}` is a moving position rather than a stable identity: a
-      concurrent `git stash push` in another worktree shifts every index.
-      Bare or position-only `git stash drop` and `git stash pop` can then
-      remove a different agent's stash. `git stash clear` removes the
-      entire shared stack.
+      Every worktree uses the same object store and reflogs. Immediate
+      expiration can remove another agent's only recovery path after an amend,
+      rebase, or ref deletion.
 
-      Safe alternatives:
-        - `git stash list` / `git stash show` to inspect the shared stack
-        - `git stash apply` to apply without removing an entry
-        - `git stash push` (allowed) — adds an entry, destroys nothing
-        - Ask the operator to perform an intended removal after verifying
-          the target's full object ID
-
-  - name: git-shared-object-store-destroy
-    # The object store and reflogs live in the common git dir and back
-    # every worktree in the pool. Immediate pruning destroys unreachable
-    # objects that are another agent's only recovery path. Plain `git gc`
-    # (default two-week expiry) and `git prune-packed` are not matched.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}git\s+(?:[^\s&;|`()<>]+\s+)*(?:gc\s+(?:[^\s&;|`()<>]+\s+)*--prune=(?:now|all)\b|prune\b(?!-)|reflog\s+expire\b)
-    severity: critical
-    description: git gc --prune=now / prune / reflog expire blocked — destroys the shared object store and reflogs
-    explanation: |
-      Every worktree in the pool shares one object store and one set of
-      reflogs in the common git directory. `git gc --prune=now`,
-      `git prune`, and `git reflog expire --expire=now --all` delete
-      unreachable objects and reflog entries immediately, repo-wide.
-
-      Those unreachable objects are precisely what another agent falls
-      back on after an amend, a rebase, or a branch deletion. Pruning
-      them turns every other agent's recoverable mistake into permanent
-      data loss, and the agent running the command cannot see what the
-      others are relying on.
-
-      Safe alternatives:
-        - `git count-objects -vH` to inspect repository size
-        - Plain `git gc` (allowed) — honours the default two-week
-          expiry, so recent unreachable objects survive
-        - Ask the user to run an immediate prune during a quiet window
+      Use `git prune --dry-run` to inspect candidates. Plain `git gc` keeps its
+      configured retention period.
 
   - name: git-ref-delete-plumbing
-    # `git update-ref` is plumbing and bypasses the porcelain guard that
-    # makes `git branch -d/-D` refuse branches checked out elsewhere.
-    # `--stdin` is included because its `delete <ref>` lines are the same
-    # operation in batch form. Read forms are not matched.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}git\s+(?:[^\s&;|`()<>]+\s+)*update-ref\s+(?:[^\s&;|`()<>]+\s+)*(?:-d\b|--stdin\b)
-    severity: high
-    description: git update-ref -d/--stdin blocked — deletes shared refs, bypassing git's worktree guard
-    explanation: |
-      `git branch -d/-D` is allowed in this pack because git itself
-      refuses to delete a branch that is checked out in another worktree.
-      `git update-ref -d` is plumbing and enforces no such check: it will
-      delete refs/heads/<branch> out from under a peer worktree that has
-      it checked out, leaving that worktree on a dangling HEAD.
-
-      `git update-ref --stdin` performs the same deletions in batch.
-
-      Safe alternatives:
-        - `git branch -d/-D <branch>` (allowed) — carries git's own
-          worktree guard and writes a reflog entry
-        - `git worktree list` to see which branches are checked out
-        - `git show-ref` / `git for-each-ref` to inspect refs read-only
-
-  - name: git-remote-repoint
-    # Remote configuration lives in the common git dir's config file, so
-    # a change made from one worktree silently applies to every agent in
-    # the pool. `git remote add`, `-v`, and `get-url` are not matched.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}git\s+(?:[^\s&;|`()<>]+\s+)*remote\s+(?:remove|rm|set-url)\b
-    severity: high
-    description: git remote remove/set-url blocked — repoints or drops the remote for every worktree in the pool
-    explanation: |
-      Remote definitions live in the shared config file in the common git
-      directory. `git remote set-url` and `git remote remove` therefore
-      apply to every worktree at once, not just the caller's.
-
-      Repointing sends other agents' subsequent pushes to a different
-      host; removing the remote breaks fetch and push pool-wide. Neither
-      produces any signal in the worktrees that were not expecting it.
-
-      Safe alternatives:
-        - `git remote -v` / `git remote get-url origin` to inspect
-        - `git push <url> <refspec>` for a genuine one-off to another
-          destination, leaving the shared config untouched
-        - `git remote add <name> <url>` (allowed) — additive
-        - Ask the user before changing where the pool pushes
-
-  - name: git-push-force
-    # Matches `git push --force` and `git push -f`. The verified-push
-    # forms `--force-with-lease` and `--force-if-includes` are carved
-    # out via safe_patterns below.
-    # Token matching stops at shell command boundaries.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}git\s+(?:[^\s&;|`()<>]+\s+)*push\s+(?:[^\s&;|`()<>]+\s+)*(?:--force(?![-a-z])|-[a-zA-Z]*f[a-zA-Z]*\b)
+    pattern: \bgit\s+(?:-(?:C|c)\s+[^\s&;|`()<>]+\s+|-C[^\s&;|`()<>]+\s+|--(?:git-dir|work-tree|namespace|super-prefix|config-env|exec-path)=[^\s&;|`()<>]+\s+|--exec-path\s+[^\s&;|`()<>]+\s+|-(?:p|P)\s+|--(?:no-pager|paginate|literal-pathspecs|no-literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-replace-objects|bare)\s+){0,16}update-ref\s+(?:[^\s&;|`()<>]+\s+)*(?:-d\b|--stdin\b)
+    executables:
+      - git
     severity: critical
-    description: git push --force blocked — overwrites remote branch history without verification
+    description: git update-ref deletion blocked - bypasses Git's worktree-aware porcelain checks
     explanation: |
-      `git push --force` (or `-f`) overwrites the remote branch history
-      without checking what's there. If a teammate or another agent has
-      pushed in the meantime, their commits are silently destroyed on
-      the remote. The remote is the one git resource that no worktree
-      isolation protects.
+      `git update-ref -d` deletes a shared ref without the guard that protects a
+      branch checked out in another worktree. The stdin protocol can perform
+      the same deletion in a transaction whose body is not always visible to
+      this rule.
 
-      Safe alternatives:
-        - `git push --force-with-lease` (allowed) only force-pushes when
-          the remote matches what you last fetched, preventing accidental
-          overwrites of others' work
-        - `git push --force-if-includes` (allowed) is stricter still
-        - For shared branches (main, master, release/*), ask the user
-          before any history rewrite, even with --force-with-lease
+      Use the relevant Git porcelain command, or ask the user to approve the
+      plumbing operation.
 
   - name: git-push-refspec-force
-    # A leading `+` on a refspec is a force push that carries no --force
-    # or -f flag, so the rule above never sees it. `--mirror` force-updates
-    # every ref and deletes remote refs absent locally.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}git\s+(?:[^\s&;|`()<>]+\s+)*push\s+(?:[^\s&;|`()<>]+\s+)*(?:\+[^\s&;|`()<>]+|--mirror\b)
+    pattern: \bgit\s+(?:-(?:C|c)\s+[^\s&;|`()<>]+\s+|-C[^\s&;|`()<>]+\s+|--(?:git-dir|work-tree|namespace|super-prefix|config-env|exec-path)=[^\s&;|`()<>]+\s+|--exec-path\s+[^\s&;|`()<>]+\s+|-(?:p|P)\s+|--(?:no-pager|paginate|literal-pathspecs|no-literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-replace-objects|bare)\s+){0,16}push\s+(?:[^\s&;|`()<>]+\s+)*(?:\+[^\s&;|`()<>]+|--mirror\b)
+    executables:
+      - git
     severity: critical
-    description: git push +<refspec> / --mirror blocked — force-updates the remote without a --force flag
+    description: forced refspec or mirror push blocked - can overwrite multiple remote refs without verification
     explanation: |
-      A refspec with a leading plus, as in `git push origin +main` or
-      `git push origin +refs/heads/x:refs/heads/x`, is a force push. It
-      carries neither `--force` nor `-f`, so flag-based guards miss it
-      entirely while the effect on remote history is identical.
+      A leading `+` forces its refspec. `--mirror` force-updates every remote
+      ref and can delete refs that do not exist locally. Neither form provides
+      the lease check that protects concurrent remote work.
 
-      `git push --mirror` is broader still: it force-updates every ref
-      under refs/ and deletes any remote ref that has no local
-      counterpart, which in a worktree pool means refs another agent
-      created but this one never fetched.
-
-      Safe alternatives:
-        - `git push --force-with-lease origin <branch>` (allowed) —
-          verified force, and it is visible as a force push
-        - `git push origin <branch>` without the plus for a fast-forward
-        - Ask the user before any mirrored or wholesale ref update
-
-safe_patterns:
-  - name: git-push-force-verified
-    # `--force-with-lease` and `--force-if-includes` verify the remote
-    # state before rewriting history. Bounded walker rather than `.*`:
-    # `.*` let a `--force-with-lease` token appearing anywhere later on
-    # the line (after a `;`, inside an echo) satisfy the carve-out for an
-    # unrelated unverified force push. Nothing was actually permitted —
-    # core.git:push-force-long denies that line independently — but a
-    # carve-out must not depend on another pack for its correctness.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}git\s+(?:[^\s&;|`()<>]+\s+)*push\s+(?:[^\s&;|`()<>]+\s+)*--force-(?:with-lease|if-includes)\b
-    description: git push --force-with-lease / --force-if-includes verify remote state
+      Use an ordinary push. If a history rewrite is required, use
+      `--force-with-lease` for the intended ref only.

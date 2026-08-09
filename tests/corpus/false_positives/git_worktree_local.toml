@@ -31,6 +31,11 @@ command = "grep -rn 'worktree prune' docs/"
 expected = "allow"
 
 [[case]]
+description = "a prowl payload mentioning worktree removal is data"
+command = "prowl send agent --prompt 'run git worktree remove ../peer'"
+expected = "allow"
+
+[[case]]
 description = "fp log then ls"
 command = "git log --oneline; ls stash clear"
 expected = "allow"
@@ -48,6 +53,26 @@ expected = "allow"
 [[case]]
 description = "tn prune packed"
 command = "git prune-packed"
+expected = "allow"
+
+[[case]]
+description = "tn prune dry run long"
+command = "git prune --dry-run"
+expected = "allow"
+
+[[case]]
+description = "tn prune dry run short"
+command = "git prune -n"
+expected = "allow"
+
+[[case]]
+description = "tn gc retained objects"
+command = "git gc --prune=2.weeks.ago"
+expected = "allow"
+
+[[case]]
+description = "tn reflog configured expiration"
+command = "git reflog expire --all"
 expected = "allow"
 
 [[case]]
@@ -86,6 +111,16 @@ command = "git remote -v"
 expected = "allow"
 
 [[case]]
+description = "tn remote remove"
+command = "git remote remove origin"
+expected = "allow"
+
+[[case]]
+description = "tn remote set-url"
+command = "git remote set-url origin git@example.invalid:x/y.git"
+expected = "allow"
+
+[[case]]
 description = "tn reset soft"
 command = "git reset --soft HEAD~1"
 expected = "allow"
@@ -106,6 +141,11 @@ command = "git stash push -m wip"
 expected = "allow"
 
 [[case]]
+description = "tn stash pop"
+command = "git stash pop"
+expected = "allow"
+
+[[case]]
 description = "tn update ref set"
 command = "git update-ref refs/heads/x abc123"
 expected = "allow"
@@ -118,4 +158,9 @@ expected = "allow"
 [[case]]
 description = "tn worktree list"
 command = "git worktree list"
+expected = "allow"
+
+[[case]]
+description = "tn worktree prune"
+command = "git worktree prune"
 expected = "allow"

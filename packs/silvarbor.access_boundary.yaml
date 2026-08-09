@@ -14,17 +14,6 @@
 # What IS expressible is the set of actions whose blast radius does not depend
 # on cwd at all — the ones with no recovery path once taken. Those are here.
 #
-# THE PULL-REQUEST RULE IS WHY THIS PACK EXISTS
-#
-# On 2026-08-05 three pull requests were opened against a third-party upstream
-# from a fork. No command named the target. `gh` resolves the base repository
-# of a fork to its parent, so `gh pr create` in a fork with an `upstream`
-# remote targets the parent, and the operator had READ there.
-#
-# The permission level is not knowable from the command text. The MISSING
-# `--repo` is. Requiring it converts an invisible default into a stated target,
-# which is the whole ask.
-#
 # Schema: docs/pack.schema.yaml
 # Documentation: docs/custom-packs.md
 
@@ -34,31 +23,30 @@ id: silvarbor.access_boundary
 
 name: Access Boundary — Harnessed Agents
 
-version: 1.0.0
+version: 2.0.0
 
 description: |
-  Blocks the outward actions a harnessed agent cannot undo: publishing a pull
-  request to an unnamed repository, publishing to a package registry, writing
-  a repository secret, and changing repository visibility.
+  Blocks outward actions that a harnessed agent cannot undo: publishing to a
+  package registry, writing a repository secret, and changing repository
+  visibility.
 
-  Each is reversible in state and irreversible in effect. Closing a pull
-  request leaves the notification in every watcher's inbox. Unpublishing a
+  Each is reversible in state and irreversible in effect. Unpublishing a
   package is time-limited on npm and impossible on PyPI. A private repository
-  made public is crawled before it is made private again.
+  made public is crawled before it is made private again. A secret exposed to
+  a workflow cannot be made unknown again.
 
   `gh repo delete` is NOT here — platform.github:gh-repo-delete already
   covers it, and duplicating a built-in rule means two messages for one
   action.
 
   Covered:
-    - `gh pr create` with no `--repo` (target defaults to a fork's parent)
     - `gh repo edit --visibility`
     - `gh secret set`
     - npm / pnpm / yarn / poetry / cargo publish, twine upload, gem push
 
   Allowed (not matched):
-    - `gh pr create --repo <owner>/<name>` — the target is stated
-    - `gh pr list`, `gh pr view`, `gh pr merge`, `gh release create`
+    - `gh pr create`, `gh pr list`, `gh pr view`, `gh pr merge`
+    - package publish commands with a supported `--dry-run` option
     - `gh secret list`, `gh repo edit` without `--visibility`
 
 # Keywords are a PRE-FILTER, not documentation: a command containing none of
@@ -75,49 +63,15 @@ keywords:
   - cargo
   - twine
   - gem
-  - publish
-  - upload
 
 destructive_patterns:
-  - name: gh-pr-create-implicit-target
-    # `gh pr create` with no `--repo`. The carve-out lives in safe_patterns.
-    #
-    # Anchored to a command position and walked with the bounded class, per
-    # the conventions in packs/readme.md. `--repo` can only follow `create`,
-    # so the safe pattern walks from there rather than from `gh`.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}gh\s+(?:[^\s&;|`()<>]+\s+)*pr\s+(?:[^\s&;|`()<>]+\s+)*create\b
-    severity: critical
-    description: "`gh pr create` without `--repo` blocked — the target defaults to a fork's parent and is never stated"
-    explanation: |
-      `gh` resolves the base repository of a fork to its PARENT. In a checkout
-      with an `upstream` remote, `gh pr create` therefore opens the pull
-      request against the third-party repository, and nothing in the command
-      says so. Three pull requests reached an unrelated upstream this way on
-      2026-08-05.
-
-      Closing one does not undo it. The notification reached every watcher of
-      that repository the moment it opened, and the body is in their inboxes
-      permanently.
-
-      Be honest about what this rule does and does not know: it cannot check
-      whether the operator may write to the target, because permission is not
-      in the command text. It checks only that a target was NAMED. A wrong
-      `--repo` still passes; a wrong default no longer does.
-
-      That costs friction in every ordinary repository, where `gh pr create`
-      is unremarkable and the default base is correct. The trade is deliberate
-      — the failure is silent and reaches strangers, and the fix is one flag
-      that documents itself.
-
-      State the target:
-        - gh pr create --repo <owner>/<name> --fill
-        - gh repo view --json parent   (shows what the default would be)
-
   - name: gh-repo-visibility-change
     # `gh repo edit --visibility`. Reversible in one call and permanent in
     # fact: a repository made public is in the events firehose, GHArchive,
     # and scraper caches before it can be made private again.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}gh\s+(?:[^\s&;|`()<>]+\s+)*repo\s+(?:[^\s&;|`()<>]+\s+)*edit\s+(?:[^\s&;|`()<>]+\s+)*--visibility\b
+    pattern: \bgh\s+(?:[^\s&;|`()<>]+\s+)*repo\s+(?:[^\s&;|`()<>]+\s+)*edit\s+(?:[^\s&;|`()<>]+\s+)*--visibility\b
+    executables:
+      - gh
     severity: critical
     description: "`gh repo edit --visibility` blocked — a repository made public stays public in every cache that saw it"
     explanation: |
@@ -138,7 +92,9 @@ destructive_patterns:
     # places credential material into a repository's Actions environment,
     # where every workflow — including one added later by someone else — can
     # read it. Reading and listing are untouched.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}gh\s+(?:[^\s&;|`()<>]+\s+)*secret\s+(?:[^\s&;|`()<>]+\s+)*set\b
+    pattern: \bgh\s+(?:[^\s&;|`()<>]+\s+)*secret\s+(?:[^\s&;|`()<>]+\s+)*set\b
+    executables:
+      - gh
     severity: high
     description: "`gh secret set` blocked — grants every workflow in the repository access to the credential"
     explanation: |
@@ -147,17 +103,21 @@ destructive_patterns:
       that accepts pull requests, that is a wider audience than the command
       suggests.
 
-      An agent also has no way to confirm which repository it is writing to
-      when `--repo` is absent, for the same reason gh-pr-create-implicit-target
-      exists: `gh` resolves a fork to its parent.
-
-      Have the operator set the secret, or state the repository and ask.
+      Have the operator set the secret, or ask before changing it.
 
   - name: registry-publish
     # Publishing to a package registry. npm's unpublish window is 72 hours
     # and narrower once others depend on the version; PyPI has no unpublish
     # at all; crates.io yanks but never removes.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:(?:npm|pnpm|yarn|poetry|cargo)\s+(?:[^\s&;|`()<>]+\s+)*publish\b|twine\s+(?:[^\s&;|`()<>]+\s+)*upload\b|gem\s+(?:[^\s&;|`()<>]+\s+)*push\b)
+    pattern: \b(?:(?:npm|pnpm|yarn|poetry|cargo)\s+(?:[^\s&;|`()<>]+\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+){0,64}\s+--dry-run(?:=true)?(?:\s|$))|twine\s+(?:[^\s&;|`()<>]+\s+)*upload\b|gem\s+(?:[^\s&;|`()<>]+\s+)*push\b)
+    executables:
+      - npm
+      - pnpm
+      - yarn
+      - poetry
+      - cargo
+      - twine
+      - gem
     severity: critical
     description: "package registry publish blocked — a published version cannot be recalled"
     explanation: |
@@ -170,18 +130,5 @@ destructive_patterns:
       impossible to undo, so it is blocked regardless of which skill or
       workflow asks for it.
 
-      Publish from CI on a tag, or have the operator run the command.
-
-safe_patterns:
-  - name: gh-pr-create-named-target
-    # `gh pr create --repo <owner>/<name>` states its target, which is the
-    # entire ask of gh-pr-create-implicit-target.
-    #
-    # Bounded walker rather than `.*`: with `.*` a `--repo` token appearing
-    # anywhere later on the line — after a `;`, inside an echo — would satisfy
-    # the carve-out for an unrelated `gh pr create`. packs/readme.md records
-    # that exact defect in the --force-with-lease carve-out, and a safe
-    # pattern fails OPEN, so the overreach is worse here than in a
-    # destructive one.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}gh\s+(?:[^\s&;|`()<>]+\s+)*pr\s+(?:[^\s&;|`()<>]+\s+)*create\s+(?:[^\s&;|`()<>]+\s+)*--repo\s+[^\s&;|`()<>]+
-    description: "`gh pr create --repo <owner>/<name>` names its target repository"
+      Use a supported `--dry-run` option first. Publish from CI on a tag, or
+      have the operator run the command.

@@ -9,18 +9,6 @@
 # Every case here is allowlist-independent.
 
 [[case]]
-description = "gh pr create with no --repo targets a fork's parent"
-command = "gh pr create --fill"
-expected = "deny"
-rule_id = "silvarbor.access_boundary:gh-pr-create-implicit-target"
-
-[[case]]
-description = "--base and --head do not name the target repository"
-command = "gh pr create --base main --head feature/x"
-expected = "deny"
-rule_id = "silvarbor.access_boundary:gh-pr-create-implicit-target"
-
-[[case]]
 description = "gh repo edit --visibility"
 command = "gh repo edit --visibility public"
 expected = "deny"

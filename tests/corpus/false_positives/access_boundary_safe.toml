@@ -1,8 +1,12 @@
 # false positives / silvarbor.access_boundary
 #
-# Two classes: commands that name their target or do not publish, and prose
-# that mentions a guarded command without performing one. The prose cases are
-# the ones the anchoring convention in packs/readme.md exists for.
+# Commands that do not change access or publish, supported publish dry runs,
+# and prose that mentions a guarded command without performing one.
+
+[[case]]
+description = "gh pr create without --repo is allowed"
+command = "gh pr create --fill"
+expected = "allow"
 
 [[case]]
 description = "gh pr create --repo names its target"
@@ -12,6 +16,36 @@ expected = "allow"
 [[case]]
 description = "--repo followed by more flags still carves out"
 command = "gh pr create --repo acme/x --title t --body b"
+expected = "allow"
+
+[[case]]
+description = "--repo after a quoted flag value still carves out"
+command = "gh pr create --title \"ordinary title\" --repo acme/x --fill"
+expected = "allow"
+
+[[case]]
+description = "--repo equals form names its target"
+command = "gh pr create --title 'ordinary title' --repo=acme/x --fill"
+expected = "allow"
+
+[[case]]
+description = "named-target PR after a neighbouring command"
+command = "cd /repo; gh pr create --repo acme/x --fill"
+expected = "allow"
+
+[[case]]
+description = "named-target multiline PR with heredoc body"
+command = '''cd /Users/example/project
+GIT_TERMINAL_PROMPT=0 gh pr create \
+  --repo outcomeeng/claude-status \
+  --base main \
+  --head fix/always-output \
+  --title "fix: guarantee one status line" \
+  --body-file - <<'EOF'
+## Summary
+
+- The command names its target repository.
+EOF'''
 expected = "allow"
 
 [[case]]
@@ -54,6 +88,21 @@ description = "cargo build is not cargo publish"
 command = "cargo build --release"
 expected = "allow"
 
+[[case]]
+description = "npm publish dry run"
+command = "npm publish --dry-run"
+expected = "allow"
+
+[[case]]
+description = "cargo publish dry run"
+command = "cargo publish --dry-run"
+expected = "allow"
+
+[[case]]
+description = "poetry publish dry run"
+command = "poetry publish --dry-run"
+expected = "allow"
+
 # Prose. A document or message that names a guarded command must not block.
 # packs/readme.md records a handoff document blocked on 2026-07-27 for
 # containing the words, which is what the command-position anchor prevents.
@@ -70,4 +119,9 @@ expected = "allow"
 [[case]]
 description = "prose mentioning npm publish, unquoted in a commit message"
 command = "git commit -m do not npm publish from a laptop"
+expected = "allow"
+
+[[case]]
+description = "a prowl payload mentioning a guarded gh command is data"
+command = "prowl send agent --prompt 'run gh repo edit --visibility public'"
 expected = "allow"

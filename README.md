@@ -98,7 +98,11 @@ still deny worktree-local operations that this policy intentionally permits.
 
 The packs use dcg 0.10 executable scoping. dcg resolves assignments, wrappers,
 and executable paths before it applies a custom pattern. A rule for `gh` does
-not deny a command merely because its argument text mentions `gh`.
+not deny another program merely because its argument text mentions `gh`.
+
+Every active destructive pattern also starts at a command position. This
+anchor limits matches to command positions, not phrases in the scoped
+executable's arguments.
 
 Patterns still walk tokens with a bounded class that stops at shell operators:
 

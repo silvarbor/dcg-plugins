@@ -57,11 +57,18 @@ rule therefore declares `executables: [git]`. Text in another program's stdin
 or argument list does not become a Git command merely because it contains a
 matching phrase.
 
-The regex consumes supported global Git options before it identifies the
-subcommand. This distinction prevents confusion between `git worktree prune`
-and the top-level `git prune` command. Arguments use a shell-operator-bounded
-token class rather than `.*` or `\S+`. One command cannot satisfy a rule or
-exception in its neighbour.
+Every pattern also starts at a command position. The executable scope rejects
+other programs. The anchor rejects a matching phrase inside the scoped
+executable's own arguments.
+
+The Git patterns consume global options before they identify the subcommand.
+The grammar accepts any option token. Only `-C` and `-c` consume the next shell
+token. The grammar accepts quoted values. This structure covers new
+zero-argument options without a manual whitelist. It also distinguishes
+`git worktree prune` from the top-level `git prune` command.
+
+Arguments use a shell-operator-bounded token class rather than `.*` or `\S+`.
+One command cannot satisfy a rule or exception in its neighbour.
 
 ## Access boundary
 

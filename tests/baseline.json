@@ -1,35 +1,35 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-09T17:03:37.871019+00:00",
+  "generated_at": "2026-08-09T17:29:24.982677+00:00",
   "binary_version": "0.10.0",
   "corpus_dir": "tests/corpus",
-  "total_cases": 96,
-  "total_passed": 96,
+  "total_cases": 107,
+  "total_passed": 107,
   "total_failed": 0,
   "summary": {
     "decision": {
-      "deny": 41,
-      "allow": 55
+      "deny": 50,
+      "allow": 57
     },
     "pack": {
-      "silvarbor.access_boundary": 11,
-      "core.git": 6,
-      "silvarbor.git_safety": 24
+      "silvarbor.access_boundary": 13,
+      "silvarbor.git_safety": 33,
+      "core.git": 4
     },
     "category": {
       "bypass_attempts": {
-        "total": 15,
-        "passed": 15,
-        "failed": 0
-      },
-      "true_positives": {
-        "total": 26,
-        "passed": 26,
+        "total": 20,
+        "passed": 20,
         "failed": 0
       },
       "false_positives": {
-        "total": 55,
-        "passed": 55,
+        "total": 57,
+        "passed": 57,
+        "failed": 0
+      },
+      "true_positives": {
+        "total": 30,
+        "passed": 30,
         "failed": 0
       }
     }
@@ -50,7 +50,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 119
+      "duration_us": 93
     },
     {
       "id": "bypass_attempts/access_boundary.toml:1",
@@ -67,7 +67,41 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 76
+      "duration_us": 58
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:2",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "five assignments must not hide a repository visibility change",
+      "command": "A=1 B=2 C=3 D=4 E=5 gh repo edit --visibility public",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-repo-visibility-change",
+      "actual_rule_id": "silvarbor.access_boundary:gh-repo-visibility-change",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-repo-visibility-change",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 102
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:3",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "three wrappers must not hide a repository visibility change",
+      "command": "command nohup sudo gh repo edit --visibility public",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-repo-visibility-change",
+      "actual_rule_id": "silvarbor.access_boundary:gh-repo-visibility-change",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-repo-visibility-change",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 86
     },
     {
       "id": "bypass_attempts/wrappers.toml:0",
@@ -84,7 +118,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 146
+      "duration_us": 127
     },
     {
       "id": "bypass_attempts/wrappers.toml:1",
@@ -101,14 +135,14 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 133
+      "duration_us": 110
     },
     {
       "id": "bypass_attempts/wrappers.toml:10",
       "category": "bypass_attempts",
       "file": "bypass_attempts/wrappers.toml",
-      "description": "--help as a -C path is data",
-      "command": "git -C --help worktree remove ../peer",
+      "description": "seventeen global options must not hide worktree removal",
+      "command": "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b worktree remove ../peer",
       "expected": "deny",
       "actual": "deny",
       "passed": true,
@@ -118,31 +152,65 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 112
+      "duration_us": 340
     },
     {
       "id": "bypass_attempts/wrappers.toml:11",
       "category": "bypass_attempts",
       "file": "bypass_attempts/wrappers.toml",
-      "description": "help on one segment must not protect neighbouring removal",
-      "command": "git worktree remove --help; git worktree remove ../peer",
+      "description": "seventeen global options must not hide immediate pruning",
+      "command": "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b gc --prune=now",
       "expected": "deny",
       "actual": "deny",
       "passed": true,
-      "expected_rule_id": "silvarbor.git_safety:git-worktree-remove",
-      "actual_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "expected_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
+      "actual_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
       "pack_id": "silvarbor.git_safety",
-      "pattern_name": "git-worktree-remove",
+      "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 170
+      "duration_us": 453
     },
     {
       "id": "bypass_attempts/wrappers.toml:12",
       "category": "bypass_attempts",
       "file": "bypass_attempts/wrappers.toml",
-      "description": "a long global-option prefix remains within the evaluation budget",
-      "command": "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b worktree remove ../peer",
+      "description": "seventeen global options must not hide ref deletion",
+      "command": "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b update-ref -d refs/heads/x",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
+      "actual_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-ref-delete-plumbing",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 496
+    },
+    {
+      "id": "bypass_attempts/wrappers.toml:13",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/wrappers.toml",
+      "description": "seventeen global options must not hide a mirror push",
+      "command": "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b push --mirror origin",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-push-refspec-force",
+      "actual_rule_id": "silvarbor.git_safety:git-push-refspec-force",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-push-refspec-force",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 372
+    },
+    {
+      "id": "bypass_attempts/wrappers.toml:14",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/wrappers.toml",
+      "description": "five assignments must not hide worktree removal",
+      "command": "A=1 B=2 C=3 D=4 E=5 git worktree remove ../peer",
       "expected": "deny",
       "actual": "deny",
       "passed": true,
@@ -152,7 +220,24 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 628
+      "duration_us": 115
+    },
+    {
+      "id": "bypass_attempts/wrappers.toml:15",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/wrappers.toml",
+      "description": "three wrappers must not hide worktree removal",
+      "command": "command nohup sudo git worktree remove ../peer",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "actual_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-worktree-remove",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 105
     },
     {
       "id": "bypass_attempts/wrappers.toml:2",
@@ -169,7 +254,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 105
+      "duration_us": 77
     },
     {
       "id": "bypass_attempts/wrappers.toml:3",
@@ -186,7 +271,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 143
+      "duration_us": 223
     },
     {
       "id": "bypass_attempts/wrappers.toml:4",
@@ -203,7 +288,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 131
+      "duration_us": 118
     },
     {
       "id": "bypass_attempts/wrappers.toml:5",
@@ -220,7 +305,7 @@
       "pattern_name": "git-ref-delete-plumbing",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 184
+      "duration_us": 177
     },
     {
       "id": "bypass_attempts/wrappers.toml:6",
@@ -237,44 +322,10 @@
       "pattern_name": "git-push-refspec-force",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 165
+      "duration_us": 160
     },
     {
       "id": "bypass_attempts/wrappers.toml:7",
-      "category": "bypass_attempts",
-      "file": "bypass_attempts/wrappers.toml",
-      "description": "a quoted path value must not hide worktree removal",
-      "command": "git -C '/tmp/path with spaces' worktree remove ../peer",
-      "expected": "deny",
-      "actual": "deny",
-      "passed": true,
-      "expected_rule_id": "silvarbor.git_safety:git-worktree-remove",
-      "actual_rule_id": "core.git:git-alias-semantic-unverified",
-      "pack_id": "core.git",
-      "pattern_name": "git-alias-semantic-unverified",
-      "match_source": "pack",
-      "quick_rejected": false,
-      "duration_us": 107
-    },
-    {
-      "id": "bypass_attempts/wrappers.toml:8",
-      "category": "bypass_attempts",
-      "file": "bypass_attempts/wrappers.toml",
-      "description": "a quoted configuration value must not hide worktree removal",
-      "command": "git -c 'policy.note=value with spaces' worktree remove ../peer",
-      "expected": "deny",
-      "actual": "deny",
-      "passed": true,
-      "expected_rule_id": "silvarbor.git_safety:git-worktree-remove",
-      "actual_rule_id": "core.git:git-alias-semantic-unverified",
-      "pack_id": "core.git",
-      "pattern_name": "git-alias-semantic-unverified",
-      "match_source": "pack",
-      "quick_rejected": false,
-      "duration_us": 85
-    },
-    {
-      "id": "bypass_attempts/wrappers.toml:9",
       "category": "bypass_attempts",
       "file": "bypass_attempts/wrappers.toml",
       "description": "help as a -C path is data",
@@ -288,7 +339,41 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 125
+      "duration_us": 92
+    },
+    {
+      "id": "bypass_attempts/wrappers.toml:8",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/wrappers.toml",
+      "description": "--help as a -C path is data",
+      "command": "git -C --help worktree remove ../peer",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "actual_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-worktree-remove",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 129
+    },
+    {
+      "id": "bypass_attempts/wrappers.toml:9",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/wrappers.toml",
+      "description": "help on one segment must not protect neighbouring removal",
+      "command": "git worktree remove --help; git worktree remove ../peer",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "actual_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-worktree-remove",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 144
     },
     {
       "id": "false_positives/access_boundary_safe.toml:0",
@@ -300,7 +385,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 84
+      "duration_us": 119
     },
     {
       "id": "false_positives/access_boundary_safe.toml:1",
@@ -312,7 +397,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 98
+      "duration_us": 121
     },
     {
       "id": "false_positives/access_boundary_safe.toml:10",
@@ -324,7 +409,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 126
+      "duration_us": 89
     },
     {
       "id": "false_positives/access_boundary_safe.toml:11",
@@ -336,7 +421,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 61
+      "duration_us": 44
     },
     {
       "id": "false_positives/access_boundary_safe.toml:12",
@@ -348,7 +433,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 85
+      "duration_us": 118
     },
     {
       "id": "false_positives/access_boundary_safe.toml:13",
@@ -360,7 +445,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 87
+      "duration_us": 79
     },
     {
       "id": "false_positives/access_boundary_safe.toml:14",
@@ -372,7 +457,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 74
+      "duration_us": 65
     },
     {
       "id": "false_positives/access_boundary_safe.toml:15",
@@ -384,7 +469,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 74
+      "duration_us": 70
     },
     {
       "id": "false_positives/access_boundary_safe.toml:16",
@@ -396,7 +481,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 67
+      "duration_us": 81
     },
     {
       "id": "false_positives/access_boundary_safe.toml:17",
@@ -408,7 +493,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 73
+      "duration_us": 75
     },
     {
       "id": "false_positives/access_boundary_safe.toml:18",
@@ -420,7 +505,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 23
+      "duration_us": 20
     },
     {
       "id": "false_positives/access_boundary_safe.toml:19",
@@ -432,7 +517,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 23
+      "duration_us": 27
     },
     {
       "id": "false_positives/access_boundary_safe.toml:2",
@@ -444,7 +529,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 101
+      "duration_us": 149
     },
     {
       "id": "false_positives/access_boundary_safe.toml:20",
@@ -456,7 +541,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 177
+      "duration_us": 170
     },
     {
       "id": "false_positives/access_boundary_safe.toml:21",
@@ -468,7 +553,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 42
+      "duration_us": 31
     },
     {
       "id": "false_positives/access_boundary_safe.toml:22",
@@ -480,7 +565,19 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 137
+      "duration_us": 165
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:23",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "a dry-run remains safe after more than sixty-four publish arguments",
+      "command": "npm publish arg01 arg02 arg03 arg04 arg05 arg06 arg07 arg08 arg09 arg10 arg11 arg12 arg13 arg14 arg15 arg16 arg17 arg18 arg19 arg20 arg21 arg22 arg23 arg24 arg25 arg26 arg27 arg28 arg29 arg30 arg31 arg32 arg33 arg34 arg35 arg36 arg37 arg38 arg39 arg40 arg41 arg42 arg43 arg44 arg45 arg46 arg47 arg48 arg49 arg50 arg51 arg52 arg53 arg54 arg55 arg56 arg57 arg58 arg59 arg60 arg61 arg62 arg63 arg64 arg65 --dry-run",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 733
     },
     {
       "id": "false_positives/access_boundary_safe.toml:3",
@@ -492,7 +589,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 139
+      "duration_us": 180
     },
     {
       "id": "false_positives/access_boundary_safe.toml:4",
@@ -504,7 +601,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 153
+      "duration_us": 168
     },
     {
       "id": "false_positives/access_boundary_safe.toml:5",
@@ -516,7 +613,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 156
+      "duration_us": 184
     },
     {
       "id": "false_positives/access_boundary_safe.toml:6",
@@ -528,7 +625,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 15906,
+      "duration_us": 5408,
       "heredoc_triggers": [
         18
       ],
@@ -546,7 +643,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 1463
+      "duration_us": 1055
     },
     {
       "id": "false_positives/access_boundary_safe.toml:8",
@@ -558,7 +655,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 110
+      "duration_us": 102
     },
     {
       "id": "false_positives/access_boundary_safe.toml:9",
@@ -570,7 +667,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 74
+      "duration_us": 78
     },
     {
       "id": "false_positives/git_worktree_local.toml:0",
@@ -582,7 +679,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 34
+      "duration_us": 24
     },
     {
       "id": "false_positives/git_worktree_local.toml:1",
@@ -594,10 +691,22 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 26
+      "duration_us": 17
     },
     {
       "id": "false_positives/git_worktree_local.toml:10",
+      "category": "false_positives",
+      "file": "false_positives/git_worktree_local.toml",
+      "description": "tn prune packed",
+      "command": "git prune-packed",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 64
+    },
+    {
+      "id": "false_positives/git_worktree_local.toml:11",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn prune dry run long",
@@ -606,10 +715,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 95
+      "duration_us": 64
     },
     {
-      "id": "false_positives/git_worktree_local.toml:11",
+      "id": "false_positives/git_worktree_local.toml:12",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn prune dry run short",
@@ -618,10 +727,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 67
+      "duration_us": 69
     },
     {
-      "id": "false_positives/git_worktree_local.toml:12",
+      "id": "false_positives/git_worktree_local.toml:13",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn gc retained objects",
@@ -630,10 +739,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 106
+      "duration_us": 91
     },
     {
-      "id": "false_positives/git_worktree_local.toml:13",
+      "id": "false_positives/git_worktree_local.toml:14",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn reflog configured expiration",
@@ -642,10 +751,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 94
+      "duration_us": 70
     },
     {
-      "id": "false_positives/git_worktree_local.toml:14",
+      "id": "false_positives/git_worktree_local.toml:15",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn push delete",
@@ -654,10 +763,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 1676
+      "duration_us": 1391
     },
     {
-      "id": "false_positives/git_worktree_local.toml:15",
+      "id": "false_positives/git_worktree_local.toml:16",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn push includes",
@@ -666,10 +775,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 161
+      "duration_us": 117
     },
     {
-      "id": "false_positives/git_worktree_local.toml:16",
+      "id": "false_positives/git_worktree_local.toml:17",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn push lease",
@@ -678,10 +787,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 130
+      "duration_us": 128
     },
     {
-      "id": "false_positives/git_worktree_local.toml:17",
+      "id": "false_positives/git_worktree_local.toml:18",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn push plain",
@@ -690,10 +799,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 90
+      "duration_us": 69
     },
     {
-      "id": "false_positives/git_worktree_local.toml:18",
+      "id": "false_positives/git_worktree_local.toml:19",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn reflog show",
@@ -702,19 +811,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 93
-    },
-    {
-      "id": "false_positives/git_worktree_local.toml:19",
-      "category": "false_positives",
-      "file": "false_positives/git_worktree_local.toml",
-      "description": "tn remote add",
-      "command": "git remote add upstream https://x/y.git",
-      "expected": "allow",
-      "actual": "allow",
-      "passed": true,
-      "quick_rejected": false,
-      "duration_us": 4408
+      "duration_us": 81
     },
     {
       "id": "false_positives/git_worktree_local.toml:2",
@@ -726,10 +823,22 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 31
+      "duration_us": 19
     },
     {
       "id": "false_positives/git_worktree_local.toml:20",
+      "category": "false_positives",
+      "file": "false_positives/git_worktree_local.toml",
+      "description": "tn remote add",
+      "command": "git remote add upstream https://x/y.git",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 3831
+    },
+    {
+      "id": "false_positives/git_worktree_local.toml:21",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn remote v",
@@ -738,10 +847,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 92
+      "duration_us": 63
     },
     {
-      "id": "false_positives/git_worktree_local.toml:21",
+      "id": "false_positives/git_worktree_local.toml:22",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn remote remove",
@@ -750,10 +859,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 96
+      "duration_us": 75
     },
     {
-      "id": "false_positives/git_worktree_local.toml:22",
+      "id": "false_positives/git_worktree_local.toml:23",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn remote set-url",
@@ -762,10 +871,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 151
+      "duration_us": 132
     },
     {
-      "id": "false_positives/git_worktree_local.toml:23",
+      "id": "false_positives/git_worktree_local.toml:24",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn reset soft",
@@ -774,10 +883,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 88
+      "duration_us": 80
     },
     {
-      "id": "false_positives/git_worktree_local.toml:24",
+      "id": "false_positives/git_worktree_local.toml:25",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn stash apply",
@@ -786,10 +895,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 73
+      "duration_us": 81
     },
     {
-      "id": "false_positives/git_worktree_local.toml:25",
+      "id": "false_positives/git_worktree_local.toml:26",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn stash list",
@@ -798,10 +907,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 76
+      "duration_us": 58
     },
     {
-      "id": "false_positives/git_worktree_local.toml:26",
+      "id": "false_positives/git_worktree_local.toml:27",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn stash push",
@@ -810,10 +919,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 76
+      "duration_us": 91
     },
     {
-      "id": "false_positives/git_worktree_local.toml:27",
+      "id": "false_positives/git_worktree_local.toml:28",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn stash pop",
@@ -822,10 +931,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 66
+      "duration_us": 63
     },
     {
-      "id": "false_positives/git_worktree_local.toml:28",
+      "id": "false_positives/git_worktree_local.toml:29",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn update ref set",
@@ -834,19 +943,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 96
-    },
-    {
-      "id": "false_positives/git_worktree_local.toml:29",
-      "category": "false_positives",
-      "file": "false_positives/git_worktree_local.toml",
-      "description": "tn worktree add",
-      "command": "git worktree add ../peer -b feature/x",
-      "expected": "allow",
-      "actual": "allow",
-      "passed": true,
-      "quick_rejected": false,
-      "duration_us": 133
+      "duration_us": 87
     },
     {
       "id": "false_positives/git_worktree_local.toml:3",
@@ -858,10 +955,22 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 41
+      "duration_us": 32
     },
     {
       "id": "false_positives/git_worktree_local.toml:30",
+      "category": "false_positives",
+      "file": "false_positives/git_worktree_local.toml",
+      "description": "tn worktree add",
+      "command": "git worktree add ../peer -b feature/x",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 141
+    },
+    {
+      "id": "false_positives/git_worktree_local.toml:31",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn worktree list",
@@ -870,10 +979,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 86
+      "duration_us": 80
     },
     {
-      "id": "false_positives/git_worktree_local.toml:31",
+      "id": "false_positives/git_worktree_local.toml:32",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn worktree prune",
@@ -894,7 +1003,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 38
+      "duration_us": 37
     },
     {
       "id": "false_positives/git_worktree_local.toml:5",
@@ -906,10 +1015,22 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 183
+      "duration_us": 140
     },
     {
       "id": "false_positives/git_worktree_local.toml:6",
+      "category": "false_positives",
+      "file": "false_positives/git_worktree_local.toml",
+      "description": "a prune dry-run remains safe after more than sixty-four arguments",
+      "command": "git prune arg01 arg02 arg03 arg04 arg05 arg06 arg07 arg08 arg09 arg10 arg11 arg12 arg13 arg14 arg15 arg16 arg17 arg18 arg19 arg20 arg21 arg22 arg23 arg24 arg25 arg26 arg27 arg28 arg29 arg30 arg31 arg32 arg33 arg34 arg35 arg36 arg37 arg38 arg39 arg40 arg41 arg42 arg43 arg44 arg45 arg46 arg47 arg48 arg49 arg50 arg51 arg52 arg53 arg54 arg55 arg56 arg57 arg58 arg59 arg60 arg61 arg62 arg63 arg64 arg65 --dry-run",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 941
+    },
+    {
+      "id": "false_positives/git_worktree_local.toml:7",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "fp log then ls",
@@ -918,10 +1039,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 162
+      "duration_us": 134
     },
     {
-      "id": "false_positives/git_worktree_local.toml:7",
+      "id": "false_positives/git_worktree_local.toml:8",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "fp word in path",
@@ -930,10 +1051,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 105
+      "duration_us": 132
     },
     {
-      "id": "false_positives/git_worktree_local.toml:8",
+      "id": "false_positives/git_worktree_local.toml:9",
       "category": "false_positives",
       "file": "false_positives/git_worktree_local.toml",
       "description": "tn gc default",
@@ -942,19 +1063,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 58
-    },
-    {
-      "id": "false_positives/git_worktree_local.toml:9",
-      "category": "false_positives",
-      "file": "false_positives/git_worktree_local.toml",
-      "description": "tn prune packed",
-      "command": "git prune-packed",
-      "expected": "allow",
-      "actual": "allow",
-      "passed": true,
-      "quick_rejected": false,
-      "duration_us": 86
+      "duration_us": 54
     },
     {
       "id": "true_positives/access_boundary.toml:0",
@@ -971,7 +1080,7 @@
       "pattern_name": "gh-repo-visibility-change",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 1557
+      "duration_us": 1973
     },
     {
       "id": "true_positives/access_boundary.toml:1",
@@ -988,7 +1097,7 @@
       "pattern_name": "gh-repo-visibility-change",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 141
+      "duration_us": 153
     },
     {
       "id": "true_positives/access_boundary.toml:2",
@@ -1005,7 +1114,7 @@
       "pattern_name": "gh-secret-write",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 315
+      "duration_us": 398
     },
     {
       "id": "true_positives/access_boundary.toml:3",
@@ -1022,7 +1131,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 739
+      "duration_us": 534
     },
     {
       "id": "true_positives/access_boundary.toml:4",
@@ -1039,7 +1148,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 126
+      "duration_us": 176
     },
     {
       "id": "true_positives/access_boundary.toml:5",
@@ -1056,7 +1165,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 77
+      "duration_us": 86
     },
     {
       "id": "true_positives/access_boundary.toml:6",
@@ -1073,7 +1182,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 65
+      "duration_us": 86
     },
     {
       "id": "true_positives/access_boundary.toml:7",
@@ -1090,7 +1199,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 12931
+      "duration_us": 14630
     },
     {
       "id": "true_positives/access_boundary.toml:8",
@@ -1124,7 +1233,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 2179
+      "duration_us": 1980
     },
     {
       "id": "true_positives/git_cross_boundary.toml:1",
@@ -1141,10 +1250,78 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 96
+      "duration_us": 107
     },
     {
       "id": "true_positives/git_cross_boundary.toml:10",
+      "category": "true_positives",
+      "file": "true_positives/git_cross_boundary.toml",
+      "description": "split all-valued unreachable expiration destroys shared recovery data",
+      "command": "git reflog expire --all --expire-unreachable all",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
+      "actual_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-shared-recovery-data-destroy",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 109
+    },
+    {
+      "id": "true_positives/git_cross_boundary.toml:11",
+      "category": "true_positives",
+      "file": "true_positives/git_cross_boundary.toml",
+      "description": "update-ref -d deletes a shared ref",
+      "command": "git update-ref -d refs/heads/x",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
+      "actual_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-ref-delete-plumbing",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 400
+    },
+    {
+      "id": "true_positives/git_cross_boundary.toml:12",
+      "category": "true_positives",
+      "file": "true_positives/git_cross_boundary.toml",
+      "description": "update-ref --stdin can delete shared refs in a transaction",
+      "command": "git update-ref --stdin",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
+      "actual_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-ref-delete-plumbing",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 99
+    },
+    {
+      "id": "true_positives/git_cross_boundary.toml:13",
+      "category": "true_positives",
+      "file": "true_positives/git_cross_boundary.toml",
+      "description": "worktree remove can delete a peer worktree",
+      "command": "git worktree remove ../peer",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "actual_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-worktree-remove",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 144
+    },
+    {
+      "id": "true_positives/git_cross_boundary.toml:14",
       "category": "true_positives",
       "file": "true_positives/git_cross_boundary.toml",
       "description": "forced worktree removal can delete uncommitted peer files",
@@ -1158,10 +1335,10 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 103
+      "duration_us": 102
     },
     {
-      "id": "true_positives/git_cross_boundary.toml:11",
+      "id": "true_positives/git_cross_boundary.toml:15",
       "category": "true_positives",
       "file": "true_positives/git_cross_boundary.toml",
       "description": "mirror push force-updates every remote ref",
@@ -1175,10 +1352,10 @@
       "pattern_name": "git-push-refspec-force",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 817
+      "duration_us": 368
     },
     {
-      "id": "true_positives/git_cross_boundary.toml:12",
+      "id": "true_positives/git_cross_boundary.toml:16",
       "category": "true_positives",
       "file": "true_positives/git_cross_boundary.toml",
       "description": "leading plus force-updates a remote refspec",
@@ -1192,10 +1369,10 @@
       "pattern_name": "git-push-refspec-force",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 106
+      "duration_us": 121
     },
     {
-      "id": "true_positives/git_cross_boundary.toml:13",
+      "id": "true_positives/git_cross_boundary.toml:17",
       "category": "true_positives",
       "file": "true_positives/git_cross_boundary.toml",
       "description": "plain long force push is covered upstream",
@@ -1209,10 +1386,10 @@
       "pattern_name": "push-force-long",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 90
+      "duration_us": 79
     },
     {
-      "id": "true_positives/git_cross_boundary.toml:14",
+      "id": "true_positives/git_cross_boundary.toml:18",
       "category": "true_positives",
       "file": "true_positives/git_cross_boundary.toml",
       "description": "plain short force push is covered upstream",
@@ -1226,10 +1403,10 @@
       "pattern_name": "push-force-short",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 81
+      "duration_us": 79
     },
     {
-      "id": "true_positives/git_cross_boundary.toml:15",
+      "id": "true_positives/git_cross_boundary.toml:19",
       "category": "true_positives",
       "file": "true_positives/git_cross_boundary.toml",
       "description": "stash clear is covered upstream",
@@ -1243,24 +1420,7 @@
       "pattern_name": "stash-clear",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 84
-    },
-    {
-      "id": "true_positives/git_cross_boundary.toml:16",
-      "category": "true_positives",
-      "file": "true_positives/git_cross_boundary.toml",
-      "description": "stash drop is covered upstream",
-      "command": "git stash drop",
-      "expected": "deny",
-      "actual": "deny",
-      "passed": true,
-      "expected_rule_id": "core.git:stash-drop",
-      "actual_rule_id": "core.git:stash-drop",
-      "pack_id": "core.git",
-      "pattern_name": "stash-drop",
-      "match_source": "pack",
-      "quick_rejected": false,
-      "duration_us": 72
+      "duration_us": 74
     },
     {
       "id": "true_positives/git_cross_boundary.toml:2",
@@ -1277,7 +1437,24 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 66
+      "duration_us": 69
+    },
+    {
+      "id": "true_positives/git_cross_boundary.toml:20",
+      "category": "true_positives",
+      "file": "true_positives/git_cross_boundary.toml",
+      "description": "stash drop is covered upstream",
+      "command": "git stash drop",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "core.git:stash-drop",
+      "actual_rule_id": "core.git:stash-drop",
+      "pack_id": "core.git",
+      "pattern_name": "stash-drop",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 75
     },
     {
       "id": "true_positives/git_cross_boundary.toml:3",
@@ -1294,7 +1471,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 113
+      "duration_us": 118
     },
     {
       "id": "true_positives/git_cross_boundary.toml:4",
@@ -1311,7 +1488,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 152
+      "duration_us": 156
     },
     {
       "id": "true_positives/git_cross_boundary.toml:5",
@@ -1328,7 +1505,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 118
+      "duration_us": 127
     },
     {
       "id": "true_positives/git_cross_boundary.toml:6",
@@ -1345,58 +1522,58 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 108
+      "duration_us": 134
     },
     {
       "id": "true_positives/git_cross_boundary.toml:7",
       "category": "true_positives",
       "file": "true_positives/git_cross_boundary.toml",
-      "description": "update-ref -d deletes a shared ref",
-      "command": "git update-ref -d refs/heads/x",
+      "description": "all-valued reflog expiration destroys shared recovery data",
+      "command": "git reflog expire --expire=all --all",
       "expected": "deny",
       "actual": "deny",
       "passed": true,
-      "expected_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
-      "actual_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
+      "expected_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
+      "actual_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
       "pack_id": "silvarbor.git_safety",
-      "pattern_name": "git-ref-delete-plumbing",
+      "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 781
+      "duration_us": 119
     },
     {
       "id": "true_positives/git_cross_boundary.toml:8",
       "category": "true_positives",
       "file": "true_positives/git_cross_boundary.toml",
-      "description": "update-ref --stdin can delete shared refs in a transaction",
-      "command": "git update-ref --stdin",
+      "description": "split all-valued reflog expiration destroys shared recovery data",
+      "command": "git reflog expire --expire all --all",
       "expected": "deny",
       "actual": "deny",
       "passed": true,
-      "expected_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
-      "actual_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
+      "expected_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
+      "actual_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
       "pack_id": "silvarbor.git_safety",
-      "pattern_name": "git-ref-delete-plumbing",
+      "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 116
+      "duration_us": 136
     },
     {
       "id": "true_positives/git_cross_boundary.toml:9",
       "category": "true_positives",
       "file": "true_positives/git_cross_boundary.toml",
-      "description": "worktree remove can delete a peer worktree",
-      "command": "git worktree remove ../peer",
+      "description": "all-valued unreachable expiration destroys shared recovery data",
+      "command": "git reflog expire --expire-unreachable=all --all",
       "expected": "deny",
       "actual": "deny",
       "passed": true,
-      "expected_rule_id": "silvarbor.git_safety:git-worktree-remove",
-      "actual_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "expected_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
+      "actual_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
       "pack_id": "silvarbor.git_safety",
-      "pattern_name": "git-worktree-remove",
+      "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 155
+      "duration_us": 109
     }
   ]
 }

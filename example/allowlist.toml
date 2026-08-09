@@ -62,22 +62,22 @@ added_at = "2026-07-27T00:00:00Z"
 # remain visible to filesystem rules.
 
 [[allow]]
-pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:help|(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)help)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")){0,64}(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")){0,16}))?\s*$'''
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:help|(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)help)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
 reason = "Shell help and an executable's immediate help subcommand only display usage. The full-line anchor permits a known pager or final background marker and rejects destructive neighbours."
 risk_acknowledged = true
 added_by = "shz"
 added_at = "2026-08-07T00:00:00Z"
 
 [[allow]]
-pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"'\-][^\s&;|`()<>"']*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)){0,6}--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")){0,64}(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")){0,16}))?\s*$'''
-reason = "An unquoted --help after an option-free command path is a help invocation. Pre-help option tokens stay guarded because an earlier option can consume --help as data."
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:(?!(?:-C|-c|--exec-path|--body|--visibility|-a|-b|-e|-o|-r|-u|--app|--env|--org|--repos|--user|--tag)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)--help(?:\s|$))(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))*--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "An unquoted --help token makes a complete command display usage. Known value-taking options consume a following --help token as data instead."
 risk_acknowledged = true
 added_by = "shz"
 added_at = "2026-08-08T00:00:00Z"
 
 [[allow]]
-pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>"']*/)?git(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:(?:(?:-C|-c|--exec-path)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|-C[^\s&;|`()<>"']+|--(?:git-dir|work-tree|namespace|super-prefix|config-env|exec-path)=(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|-(?:p|P)|--(?:no-pager|paginate|literal-pathspecs|no-literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-replace-objects|bare))(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)){1,8}(?:help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")){0,64}|(?:[^\s&;|`()<>"'\-][^\s&;|`()<>"']*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)){0,6}--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")){0,64})(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")){0,16}))?\s*$'''
-reason = "Git global options have declared arity before help matching. Their values are consumed before a later help subcommand or --help flag is recognized."
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']*/)?git(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:(?:(?:-C|-c|--exec-path)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|-(?:C|c)[^\s&;|`()<>"']+|--exec-path=(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|(?!-(?:C|c|--exec-path)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))-[^\s&;|`()<>"']+)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))+help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "Git global options have declared arity before help matching. Their values are consumed before a later help subcommand is recognized."
 risk_acknowledged = true
 added_by = "shz"
 added_at = "2026-08-08T00:00:00Z"

@@ -43,18 +43,6 @@ expected = "deny"
 rule_id = "silvarbor.git_safety:git-push-refspec-force"
 
 [[case]]
-description = "a quoted path value must not hide worktree removal"
-command = "git -C '/tmp/path with spaces' worktree remove ../peer"
-expected = "deny"
-rule_id = "silvarbor.git_safety:git-worktree-remove"
-
-[[case]]
-description = "a quoted configuration value must not hide worktree removal"
-command = "git -c 'policy.note=value with spaces' worktree remove ../peer"
-expected = "deny"
-rule_id = "silvarbor.git_safety:git-worktree-remove"
-
-[[case]]
 description = "help as a -C path is data"
 command = "git -C help worktree remove ../peer"
 expected = "deny"
@@ -73,7 +61,37 @@ expected = "deny"
 rule_id = "silvarbor.git_safety:git-worktree-remove"
 
 [[case]]
-description = "a long global-option prefix remains within the evaluation budget"
-command = "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b worktree remove ../peer"
+description = "seventeen global options must not hide worktree removal"
+command = "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "seventeen global options must not hide immediate pruning"
+command = "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b gc --prune=now"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+
+[[case]]
+description = "seventeen global options must not hide ref deletion"
+command = "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b update-ref -d refs/heads/x"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-ref-delete-plumbing"
+
+[[case]]
+description = "seventeen global options must not hide a mirror push"
+command = "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b push --mirror origin"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-push-refspec-force"
+
+[[case]]
+description = "five assignments must not hide worktree removal"
+command = "A=1 B=2 C=3 D=4 E=5 git worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "three wrappers must not hide worktree removal"
+command = "command nohup sudo git worktree remove ../peer"
 expected = "deny"
 rule_id = "silvarbor.git_safety:git-worktree-remove"

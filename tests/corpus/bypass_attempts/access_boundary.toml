@@ -11,3 +11,15 @@ description = "a wrapper must not hide a registry publish"
 command = "sudo npm publish"
 expected = "deny"
 rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
+description = "five assignments must not hide a repository visibility change"
+command = "A=1 B=2 C=3 D=4 E=5 gh repo edit --visibility public"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:gh-repo-visibility-change"
+
+[[case]]
+description = "three wrappers must not hide a repository visibility change"
+command = "command nohup sudo gh repo edit --visibility public"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:gh-repo-visibility-change"

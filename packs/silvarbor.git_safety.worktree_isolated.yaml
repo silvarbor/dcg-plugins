@@ -54,7 +54,7 @@ keywords:
 
 destructive_patterns:
   - name: git-worktree-remove
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+)){0,16}worktree\s+(?:[^\s&;|`()<>]+\s+)*remove\b
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*worktree\s+(?:[^\s&;|`()<>]+\s+)*remove\b
     executables:
       - git
     severity: critical
@@ -70,7 +70,7 @@ destructive_patterns:
       Ask the user to remove a worktree after they confirm that it is idle.
 
   - name: git-shared-recovery-data-destroy
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+)){0,16}(?:gc\s+(?:[^\s&;|`()<>]+\s+)*--prune=(?:now|all)\b|prune\b(?!-)(?!(?:\s+[^\s&;|`()<>]+){0,64}\s+(?:-n|--dry-run)\b)|reflog\s+expire\s+(?:[^\s&;|`()<>]+\s+)*--expire(?:-unreachable)?(?:=now|\s+now)\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*(?:gc\s+(?:[^\s&;|`()<>]+\s+)*--prune=(?:now|all)\b|prune\b(?!-)(?!(?:\s+[^\s&;|`()<>]+)*\s+(?:-n|--dry-run)\b)|reflog\s+expire\s+(?:[^\s&;|`()<>]+\s+)*--expire(?:-unreachable)?(?:=|\s+)(?:now|all)\b)
     executables:
       - git
     severity: critical
@@ -84,7 +84,7 @@ destructive_patterns:
       configured retention period.
 
   - name: git-ref-delete-plumbing
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+)){0,16}update-ref\s+(?:[^\s&;|`()<>]+\s+)*(?:-d\b|--stdin\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*update-ref\s+(?:[^\s&;|`()<>]+\s+)*(?:-d\b|--stdin\b)
     executables:
       - git
     severity: critical
@@ -99,7 +99,7 @@ destructive_patterns:
       plumbing operation.
 
   - name: git-push-refspec-force
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+)){0,16}push\s+(?:[^\s&;|`()<>]+\s+)*(?:\+[^\s&;|`()<>]+|--mirror\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*push\s+(?:[^\s&;|`()<>]+\s+)*(?:\+[^\s&;|`()<>]+|--mirror\b)
     executables:
       - git
     severity: critical

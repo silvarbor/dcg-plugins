@@ -39,13 +39,14 @@ ALLOW	tn_restore	git restore src/main.rs
 
 # Help commands require effective-policy coverage because the user allowlist,
 # not any individual pack, owns the cross-pack carve-out. `--help` is accepted
-# immediately after the executable or after an option-free command path. Git's
-# global options are parsed separately so their values cannot impersonate help.
+# anywhere in a complete command unless a known value-taking option consumes
+# it. Git's global options are parsed separately before a help subcommand.
 # A pager or final background marker may follow the help segment. A redirect
 # remains visible to filesystem rules, and destructive neighbours stay guarded.
 ALLOW	help_gh_pr_create	gh pr create --help
 ALLOW	help_gh_subcommand	gh help pr create
 ALLOW	help_gh_repo_edit	gh repo edit --help --visibility public
+ALLOW	help_gh_repo_edit_trailing	gh repo edit --visibility public --help
 ALLOW	help_gh_secret_set	gh secret set TOKEN --help
 ALLOW	help_gh_run_watch	gh run watch --help
 ALLOW	help_git_clean	git clean --help -fd
@@ -53,6 +54,9 @@ ALLOW	help_git_push	git push --help --force
 ALLOW	help_git_stash	git stash --help drop
 ALLOW	help_git_global_C	git -C /repo help worktree remove
 ALLOW	help_git_global_C_flag	git -C /repo worktree remove --help
+ALLOW	help_git_global_unlisted	git --no-optional-locks worktree remove --force --help
+ALLOW	help_git_global_subcommand	git --no-optional-locks help worktree remove
+ALLOW	help_git_worktree_trailing	git worktree remove --force --help
 ALLOW	help_pipe_pager	gh pr create --help | less
 ALLOW	help_redirect	gh pr create --help > help.txt
 ALLOW	help_background_sleep	sleep --help &
@@ -103,4 +107,4 @@ DENY	canary_git_safety	git worktree remove ../peer
 DENY	canary_git_global_option	git --no-optional-locks worktree remove ../peer
 DENY	canary_git_quoted_path	git -C '/tmp/path with spaces' worktree remove ../peer
 DENY	canary_git_split_expire	git reflog expire --all --expire-unreachable now
-DENY	canary_git_long	git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b worktree remove ../peer
+DENY	canary_git_long	git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b worktree remove ../peer

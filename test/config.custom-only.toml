@@ -1,0 +1,6 @@
+# Isolate the custom Git pack so built-in core.git precedence cannot mask a
+# missing custom match in rule-attribution tests.
+
+[packs]
+custom_paths = ["packs/silvarbor.git_safety.worktree_isolated.yaml"]
+disabled = ["core.git"]

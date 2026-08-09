@@ -13,13 +13,15 @@
 #   tests/corpus/  - run by `dcg corpus`, the official harness. Asserts pack
 #                    MATCHING, with rule_id per case and a diffable baseline.
 #
-#   test/cases/    - run by the loop below against `dcg explain`. Asserts
-#                    EFFECTIVE POLICY: what the live POSIX guard decides,
-#                    with allowlist.toml applied.
+#   test/cases/    - run by the loops below against `dcg explain` and an
+#                    isolated `dcg test --config`. Asserts EFFECTIVE POLICY
+#                    and custom-pack rule attribution.
 #
 # The split is forced, not stylistic. `dcg corpus` does not apply
 # allowlist.toml and has no --config flag (and ignores DCG_CONFIG), so it
-# cannot express the allowlist-dependent ALLOWs. Verified against dcg 0.10.0.
+# cannot express allowlist-dependent ALLOWs or isolated attribution. Verified
+# against dcg 0.10.0. The runner also checks rule IDs independently because
+# dcg 0.10 can mark a wrong-rule denial as passed.
 #
 # Test data lives in files rather than inline because dcg hooks the shell it
 # protects: a command line containing a guarded command is blocked even when
@@ -33,6 +35,7 @@ ROOT="$(cd "$HERE/.." && pwd)"
 CASES="$HERE/cases"
 CORPUS="$ROOT/tests/corpus"
 BASELINE="$ROOT/tests/baseline.json"
+CUSTOM_CONFIG="$HERE/config.custom-only.toml"
 
 VERBOSE=0
 WHICH=all
@@ -65,6 +68,27 @@ if [ "$WHICH" = all ] || [ "$WHICH" = corpus ]; then
   elif [ "$VERBOSE" -eq 1 ]; then
     printf '%s\n' "$out" | sed 's/^/  /'
   fi
+
+  mismatches="$(awk '
+    /"expected_rule_id":/ {
+      expected = $0
+      sub(/^.*"expected_rule_id": "/, "", expected)
+      sub(/".*$/, "", expected)
+    }
+    /"actual_rule_id":/ {
+      actual = $0
+      sub(/^.*"actual_rule_id": "/, "", actual)
+      sub(/".*$/, "", actual)
+      if (expected != "" && expected != actual) {
+        print expected " != " actual
+      }
+      expected = ""
+    }
+  ' "$BASELINE")"
+  if [ -n "$mismatches" ]; then
+    printf '%s\n' "$mismatches" | sed 's/^/  rule mismatch: /'
+    rc_total=1
+  fi
 fi
 
 # ---------------------------------------------------------------- policy ----
@@ -96,6 +120,31 @@ if [ "$WHICH" = all ] || [ "$WHICH" = policy ]; then
     [ "$fail" -gt 0 ] && { printf ', %d FAILED' "$fail"; rc_total=1; }
     printf '\n'
   done
+
+  tsv="$CASES/custom_pack.tsv"
+  pass=0; fail=0
+  while IFS=$'\t' read -r expected label expected_rule command; do
+    case "$expected" in '' | '#'*) continue ;; esac
+    command="$(printf '%b' "${command//\\n/$'\n'}")"
+
+    out="$(cd "$ROOT" && dcg test --config "$CUSTOM_CONFIG" --explain --dialect posix -- "$command" 2>&1)"
+    got="$(printf '%s' "$out" | grep -m1 'Decision:' | awk '{print $2}')"
+    rule="$(printf '%s' "$out" | grep -m1 'Rule ID:' | awk '{print $3}')"
+
+    if [ "$got" = "$expected" ] && [ "$rule" = "$expected_rule" ]; then
+      pass=$((pass + 1))
+      [ "$VERBOSE" -eq 1 ] && printf '  ok   %-24s %-5s %s\n' "$label" "$got" "$rule"
+    else
+      fail=$((fail + 1))
+      printf '  FAIL %-24s expected=%-5s got=%-5s expected_rule=%s got_rule=%s\n' \
+        "$label" "$expected" "$got" "$expected_rule" "$rule"
+      printf '       %s\n' "$command"
+    fi
+  done < "$tsv"
+
+  printf '%-20s %2d passed' "policy:custom_pack" "$pass"
+  [ "$fail" -gt 0 ] && { printf ', %d FAILED' "$fail"; rc_total=1; }
+  printf '\n'
 fi
 
 echo "---"

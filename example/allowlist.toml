@@ -69,11 +69,32 @@ added_by = "shz"
 added_at = "2026-08-07T00:00:00Z"
 
 [[allow]]
-pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:(?!(?:-C|-c|--exec-path|--body|--visibility|-a|-b|-e|-o|-r|-u|--app|--env|--org|--repos|--user|--tag)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)--help(?:\s|$))(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))*--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
-reason = "An unquoted --help token makes a complete command display usage. Known value-taking options consume a following --help token as data instead."
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"'\-][^\s&;|`()<>"']*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))*--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "An unquoted --help after an option-free command path displays usage. Pre-help option tokens require an executable-scoped rule with declared arity."
 risk_acknowledged = true
 added_by = "shz"
 added_at = "2026-08-08T00:00:00Z"
+
+[[allow]]
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']*/)?gh(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)repo(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)edit(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"'\-][^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*"))?(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:(?:--accept-visibility-change-consequences|--allow-forking|--allow-update-branch|--delete-branch-on-merge|--enable-advanced-security|--enable-auto-merge|--enable-discussions|--enable-issues|--enable-merge-commit|--enable-projects|--enable-rebase-merge|--enable-secret-scanning|--enable-secret-scanning-push-protection|--enable-squash-merge|--enable-wiki|--template)(?:=(?:true|false))?|(?:--add-topic|--default-branch|-d|--description|-h|--homepage|--remove-topic|--squash-merge-commit-message|--visibility)(?:=(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))))*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "GitHub repository-edit help allows only declared zero-argument and value-taking flags before --help. A flag value cannot impersonate help."
+risk_acknowledged = true
+added_by = "shz"
+added_at = "2026-08-09T00:00:00Z"
+
+[[allow]]
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']*/)?gh(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)secret(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)set(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"'\-][^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*"))?(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:--no-repos-selected|--no-store|-u|--user|(?:-a|--app|-b|--body|-e|--env|-f|--env-file|-o|--org|-r|--repos|-v|--visibility|-R|--repo)(?:=(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))))*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "GitHub secret-set help declares which flags consume values before --help. A secret value cannot impersonate help."
+risk_acknowledged = true
+added_by = "shz"
+added_at = "2026-08-09T00:00:00Z"
+
+[[allow]]
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']*/)?git(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:(?:(?:-C|-c|--exec-path)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|-(?:C|c)[^\s&;|`()<>"']+|--exec-path=(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|(?!-(?:C|c|--exec-path)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))-[^\s&;|`()<>"']+)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))*worktree(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)remove(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:-f|--force|[^\s&;|`()<>"'\-][^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "Git worktree-remove help accepts only its zero-argument force flag and worktree operand before --help. Git global option values keep their declared arity."
+risk_acknowledged = true
+added_by = "shz"
+added_at = "2026-08-09T00:00:00Z"
 
 [[allow]]
 pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']*/)?git(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:(?:(?:-C|-c|--exec-path)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|-(?:C|c)[^\s&;|`()<>"']+|--exec-path=(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|(?!-(?:C|c|--exec-path)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))-[^\s&;|`()<>"']+)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))+help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''

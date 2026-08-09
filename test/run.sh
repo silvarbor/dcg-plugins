@@ -36,6 +36,8 @@ CASES="$HERE/cases"
 CORPUS="$ROOT/tests/corpus"
 BASELINE="$ROOT/tests/baseline.json"
 CUSTOM_CONFIG="$HERE/config.custom-only.toml"
+RULE_ID_CHECK="$HERE/check-rule-ids.sh"
+WRONG_RULE_FIXTURE="$HERE/fixtures/wrong-rule.json"
 
 VERBOSE=0
 WHICH=all
@@ -69,24 +71,18 @@ if [ "$WHICH" = all ] || [ "$WHICH" = corpus ]; then
     printf '%s\n' "$out" | sed 's/^/  /'
   fi
 
-  mismatches="$(awk '
-    /"expected_rule_id":/ {
-      expected = $0
-      sub(/^.*"expected_rule_id": "/, "", expected)
-      sub(/".*$/, "", expected)
-    }
-    /"actual_rule_id":/ {
-      actual = $0
-      sub(/^.*"actual_rule_id": "/, "", actual)
-      sub(/".*$/, "", actual)
-      if (expected != "" && expected != actual) {
-        print expected " != " actual
-      }
-      expected = ""
-    }
-  ' "$BASELINE")"
-  if [ -n "$mismatches" ]; then
-    printf '%s\n' "$mismatches" | sed 's/^/  rule mismatch: /'
+  current_corpus="$(mktemp "${TMPDIR:-/tmp}/dcg-corpus.XXXXXX")"
+  if ! dcg corpus -d "$CORPUS" --format json --output "$current_corpus"; then
+    echo "  failed to produce current corpus rule attribution"
+    rc_total=1
+  elif ! mismatches="$($RULE_ID_CHECK "$current_corpus")"; then
+    printf '%s\n' "$mismatches" | sed 's/^/  live rule mismatch: /'
+    rc_total=1
+  fi
+  rm -f "$current_corpus"
+
+  if "$RULE_ID_CHECK" "$WRONG_RULE_FIXTURE" >/dev/null; then
+    echo "  wrong-rule checker accepted its rejection fixture"
     rc_total=1
   fi
 fi

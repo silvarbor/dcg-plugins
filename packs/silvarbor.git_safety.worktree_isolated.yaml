@@ -54,7 +54,7 @@ keywords:
 
 destructive_patterns:
   - name: git-worktree-remove
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*worktree\s+(?:[^\s&;|`()<>]+\s+)*remove\b
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*worktree\s+remove\b
     executables:
       - git
     severity: critical

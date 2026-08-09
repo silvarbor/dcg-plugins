@@ -132,6 +132,41 @@ command = "gh issue create --body 'never run gh repo edit --visibility public'"
 expected = "allow"
 
 [[case]]
+description = "secret list may use set as a jq expression"
+command = "gh secret list --jq set"
+expected = "allow"
+
+[[case]]
+description = "repo list may use edit as a jq expression before its visibility filter"
+command = "gh repo list --jq edit --visibility public"
+expected = "allow"
+
+[[case]]
+description = "an npm script named publish is not a registry publish"
+command = "npm run publish"
+expected = "allow"
+
+[[case]]
+description = "a pnpm script named publish is not a registry publish"
+command = "pnpm run publish"
+expected = "allow"
+
+[[case]]
+description = "a Yarn script named publish is not a registry publish"
+command = "yarn run publish"
+expected = "allow"
+
+[[case]]
+description = "a Poetry command named publish is data passed to run"
+command = "poetry run publish"
+expected = "allow"
+
+[[case]]
+description = "a Cargo binary named publish is not a registry publish"
+command = "cargo run --bin publish"
+expected = "allow"
+
+[[case]]
 description = "a dry-run remains safe after more than sixty-four publish arguments"
 command = "npm publish arg01 arg02 arg03 arg04 arg05 arg06 arg07 arg08 arg09 arg10 arg11 arg12 arg13 arg14 arg15 arg16 arg17 arg18 arg19 arg20 arg21 arg22 arg23 arg24 arg25 arg26 arg27 arg28 arg29 arg30 arg31 arg32 arg33 arg34 arg35 arg36 arg37 arg38 arg39 arg40 arg41 arg42 arg43 arg44 arg45 arg46 arg47 arg48 arg49 arg50 arg51 arg52 arg53 arg54 arg55 arg56 arg57 arg58 arg59 arg60 arg61 arg62 arg63 arg64 arg65 --dry-run"
 expected = "allow"

@@ -1,0 +1,8 @@
+{
+  "results": [
+    {
+      "expected_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "actual_rule_id": "core.git:git-alias-semantic-unverified"
+    }
+  ]
+}

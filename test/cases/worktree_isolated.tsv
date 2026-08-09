@@ -48,6 +48,9 @@ ALLOW	help_gh_subcommand	gh help pr create
 ALLOW	help_gh_repo_edit	gh repo edit --help --visibility public
 ALLOW	help_gh_repo_edit_trailing	gh repo edit --visibility public --help
 ALLOW	help_gh_secret_set	gh secret set TOKEN --help
+ALLOW	help_gh_repo_edit_flags	gh repo edit --enable-issues --visibility public --help
+ALLOW	help_gh_secret_value_flag	gh secret set TOKEN --app actions --help
+ALLOW	help_gh_secret_zero_flag	gh secret set TOKEN --no-store --help
 ALLOW	help_gh_run_watch	gh run watch --help
 ALLOW	help_git_clean	git clean --help -fd
 ALLOW	help_git_push	git push --help --force
@@ -72,6 +75,9 @@ DENY	help_C_value	git -C help worktree remove ../peer
 DENY	help_C_long_value	git -C --help worktree remove ../peer
 DENY	help_neighbour	gh repo edit --help; gh repo edit --visibility public
 DENY	help_option_value	gh secret set TOKEN --body --help
+DENY	help_description_value	gh repo edit --description --help --visibility public
+DENY	help_secret_app_value	gh secret set TOKEN --app --help
+DENY	help_publish_tag_value	npm publish --tag --help
 DENY	help_quoted_data	gh secret set TOKEN --body '--help'
 DENY	help_substitution_data	gh secret set TOKEN --body $(printf -- --help)
 DENY	help_sensitive_redirect	gh pr create --help > /etc/passwd

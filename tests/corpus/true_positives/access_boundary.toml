@@ -33,6 +33,36 @@ expected = "deny"
 rule_id = "silvarbor.access_boundary:registry-publish"
 
 [[case]]
+description = "npm workspace selection before publish remains guarded"
+command = "npm --workspace package-a publish"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
+description = "pnpm filtering before publish remains guarded"
+command = "pnpm --filter package-a publish"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
+description = "Yarn directory selection before publish remains guarded"
+command = "yarn --cwd package-a publish"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
+description = "Poetry directory selection before publish remains guarded"
+command = "poetry --directory package-a publish"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
+description = "Cargo lock enforcement before publish remains guarded"
+command = "cargo --locked publish"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
 description = "pnpm publish"
 command = "pnpm publish --access public"
 expected = "deny"

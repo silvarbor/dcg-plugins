@@ -64,15 +64,14 @@ Two suites, because one tool cannot express both:
   regressions into a non-zero exit.
 - **`test/cases/`** runs against `dcg explain`. `dcg corpus` evaluates pack
   matching *without* applying `allowlist.toml` and has no `--config` flag, so
-  neither the allowlist-dependent ALLOWs nor the shared_checkout pack can be
-  expressed there.
+  allowlist-dependent ALLOWs cannot be expressed there.
 
 That second point matters if you adopt these packs: **a corpus run alone will
 not tell you the allowlist is installed**, and without it the git pack does not
 behave as this repo documents.
 
 `dcg pack validate` proves a pack parses, not that a rule still matches. Always
-run the matrices. Verified against dcg 0.9.2.
+run the matrices. Verified against dcg 0.10.0.
 
 CI runs both suites on every push and pull request. It pins the dcg version and
 the release tarball's checksum in
@@ -84,8 +83,8 @@ checksum and the baseline together.
 ## Three things that will trip you up
 
 **dcg hooks your own shell.** A command line containing `git worktree remove`
-or a poll loop is blocked *for you*, including when testing the rule that
-blocks it. That is why cases live in files and reach dcg through a variable.
+is blocked *for you*, including when testing the rule that blocks it. That is
+why cases live in files and reach dcg through a variable.
 `dcg test --stdin` exists for the same reason. Same for prose: in shell
 `` `cmd` `` **is** command substitution, so a markdown code span containing a
 guarded command is byte-identical to the real thing. Pass document bodies by

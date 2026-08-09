@@ -67,6 +67,10 @@ token. The grammar accepts quoted values. This structure covers new
 zero-argument options without a manual whitelist. It also distinguishes
 `git worktree prune` from the top-level `git prune` command.
 
+Each rule then requires its subcommands in their exact grammar positions. A
+later argument named `remove`, `set`, `edit`, or `publish` cannot impersonate a
+subcommand.
+
 Arguments use a shell-operator-bounded token class rather than `.*` or `\S+`.
 One command cannot satisfy a rule or exception in its neighbour.
 
@@ -113,11 +117,12 @@ or parsed-command scope to create the narrowest rule.
 patterns cannot override another pack's denial.
 
 The allowlist accepts complete `help` and `<tool> help` commands. It also
-accepts an unquoted `--help` token anywhere in a complete command. Known
-value-taking options consume a following `--help` token as data. The help
-command can end with a known pager pipeline or final background marker. The
-allowlist does not absorb redirects or neighbouring commands, so other dcg
-rules can still inspect those operations.
+accepts an unquoted `--help` after an option-free command path.
+Command-specific help patterns allow trailing `--help` after declared options
+for guarded GitHub and Git commands. Value-taking options consume a following
+`--help` token as data. The help command can end with a known pager pipeline or
+final background marker. The allowlist does not absorb redirects or
+neighbouring commands, so other dcg rules can still inspect those operations.
 
 The allowlist matches Git global options with declared arity before it
 recognizes help. For example, `git -C /repo worktree remove --help` is help. In

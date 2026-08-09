@@ -61,7 +61,8 @@ Two suites, because one tool cannot express both:
   harness, in the upstream `true_positives` / `false_positives` /
   `bypass_attempts` taxonomy. Each case asserts a `rule_id`. dcg 0.10 can mark
   a wrong-rule denial as passed, so `test/run.sh` independently compares every
-  expected and actual rule ID. `tests/baseline.json` records the full result.
+  expected rule ID with the current run's actual rule ID. A rejection fixture
+  verifies that check. `tests/baseline.json` records the full result.
 - **`test/cases/`** covers effective policy through `dcg explain` and custom
   pack attribution through `dcg test --config`. `dcg corpus` evaluates pack
   matching *without* applying `allowlist.toml` and has no `--config` flag, so

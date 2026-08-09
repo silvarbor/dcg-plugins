@@ -63,8 +63,10 @@ scope belongs in the harness permission layer and agent instructions.
 pattern cannot override a rule from another pack. The policy supports:
 
 - `help <topic>` and `<tool> help <topic>`, including `gh help`
-- unquoted `--help` anywhere in a complete command
-- Git help following global options with declared argument counts
+- option-free command paths ending in an unquoted `--help`
+- trailing `--help` for guarded GitHub and Git commands with declared option
+  arity
+- the `git help` subcommand after global options with declared argument counts
 - help piped to `less`, `more`, or `cat`, or followed by a final `&`
 
 Known value-taking options consume a following `--help` token as data. For
@@ -101,6 +103,9 @@ not deny another program merely because its argument text mentions `gh`.
 Every active destructive pattern also starts at a command position. This
 anchor limits matches to command positions, not phrases in the scoped
 executable's arguments.
+
+Rules require subcommands at their declared grammar positions. They do not
+search later argument values for a command-shaped phrase.
 
 Patterns still walk tokens with a bounded class that stops at shell operators:
 

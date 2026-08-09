@@ -5,3 +5,7 @@
 # cwd) for each guarded invocation, and may contain secrets if a guarded
 # command ever has one in argv. Never commit this.
 pending_exceptions.jsonl
+
+# Spec-tree session claims are ephemeral host/process state. They are never
+# product truth and must not enter the repository.
+.spx/

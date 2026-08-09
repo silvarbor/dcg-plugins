@@ -59,12 +59,13 @@ Two suites, because one tool cannot express both:
 
 - **`tests/corpus/`** runs under `dcg corpus`, dcg's own regression
   harness, in the upstream `true_positives` / `false_positives` /
-  `bypass_attempts` taxonomy. Each case asserts a `rule_id`, so a command
-  denied by the *wrong* rule is a failure, and `tests/baseline.json` turns
-  regressions into a non-zero exit.
-- **`test/cases/`** runs against `dcg explain`. `dcg corpus` evaluates pack
+  `bypass_attempts` taxonomy. Each case asserts a `rule_id`. dcg 0.10 can mark
+  a wrong-rule denial as passed, so `test/run.sh` independently compares every
+  expected and actual rule ID. `tests/baseline.json` records the full result.
+- **`test/cases/`** covers effective policy through `dcg explain` and custom
+  pack attribution through `dcg test --config`. `dcg corpus` evaluates pack
   matching *without* applying `allowlist.toml` and has no `--config` flag, so
-  allowlist-dependent ALLOWs cannot be expressed there.
+  neither allowlist-dependent ALLOWs nor isolated attribution fit there.
 
 That second point matters if you adopt these packs: **a corpus run alone will
 not tell you the allowlist is installed**, and without it the git pack does not

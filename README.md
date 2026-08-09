@@ -63,19 +63,17 @@ scope belongs in the harness permission layer and agent instructions.
 pattern cannot override a rule from another pack. The policy supports:
 
 - `help <topic>` and `<tool> help <topic>`, including `gh help`
-- `<tool> --help` and option-free command paths ending in `--help`
-- Git help following supported global options with declared argument counts
+- unquoted `--help` anywhere in a complete command
+- Git help following global options with declared argument counts
 - help piped to `less`, `more`, or `cat`, or followed by a final `&`
+
+Known value-taking options consume a following `--help` token as data. For
+example, `git -C --help worktree remove` remains guarded.
 
 Redirects are not part of the help allowlist. The rest of dcg therefore still
 evaluates their destination; a help command cannot use the broad exception to
 write to a protected file. dcg also continues to guard destructive
 neighbouring commands.
-
-When an option can consume a value, place `--help` before ordinary options.
-For example, `git clean --help -fd` is unambiguous. In `git -C --help worktree
-remove`, the `-C` option consumes `--help`. The policy does not treat that form
-as a help request.
 
 ## Install
 
@@ -124,10 +122,11 @@ Run both suites after every rule or allowlist change:
 test/run.sh
 ```
 
-`tests/corpus/` uses dcg's native regression harness and asserts the matching
-rule ID. `test/cases/` exercises effective policy through `dcg explain`.
-Allowlist-dependent results such as Git reset and the shared help policy
-require this suite.
+`tests/corpus/` uses dcg's native regression harness. The runner independently
+checks every expected and actual rule ID because dcg 0.10 can report a mismatch
+as passed. `test/cases/` exercises effective policy and isolates the custom Git
+pack to avoid built-in-rule precedence. Allowlist-driven results such as Git
+reset and the shared help policy require this suite.
 
 The active and disabled pack files validate without warnings under dcg 0.10.0.
 CI pins that version and its release checksum. CI also asserts that dcg loads

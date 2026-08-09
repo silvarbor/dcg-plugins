@@ -112,10 +112,12 @@ or parsed-command scope to create the narrowest rule.
 `allowlist.toml` handles help instead of individual packs. Pack-local safe
 patterns cannot override another pack's denial.
 
-The allowlist accepts complete `help`, `<tool> help`, and unambiguous `--help`
-commands. It also accepts a known pager pipeline or final background marker.
-It does not absorb redirects or neighbouring commands, so other dcg rules can
-still inspect those operations.
+The allowlist accepts complete `help` and `<tool> help` commands. It also
+accepts an unquoted `--help` token anywhere in a complete command. Known
+value-taking options consume a following `--help` token as data. The help
+command can end with a known pager pipeline or final background marker. The
+allowlist does not absorb redirects or neighbouring commands, so other dcg
+rules can still inspect those operations.
 
 The allowlist matches Git global options with declared arity before it
 recognizes help. For example, `git -C /repo worktree remove --help` is help. In
@@ -131,6 +133,8 @@ continues to guard the command.
 - `../test/cases/worktree_isolated.tsv` covers the effective policy, including
   the allowlist, help behavior, disabled process rules, and `gh pr create`
   without `--repo`.
+- `../test/cases/custom_pack.tsv` checks custom Git rule attribution without
+  built-in Git pack precedence.
 
 From the repository root, validate the packs. Then run both test suites:
 

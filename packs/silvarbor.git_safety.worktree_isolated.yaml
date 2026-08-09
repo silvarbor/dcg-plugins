@@ -9,9 +9,9 @@
 # shared. This pack blocks only operations that can destroy those shared
 # resources or delete a peer worktree.
 #
-# Destructive patterns use dcg 0.10 executable scoping. The scope resolves
-# wrappers, assignments, and executable paths. Bounded token walkers remain
-# because a custom regex can still participate in whole-command evaluation.
+# Destructive patterns use dcg 0.10 executable scoping and retain a real
+# command-position anchor. Git global options are generic option tokens; the
+# only supported split-value forms, -C and -c, consume their declared value.
 #
 # Schema: docs/pack.schema.yaml
 # Documentation: docs/custom-packs.md
@@ -54,7 +54,7 @@ keywords:
 
 destructive_patterns:
   - name: git-worktree-remove
-    pattern: \bgit\s+(?:-(?:C|c)\s+[^\s&;|`()<>]+\s+|-C[^\s&;|`()<>]+\s+|--(?:git-dir|work-tree|namespace|super-prefix|config-env|exec-path)=[^\s&;|`()<>]+\s+|--exec-path\s+[^\s&;|`()<>]+\s+|-(?:p|P)\s+|--(?:no-pager|paginate|literal-pathspecs|no-literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-replace-objects|bare)\s+){0,16}worktree\s+(?:[^\s&;|`()<>]+\s+)*remove\b
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+)){0,16}worktree\s+(?:[^\s&;|`()<>]+\s+)*remove\b
     executables:
       - git
     severity: critical
@@ -70,7 +70,7 @@ destructive_patterns:
       Ask the user to remove a worktree after they confirm that it is idle.
 
   - name: git-shared-recovery-data-destroy
-    pattern: \bgit\s+(?:-(?:C|c)\s+[^\s&;|`()<>]+\s+|-C[^\s&;|`()<>]+\s+|--(?:git-dir|work-tree|namespace|super-prefix|config-env|exec-path)=[^\s&;|`()<>]+\s+|--exec-path\s+[^\s&;|`()<>]+\s+|-(?:p|P)\s+|--(?:no-pager|paginate|literal-pathspecs|no-literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-replace-objects|bare)\s+){0,16}(?:gc\s+(?:[^\s&;|`()<>]+\s+)*--prune=(?:now|all)\b|prune\b(?!-)(?!(?:\s+[^\s&;|`()<>]+){0,64}\s+(?:-n|--dry-run)\b)|reflog\s+expire\s+(?:[^\s&;|`()<>]+\s+)*--expire(?:-unreachable)?=now\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+)){0,16}(?:gc\s+(?:[^\s&;|`()<>]+\s+)*--prune=(?:now|all)\b|prune\b(?!-)(?!(?:\s+[^\s&;|`()<>]+){0,64}\s+(?:-n|--dry-run)\b)|reflog\s+expire\s+(?:[^\s&;|`()<>]+\s+)*--expire(?:-unreachable)?(?:=now|\s+now)\b)
     executables:
       - git
     severity: critical
@@ -84,7 +84,7 @@ destructive_patterns:
       configured retention period.
 
   - name: git-ref-delete-plumbing
-    pattern: \bgit\s+(?:-(?:C|c)\s+[^\s&;|`()<>]+\s+|-C[^\s&;|`()<>]+\s+|--(?:git-dir|work-tree|namespace|super-prefix|config-env|exec-path)=[^\s&;|`()<>]+\s+|--exec-path\s+[^\s&;|`()<>]+\s+|-(?:p|P)\s+|--(?:no-pager|paginate|literal-pathspecs|no-literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-replace-objects|bare)\s+){0,16}update-ref\s+(?:[^\s&;|`()<>]+\s+)*(?:-d\b|--stdin\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+)){0,16}update-ref\s+(?:[^\s&;|`()<>]+\s+)*(?:-d\b|--stdin\b)
     executables:
       - git
     severity: critical
@@ -99,7 +99,7 @@ destructive_patterns:
       plumbing operation.
 
   - name: git-push-refspec-force
-    pattern: \bgit\s+(?:-(?:C|c)\s+[^\s&;|`()<>]+\s+|-C[^\s&;|`()<>]+\s+|--(?:git-dir|work-tree|namespace|super-prefix|config-env|exec-path)=[^\s&;|`()<>]+\s+|--exec-path\s+[^\s&;|`()<>]+\s+|-(?:p|P)\s+|--(?:no-pager|paginate|literal-pathspecs|no-literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-replace-objects|bare)\s+){0,16}push\s+(?:[^\s&;|`()<>]+\s+)*(?:\+[^\s&;|`()<>]+|--mirror\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+)){0,16}push\s+(?:[^\s&;|`()<>]+\s+)*(?:\+[^\s&;|`()<>]+|--mirror\b)
     executables:
       - git
     severity: critical

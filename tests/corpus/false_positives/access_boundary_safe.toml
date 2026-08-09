@@ -125,3 +125,8 @@ expected = "allow"
 description = "a prowl payload mentioning a guarded gh command is data"
 command = "prowl send agent --prompt 'run gh repo edit --visibility public'"
 expected = "allow"
+
+[[case]]
+description = "a guarded gh executable name inside another gh argument is data"
+command = "gh issue create --body 'never run gh repo edit --visibility public'"
+expected = "allow"

@@ -31,6 +31,18 @@ expected = "deny"
 rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
+description = "split immediate reflog expiration destroys shared recovery data"
+command = "git reflog expire --expire now --all"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+
+[[case]]
+description = "split immediate unreachable expiration remains guarded after reordered options"
+command = "git reflog expire --all --expire-unreachable now"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+
+[[case]]
 description = "update-ref -d deletes a shared ref"
 command = "git update-ref -d refs/heads/x"
 expected = "deny"

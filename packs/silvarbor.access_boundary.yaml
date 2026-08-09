@@ -69,7 +69,7 @@ destructive_patterns:
     # `gh repo edit --visibility`. Reversible in one call and permanent in
     # fact: a repository made public is in the events firehose, GHArchive,
     # and scraper caches before it can be made private again.
-    pattern: \bgh\s+(?:[^\s&;|`()<>]+\s+)*repo\s+(?:[^\s&;|`()<>]+\s+)*edit\s+(?:[^\s&;|`()<>]+\s+)*--visibility\b
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>]*/)?gh\s+(?:[^\s&;|`()<>]+\s+)*repo\s+(?:[^\s&;|`()<>]+\s+)*edit\s+(?:[^\s&;|`()<>]+\s+)*--visibility\b
     executables:
       - gh
     severity: critical
@@ -92,7 +92,7 @@ destructive_patterns:
     # places credential material into a repository's Actions environment,
     # where every workflow — including one added later by someone else — can
     # read it. Reading and listing are untouched.
-    pattern: \bgh\s+(?:[^\s&;|`()<>]+\s+)*secret\s+(?:[^\s&;|`()<>]+\s+)*set\b
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:[^\s&;|`()<>]*/)?gh\s+(?:[^\s&;|`()<>]+\s+)*secret\s+(?:[^\s&;|`()<>]+\s+)*set\b
     executables:
       - gh
     severity: high
@@ -109,7 +109,7 @@ destructive_patterns:
     # Publishing to a package registry. npm's unpublish window is 72 hours
     # and narrower once others depend on the version; PyPI has no unpublish
     # at all; crates.io yanks but never removes.
-    pattern: \b(?:(?:npm|pnpm|yarn|poetry|cargo)\s+(?:[^\s&;|`()<>]+\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+){0,64}\s+--dry-run(?:=true)?(?:\s|$))|twine\s+(?:[^\s&;|`()<>]+\s+)*upload\b|gem\s+(?:[^\s&;|`()<>]+\s+)*push\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*\s+){0,4}(?:(?:sudo|command|nohup|time)\s+){0,2}(?:(?:[^\s&;|`()<>]*/)?(?:npm|pnpm|yarn|poetry|cargo)\s+(?:[^\s&;|`()<>]+\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+){0,64}\s+--dry-run(?:=true)?(?:\s|$))|(?:[^\s&;|`()<>]*/)?twine\s+(?:[^\s&;|`()<>]+\s+)*upload\b|(?:[^\s&;|`()<>]*/)?gem\s+(?:[^\s&;|`()<>]+\s+)*push\b)
     executables:
       - npm
       - pnpm

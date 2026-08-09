@@ -77,6 +77,8 @@ DENY	help_sensitive_redirect	gh pr create --help > /etc/passwd
 ALLOW	gh_pr_create_implicit	gh pr create --fill
 ALLOW	gh_pr_create_base_head	gh pr create --base main --head feature/x
 ALLOW	gh_pr_create_after_cd	cd /repo; gh pr create --fill
+ALLOW	gh_payload_is_data	gh issue create --body 'never run gh repo edit --visibility public'
+ALLOW	git_payload_is_data	git commit -m 'never run git worktree remove ../peer'
 
 # The custom Git pack no longer guards recoverable configuration, normal
 # maintenance, or stash pop. Upstream core.git still guards stash drop/clear
@@ -98,4 +100,7 @@ ALLOW	process_gh_run_watch	gh run watch 123
 # and allowlist validation remain individually green.
 DENY	canary_access_boundary	gh repo edit --visibility public
 DENY	canary_git_safety	git worktree remove ../peer
+DENY	canary_git_global_option	git --no-optional-locks worktree remove ../peer
+DENY	canary_git_quoted_path	git -C '/tmp/path with spaces' worktree remove ../peer
+DENY	canary_git_split_expire	git reflog expire --all --expire-unreachable now
 DENY	canary_git_long	git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b worktree remove ../peer

@@ -19,6 +19,42 @@ expected = "deny"
 rule_id = "silvarbor.git_safety:git-worktree-remove"
 
 [[case]]
+description = "an unlisted zero-argument Git option must not hide worktree removal"
+command = "git --no-optional-locks worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "an unlisted zero-argument Git option must not hide immediate pruning"
+command = "git --no-optional-locks gc --prune=now"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+
+[[case]]
+description = "an unlisted zero-argument Git option must not hide ref deletion"
+command = "git --no-optional-locks update-ref -d refs/heads/x"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-ref-delete-plumbing"
+
+[[case]]
+description = "an unlisted zero-argument Git option must not hide a mirror push"
+command = "git --no-optional-locks push --mirror origin"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-push-refspec-force"
+
+[[case]]
+description = "a quoted path value must not hide worktree removal"
+command = "git -C '/tmp/path with spaces' worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "a quoted configuration value must not hide worktree removal"
+command = "git -c 'policy.note=value with spaces' worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
 description = "help as a -C path is data"
 command = "git -C help worktree remove ../peer"
 expected = "deny"

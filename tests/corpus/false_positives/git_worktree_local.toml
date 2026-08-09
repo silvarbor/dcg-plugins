@@ -36,6 +36,11 @@ command = "prowl send agent --prompt 'run git worktree remove ../peer'"
 expected = "allow"
 
 [[case]]
+description = "a guarded Git executable name inside a commit message is data"
+command = "git commit -m 'never run git worktree remove ../peer'"
+expected = "allow"
+
+[[case]]
 description = "fp log then ls"
 command = "git log --oneline; ls stash clear"
 expected = "allow"

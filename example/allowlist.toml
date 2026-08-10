@@ -56,6 +56,16 @@ reason = "Worktree-pool policy permits reset in every mode; --merge is worktree-
 added_by = "shz"
 added_at = "2026-07-27T00:00:00Z"
 
+# dcg 0.10's legacy launcher detector treats Markdown code spans in a
+# single-quoted EOF heredoc for gh pr create --body-file - as shell commands.
+
+[[allow]]
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\`$]|\$(?!\()|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']*/)?gh(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)pr(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)create(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\`$]|\$(?!\()|\\.)*"))*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)--body-file(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)-(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\`$]|\$(?!\()|\\.)*"))*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)<<[ \t]*'EOF'[ \t]*\r?\n(?m:(?:(?!^EOF[ \t]*\r?$)[\s\S])*^EOF[ \t]*\r?$)\s*'''
+reason = "gh pr create --body-file - reads a single-quoted EOF heredoc as inert data. The command prefix excludes substitutions and shell operators. The pattern rejects command text after the first EOF delimiter."
+risk_acknowledged = true
+added_by = "shz"
+added_at = "2026-08-10T00:00:00Z"
+
 # Help is an effective-policy concern. Pack-local safe patterns cannot override
 # a matching rule from another pack. These entries accept only complete help
 # commands, a known pager pipeline, or a final background marker. Redirects

@@ -92,6 +92,18 @@ current directory.
 dcg's built-in GitHub pack already covers `gh repo delete`. The custom pack
 does not duplicate that rule.
 
+`allowlist.toml` accepts a single-quoted `EOF` heredoc from
+`gh pr create --body-file -`. dcg 0.10 does not register this GitHub CLI form
+as a structured standard-input data sink. Its legacy launcher detector
+therefore reads Markdown code spans that resemble shell commands as local
+commands. The exception rejects command substitution before the heredoc. It
+also rejects an unquoted delimiter.
+
+Keep PR creation as the only command in that shell tool call. dcg 0.10 does
+not inspect a command after a heredoc's end delimiter. `allowlist.toml`
+requires the first `EOF` delimiter to end the input. It cannot repair the
+separate upstream fail-open.
+
 Every destructive rule declares its executable scope. The `keywords` list
 also contains every executable name because dcg evaluates that pre-filter
 before any pattern. A missing executable silently makes its ecosystem ALLOW,

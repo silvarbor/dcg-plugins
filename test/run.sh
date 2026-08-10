@@ -33,6 +33,7 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/.." && pwd)"
 CASES="$HERE/cases"
+FIXTURES="$HERE/fixtures"
 CORPUS="$ROOT/tests/corpus"
 BASELINE="$ROOT/tests/baseline.json"
 CUSTOM_CONFIG="$HERE/config.custom-only.toml"
@@ -96,7 +97,17 @@ if [ "$WHICH" = all ] || [ "$WHICH" = policy ]; then
     pass=0; fail=0
     while IFS=$'\t' read -r expected label command; do
       case "$expected" in '' | '#'*) continue ;; esac
-      command="$(printf '%b' "${command//\\n/$'\n'}")"
+      case "$command" in
+        @fixture:*)
+          fixture="$FIXTURES/${command#@fixture:}"
+          if [ ! -f "$fixture" ]; then
+            echo "missing command fixture: $fixture" >&2
+            exit 2
+          fi
+          command="$(<"$fixture")"
+          ;;
+        *) command="$(printf '%b' "${command//\\n/$'\n'}")" ;;
+      esac
 
       out="$(dcg explain --dialect posix -- "$command" 2>&1)"
       got="$(printf '%s' "$out" | grep -m1 'Decision:' | awk '{print $2}')"

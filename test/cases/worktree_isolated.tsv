@@ -4,6 +4,7 @@
 #   expected : ALLOW or DENY
 #   command  : the command line handed to `dcg explain`.
 #              A literal \n in this column becomes a real newline.
+#              @fixture:<name> loads a multiline command from test/fixtures/.
 #
 # Blank lines and lines starting with # are ignored.
 #
@@ -87,6 +88,9 @@ DENY	help_sensitive_redirect	gh pr create --help > /etc/passwd
 ALLOW	gh_pr_create_implicit	gh pr create --fill
 ALLOW	gh_pr_create_base_head	gh pr create --base main --head feature/x
 ALLOW	gh_pr_create_after_cd	cd /repo; gh pr create --fill
+ALLOW	gh_pr_quoted_heredoc	@fixture:gh-pr-create-quoted-heredoc.txt
+DENY	gh_pr_dynamic_head	@fixture:gh-pr-create-dynamic-head.txt
+DENY	gh_pr_unquoted_heredoc	@fixture:gh-pr-create-unquoted-heredoc.txt
 ALLOW	gh_payload_is_data	gh issue create --body 'never run gh repo edit --visibility public'
 ALLOW	git_payload_is_data	git commit -m 'never run git worktree remove ../peer'
 

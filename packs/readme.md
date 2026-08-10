@@ -80,6 +80,24 @@ unlisted wrapper commands or client options can bypass a rule.
 Arguments use a shell-operator-bounded token class rather than `.*` or `\S+`.
 One command cannot satisfy a rule or exception in its neighbour.
 
+The assignment, wrapper, and Git-global-option repetitions have no count
+ceiling. Earlier ceilings created deterministic bypasses after four
+assignments, two wrappers, or 16 Git options.
+
+Assignment chains cover every active rule and every help or heredoc allowlist
+pattern. Wrapper chains cover every active rule and every help allowlist
+pattern.
+Git-option chains cover every Git rule and both Git-specific help forms. Each
+chain has 65 entries, and each Git option has a value.
+
+The matrix runs with dcg's enforced budget set to 200 ms. That is stricter than
+dcg 0.10's 1,000 ms default.
+
+The chains stay independent because dcg's launcher analysis fails closed on
+some combined synthetic prefixes before custom matching. It also fails closed
+on a long wrapper chain before a heredoc. Separate cases isolate the repetition
+they measure without weakening the live policy.
+
 ## Access boundary
 
 This pack covers outward actions whose blast radius does not depend on the

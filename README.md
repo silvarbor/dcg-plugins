@@ -133,7 +133,8 @@ test/run.sh
 checks every expected and actual rule ID because dcg 0.10 can report a mismatch
 as passed. `test/cases/` exercises effective policy and isolates the custom Git
 pack to avoid built-in-rule precedence. Allowlist-driven results such as Git
-reset and the shared help policy require this suite.
+reset and the shared help policy require this suite. Its performance matrix
+also enforces a 200 ms evaluation budget on 65-entry stress chains.
 
 The active and disabled pack files validate without warnings under dcg 0.10.0.
 CI pins that version and its release checksum. CI also asserts that dcg loads

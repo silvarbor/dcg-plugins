@@ -37,6 +37,7 @@ FIXTURES="$HERE/fixtures"
 CORPUS="$ROOT/tests/corpus"
 BASELINE="$ROOT/tests/baseline.json"
 CUSTOM_CONFIG="$HERE/config.custom-only.toml"
+PERFORMANCE_CASES="$CASES/performance.tsv"
 RULE_ID_CHECK="$HERE/check-rule-ids.sh"
 WRONG_RULE_FIXTURE="$HERE/fixtures/wrong-rule.json"
 
@@ -90,43 +91,42 @@ fi
 
 # ---------------------------------------------------------------- policy ----
 if [ "$WHICH" = all ] || [ "$WHICH" = policy ]; then
-  for suite in worktree_isolated; do
-    tsv="$CASES/$suite.tsv"
-    [ -f "$tsv" ] || { echo "missing suite file: $tsv" >&2; exit 2; }
+  suite=worktree_isolated
+  tsv="$CASES/$suite.tsv"
+  [ -f "$tsv" ] || { echo "missing suite file: $tsv" >&2; exit 2; }
 
-    pass=0; fail=0
-    while IFS=$'\t' read -r expected label command; do
-      case "$expected" in '' | '#'*) continue ;; esac
-      case "$command" in
-        @fixture:*)
-          fixture="$FIXTURES/${command#@fixture:}"
-          if [ ! -f "$fixture" ]; then
-            echo "missing command fixture: $fixture" >&2
-            exit 2
-          fi
-          command="$(<"$fixture")"
-          ;;
-        *) command="$(printf '%b' "${command//\\n/$'\n'}")" ;;
-      esac
+  pass=0; fail=0
+  while IFS=$'\t' read -r expected label command; do
+    case "$expected" in '' | '#'*) continue ;; esac
+    case "$command" in
+      @fixture:*)
+        fixture="$FIXTURES/${command#@fixture:}"
+        if [ ! -f "$fixture" ]; then
+          echo "missing command fixture: $fixture" >&2
+          exit 2
+        fi
+        command="$(<"$fixture")"
+        ;;
+      *) command="$(printf '%b' "${command//\\n/$'\n'}")" ;;
+    esac
 
-      out="$(dcg explain --dialect posix -- "$command" 2>&1)"
-      got="$(printf '%s' "$out" | grep -m1 'Decision:' | awk '{print $2}')"
-      rule="$(printf '%s' "$out" | grep -m1 'Rule ID:' | awk '{print $3}')"
+    out="$(dcg explain --dialect posix -- "$command" 2>&1)"
+    got="$(printf '%s' "$out" | grep -m1 'Decision:' | awk '{print $2}')"
+    rule="$(printf '%s' "$out" | grep -m1 'Rule ID:' | awk '{print $3}')"
 
-      if [ "$got" = "$expected" ]; then
-        pass=$((pass + 1))
-        [ "$VERBOSE" -eq 1 ] && printf '  ok   %-24s %-5s %s\n' "$label" "$got" "$rule"
-      else
-        fail=$((fail + 1))
-        printf '  FAIL %-24s expected=%-5s got=%-5s %s\n' "$label" "$expected" "$got" "$rule"
-        printf '       %s\n' "$command"
-      fi
-    done < "$tsv"
+    if [ "$got" = "$expected" ]; then
+      pass=$((pass + 1))
+      [ "$VERBOSE" -eq 1 ] && printf '  ok   %-24s %-5s %s\n' "$label" "$got" "$rule"
+    else
+      fail=$((fail + 1))
+      printf '  FAIL %-24s expected=%-5s got=%-5s %s\n' "$label" "$expected" "$got" "$rule"
+      printf '       %s\n' "$command"
+    fi
+  done < "$tsv"
 
-    printf '%-20s %2d passed' "policy:$suite" "$pass"
-    [ "$fail" -gt 0 ] && { printf ', %d FAILED' "$fail"; rc_total=1; }
-    printf '\n'
-  done
+  printf '%-20s %2d passed' "policy:$suite" "$pass"
+  [ "$fail" -gt 0 ] && { printf ', %d FAILED' "$fail"; rc_total=1; }
+  printf '\n'
 
   tsv="$CASES/custom_pack.tsv"
   pass=0; fail=0
@@ -150,6 +150,66 @@ if [ "$WHICH" = all ] || [ "$WHICH" = policy ]; then
   done < "$tsv"
 
   printf '%-20s %2d passed' "policy:custom_pack" "$pass"
+  [ "$fail" -gt 0 ] && { printf ', %d FAILED' "$fail"; rc_total=1; }
+  printf '\n'
+
+  long_env=""
+  long_wrappers=""
+  long_git_options=""
+  for ((i = 1; i <= 65; i++)); do
+    long_env+="DCG_PERF_${i}=x "
+    long_wrappers+="command "
+    long_git_options+="-c dcg.perf${i}=x "
+  done
+
+  budget_canary="${long_env}${long_wrappers}git gc --prune=now"
+  out="$(printf '%s' "$budget_canary" | DCG_HOOK_TIMEOUT_MS=1 dcg test \
+    --stdin --enforce-budget --dialect posix --format json 2>&1)"
+  got="$(printf '%s' "$out" | awk -F'"' '/"decision":/ {print $4; exit}')"
+  if [ "$got" != indeterminate ]; then
+    echo "  evaluation-budget canary did not exhaust its 1 ms deadline"
+    rc_total=1
+  fi
+
+  pass=0; fail=0
+  while IFS=$'\t' read -r expected label expected_rule prefix_kind suffix; do
+    case "$expected" in '' | '#'*) continue ;; esac
+    case "$suffix" in
+      @fixture:*)
+        fixture="$FIXTURES/${suffix#@fixture:}"
+        if [ ! -f "$fixture" ]; then
+          echo "missing command fixture: $fixture" >&2
+          exit 2
+        fi
+        suffix="$(<"$fixture")"
+        ;;
+      *) suffix="$(printf '%b' "${suffix//\\n/$'\n'}")" ;;
+    esac
+
+    case "$prefix_kind" in
+      env) command="${long_env}${suffix}" ;;
+      wrappers) command="${long_wrappers}${suffix}" ;;
+      git-options) command="git ${long_git_options}${suffix}" ;;
+      *) echo "unknown performance prefix: $prefix_kind" >&2; exit 2 ;;
+    esac
+
+    out="$(printf '%s' "$command" | DCG_HOOK_TIMEOUT_MS=200 dcg test \
+      --stdin --enforce-budget --dialect posix --format json 2>&1)"
+    got="$(printf '%s' "$out" | awk -F'"' '/"decision":/ {print $4; exit}')"
+    rule="$(printf '%s' "$out" | awk -F'"' '/"rule_id":/ {print $4; exit}')"
+
+    if [ "$got" = "${expected,,}" ] && \
+       { [ "$expected_rule" = - ] || [ "$rule" = "$expected_rule" ]; }; then
+      pass=$((pass + 1))
+      [ "$VERBOSE" -eq 1 ] && printf '  ok   %-24s %-5s %s\n' "$label" "$got" "$rule"
+    else
+      fail=$((fail + 1))
+      printf '  FAIL %-24s expected=%-5s got=%-13s expected_rule=%s got_rule=%s\n' \
+        "$label" "$expected" "$got" "$expected_rule" "$rule"
+    fi
+  done < "$PERFORMANCE_CASES"
+
+  printf '%-20s %2d passed' "policy:performance" "$pass"
   [ "$fail" -gt 0 ] && { printf ', %d FAILED' "$fail"; rc_total=1; }
   printf '\n'
 fi

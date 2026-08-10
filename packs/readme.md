@@ -134,8 +134,10 @@ or parsed-command scope to create the narrowest rule.
 `allowlist.toml` handles help instead of individual packs. Pack-local safe
 patterns cannot override another pack's denial.
 
-The allowlist accepts complete `help` and `<tool> help` commands. It also
-accepts an unquoted `--help` after an option-free command path.
+The allowlist accepts complete shell `help` commands. It accepts an immediate
+`help` subcommand only for the explicitly listed CLIs, including `gh help`.
+This limit prevents operand-oriented commands from impersonating help. The
+allowlist also accepts an unquoted `--help` after an option-free command path.
 Command-specific help patterns allow trailing `--help` after declared options
 for guarded GitHub and Git commands. Value-taking options consume a following
 `--help` token as data. The help command can end with a known pager pipeline or

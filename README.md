@@ -62,7 +62,9 @@ scope belongs in the harness permission layer and agent instructions.
 `allowlist.toml` allows help commands centrally because a pack-local safe
 pattern cannot override a rule from another pack. The policy supports:
 
-- `help <topic>` and `<tool> help <topic>`, including `gh help`
+- shell `help [<topic>]`
+- immediate `help` subcommands for Cargo, chezmoi, dcg, RubyGems, GitHub CLI,
+  Git, npm, pnpm, Poetry, spx, Twine, and Yarn
 - option-free command paths ending in an unquoted `--help`
 - trailing `--help` for guarded GitHub and Git commands with declared option
   arity

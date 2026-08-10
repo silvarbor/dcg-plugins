@@ -39,9 +39,10 @@ ALLOW	tn_reset_merge	git reset --merge
 ALLOW	tn_restore	git restore src/main.rs
 
 # Help commands require effective-policy coverage because the user allowlist,
-# not any individual pack, owns the cross-pack carve-out. `--help` is accepted
-# anywhere in a complete command unless a known value-taking option consumes
-# it. Git's global options are parsed separately before a help subcommand.
+# not any individual pack, owns the cross-pack carve-out. Immediate `help`
+# subcommands are limited to named CLIs. `--help` is accepted anywhere in a
+# complete command unless a known value-taking option consumes it. Git's
+# global options are parsed separately before a help subcommand.
 # A pager or final background marker may follow the help segment. A redirect
 # remains visible to filesystem rules, and destructive neighbours stay guarded.
 ALLOW	help_gh_pr_create	gh pr create --help
@@ -82,6 +83,7 @@ DENY	help_publish_tag_value	npm publish --tag --help
 DENY	help_quoted_data	gh secret set TOKEN --body '--help'
 DENY	help_substitution_data	gh secret set TOKEN --body $(printf -- --help)
 DENY	help_sensitive_redirect	gh pr create --help > /etc/passwd
+DENY	help_operand_command	rm help -rf /tmp/victim
 
 # Pull request creation uses gh's repository context. It does not require an
 # explicit --repo option.

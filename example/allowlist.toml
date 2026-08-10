@@ -72,8 +72,8 @@ added_at = "2026-08-10T00:00:00Z"
 # remain visible to filesystem rules.
 
 [[allow]]
-pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:help|(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)help)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
-reason = "Shell help and an executable's immediate help subcommand only display usage. The full-line anchor permits a known pager or final background marker and rejects destructive neighbours."
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:help|(?:[^\s&;|`()<>"']*/)?(?:cargo|chezmoi|dcg|gem|gh|git|npm|pnpm|poetry|spx|twine|yarn)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)help)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "Shell help and the listed CLIs' immediate help subcommands only display usage. The explicit command set excludes operand-oriented executables. The full-line anchor permits a known pager or final background marker and rejects destructive neighbours."
 risk_acknowledged = true
 added_by = "shz"
 added_at = "2026-08-07T00:00:00Z"

@@ -1,0 +1,8 @@
+# Executable documentation of intentionally unsupported client prefixes
+#
+# These ALLOW results do not classify publication as safe. They keep the
+# enumerated registry grammar and its current gaps visible in verification.
+ALLOW	registry_gap_npm	npm --registry=https://example.invalid publish
+ALLOW	registry_gap_pnpm	pnpm --registry=https://example.invalid publish
+ALLOW	registry_gap_yarn	yarn --registry https://example.invalid publish
+ALLOW	registry_gap_poetry	poetry --no-interaction publish

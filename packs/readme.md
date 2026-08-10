@@ -116,6 +116,24 @@ current directory.
 dcg's built-in GitHub pack already covers `gh repo delete`. The custom pack
 does not duplicate that rule.
 
+The registry grammar intentionally enumerates leading client options. It is
+not a general parser for each package manager.
+
+| Client             | Recognized prefixes before the guarded action                                                                                                             |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| npm                | `--workspace`/`-w`, `--prefix`, `--location`, `--workspaces`, `--include-workspace-root`, and `--global`                                                  |
+| pnpm               | `--filter`, `--dir`/`-C`, and `--workspace-root`                                                                                                          |
+| Yarn               | `--cwd`                                                                                                                                                   |
+| Poetry             | `--directory`/`-C` and `--project`/`-P`                                                                                                                   |
+| Cargo              | `+toolchain`, `--color`, `-C`, `--config`, `-Z`, `-V`, `-v`, `-q`, `--version`, `--list`, `--verbose`, `--quiet`, `--locked`, `--offline`, and `--frozen` |
+| Twine and RubyGems | none                                                                                                                                                      |
+
+Known-gap cases record ordinary prefixes that remain outside this grammar:
+npm, pnpm, and Yarn registry selection, plus Poetry's non-interactive mode.
+Those expected `ALLOW` results document the boundary; they do not classify a
+publish as safe. Widen a client grammar only with matching deny and dry-run
+evidence.
+
 `allowlist.toml` accepts a single-quoted `EOF` heredoc from
 `gh pr create --body-file -`. dcg 0.10 does not register this GitHub CLI form
 as a structured standard-input data sink. Its legacy launcher detector

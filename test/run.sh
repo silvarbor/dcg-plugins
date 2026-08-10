@@ -91,42 +91,43 @@ fi
 
 # ---------------------------------------------------------------- policy ----
 if [ "$WHICH" = all ] || [ "$WHICH" = policy ]; then
-  suite=worktree_isolated
-  tsv="$CASES/$suite.tsv"
-  [ -f "$tsv" ] || { echo "missing suite file: $tsv" >&2; exit 2; }
+  for suite in worktree_isolated known_limits; do
+    tsv="$CASES/$suite.tsv"
+    [ -f "$tsv" ] || { echo "missing suite file: $tsv" >&2; exit 2; }
 
-  pass=0; fail=0
-  while IFS=$'\t' read -r expected label command; do
-    case "$expected" in '' | '#'*) continue ;; esac
-    case "$command" in
-      @fixture:*)
-        fixture="$FIXTURES/${command#@fixture:}"
-        if [ ! -f "$fixture" ]; then
-          echo "missing command fixture: $fixture" >&2
-          exit 2
-        fi
-        command="$(<"$fixture")"
-        ;;
-      *) command="$(printf '%b' "${command//\\n/$'\n'}")" ;;
-    esac
+    pass=0; fail=0
+    while IFS=$'\t' read -r expected label command; do
+      case "$expected" in '' | '#'*) continue ;; esac
+      case "$command" in
+        @fixture:*)
+          fixture="$FIXTURES/${command#@fixture:}"
+          if [ ! -f "$fixture" ]; then
+            echo "missing command fixture: $fixture" >&2
+            exit 2
+          fi
+          command="$(<"$fixture")"
+          ;;
+        *) command="$(printf '%b' "${command//\\n/$'\n'}")" ;;
+      esac
 
-    out="$(dcg explain --dialect posix -- "$command" 2>&1)"
-    got="$(printf '%s' "$out" | grep -m1 'Decision:' | awk '{print $2}')"
-    rule="$(printf '%s' "$out" | grep -m1 'Rule ID:' | awk '{print $3}')"
+      out="$(dcg explain --dialect posix -- "$command" 2>&1)"
+      got="$(printf '%s' "$out" | grep -m1 'Decision:' | awk '{print $2}')"
+      rule="$(printf '%s' "$out" | grep -m1 'Rule ID:' | awk '{print $3}')"
 
-    if [ "$got" = "$expected" ]; then
-      pass=$((pass + 1))
-      [ "$VERBOSE" -eq 1 ] && printf '  ok   %-24s %-5s %s\n' "$label" "$got" "$rule"
-    else
-      fail=$((fail + 1))
-      printf '  FAIL %-24s expected=%-5s got=%-5s %s\n' "$label" "$expected" "$got" "$rule"
-      printf '       %s\n' "$command"
-    fi
-  done < "$tsv"
+      if [ "$got" = "$expected" ]; then
+        pass=$((pass + 1))
+        [ "$VERBOSE" -eq 1 ] && printf '  ok   %-24s %-5s %s\n' "$label" "$got" "$rule"
+      else
+        fail=$((fail + 1))
+        printf '  FAIL %-24s expected=%-5s got=%-5s %s\n' "$label" "$expected" "$got" "$rule"
+        printf '       %s\n' "$command"
+      fi
+    done < "$tsv"
 
-  printf '%-20s %2d passed' "policy:$suite" "$pass"
-  [ "$fail" -gt 0 ] && { printf ', %d FAILED' "$fail"; rc_total=1; }
-  printf '\n'
+    printf '%-20s %2d passed' "policy:$suite" "$pass"
+    [ "$fail" -gt 0 ] && { printf ', %d FAILED' "$fail"; rc_total=1; }
+    printf '\n'
+  done
 
   tsv="$CASES/custom_pack.tsv"
   pass=0; fail=0

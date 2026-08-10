@@ -103,16 +103,6 @@ description = "poetry publish dry run"
 command = "poetry publish --dry-run"
 expected = "allow"
 
-[[case]]
-description = "quoted npm publish dry run"
-command = "npm 'publish' '--dry-run'"
-expected = "allow"
-
-[[case]]
-description = "quoted Poetry publish dry run"
-command = "poetry \"publish\" \"--dry-run=true\""
-expected = "allow"
-
 # Prose. A document or message that names a guarded command must not block.
 # packs/readme.md records a handoff document blocked on 2026-07-27 for
 # containing the words, which is what the command-position anchor prevents.

@@ -71,8 +71,11 @@ Each rule then requires its subcommands in their exact grammar positions. A
 later argument named `remove`, `set`, `edit`, or `publish` cannot impersonate a
 subcommand.
 
-The rules accept single-quoted or double-quoted semantic tokens. Shell quoting
-changes the command text, but it does not change the resulting argument value.
+These custom packs guard the command grammar documented here and exercised by
+`tests/corpus` and `test/cases`. They do not parse every POSIX spelling of the
+same argument vector. dcg 0.10 resolves the executable for scoped rules. Custom
+pack patterns still receive raw shell text. Fragmented quoting, escaping, and
+unlisted wrapper commands or client options can bypass a rule.
 
 Arguments use a shell-operator-bounded token class rather than `.*` or `\S+`.
 One command cannot satisfy a rule or exception in its neighbour.
@@ -94,9 +97,6 @@ current directory.
 
 dcg's built-in GitHub pack already covers `gh repo delete`. The custom pack
 does not duplicate that rule.
-
-The npm grammar accepts `--registry` before `publish`. The Poetry grammar
-accepts `--no-interaction` before `publish`.
 
 `allowlist.toml` accepts a single-quoted `EOF` heredoc from
 `gh pr create --body-file -`. dcg 0.10 does not register this GitHub CLI form

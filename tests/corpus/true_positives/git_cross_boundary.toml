@@ -1,125 +1,128 @@
-# true positives / git cross boundary
-#
-# Corpus cases for the silvarbor dcg packs, in the format documented at
-# tests/corpus/README.md upstream. Run with:
-#
-#     dcg corpus -d tests/corpus --baseline tests/baseline.json
-#
-# NOTE: `dcg corpus` evaluates PACK MATCHING and does not apply allowlist.toml.
-# Cases whose expected verdict depends on an allowlist entry cannot live here;
-# they are in test/cases/*.tsv and run by test/run.sh. See test/README.md.
-
+# true positives / Git operations that cross a worktree boundary
 
 [[case]]
 description = "gc --prune=all destroys the shared object store"
 command = "git gc --aggressive --prune=all"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-shared-object-store-destroy"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
-description = "gc --prune=now destroys unreferenced objects other worktrees may need"
+description = "gc --prune=now destroys shared unreachable objects"
 command = "git gc --prune=now"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-shared-object-store-destroy"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
 description = "prune destroys unreachable objects in the shared store"
 command = "git prune"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-shared-object-store-destroy"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
-description = "push --force rewrites remote history with no verification"
-command = "git push --force origin main"
-expected = "deny"
-rule_id = "core.git:push-force-long"
-
-[[case]]
-description = "push -f rewrites remote history with no verification"
-command = "git push -f origin main"
-expected = "deny"
-rule_id = "core.git:push-force-short"
-
-[[case]]
-description = "push --mirror force-updates every ref on the remote"
-command = "git push --mirror origin"
-expected = "deny"
-rule_id = "silvarbor.git_safety:git-push-refspec-force"
-
-[[case]]
-description = "push +refspec force-updates the remote with no --force flag present"
-command = "git push origin +main:main"
-expected = "deny"
-rule_id = "silvarbor.git_safety:git-push-refspec-force"
-
-[[case]]
-description = "reflog expire destroys the shared recovery log"
+description = "immediate reflog expiration destroys shared recovery data"
 command = "git reflog expire --expire=now --all"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-shared-object-store-destroy"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
-description = "remote remove repoints the remote for every worktree"
-command = "git remote remove origin"
+description = "immediate unreachable reflog expiration destroys shared recovery data"
+command = "git reflog expire --expire-unreachable=now --all"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-remote-repoint"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
-description = "remote rm repoints the remote for every worktree"
-command = "git remote rm origin"
+description = "split immediate reflog expiration destroys shared recovery data"
+command = "git reflog expire --expire now --all"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-remote-repoint"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
-description = "remote set-url repoints the remote for every worktree"
-command = "git remote set-url origin git@x:y.git"
+description = "split immediate unreachable expiration remains guarded after reordered options"
+command = "git reflog expire --all --expire-unreachable now"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-remote-repoint"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
-description = "stash clear destroys every shared stash entry"
-command = "git stash clear"
+description = "all-valued reflog expiration destroys shared recovery data"
+command = "git reflog expire --expire=all --all"
 expected = "deny"
-rule_id = "core.git:stash-clear"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
-description = "stash drop mutates refs/stash, which is shared across the worktree pool"
-command = "git stash drop"
+description = "split all-valued reflog expiration destroys shared recovery data"
+command = "git reflog expire --expire all --all"
 expected = "deny"
-rule_id = "core.git:stash-drop"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
-description = "stash pop removes a shared stash entry"
-command = "git stash pop"
+description = "all-valued unreachable expiration destroys shared recovery data"
+command = "git reflog expire --expire-unreachable=all --all"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-stash-shared-stack-mutation"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
-description = "update-ref -d deletes a shared ref, bypassing git's worktree guard"
+description = "split all-valued unreachable expiration destroys shared recovery data"
+command = "git reflog expire --all --expire-unreachable all"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+
+[[case]]
+description = "update-ref -d deletes a shared ref"
 command = "git update-ref -d refs/heads/x"
 expected = "deny"
 rule_id = "silvarbor.git_safety:git-ref-delete-plumbing"
 
 [[case]]
-description = "update-ref --stdin can delete shared refs in bulk"
+description = "update-ref --stdin can delete shared refs in a transaction"
 command = "git update-ref --stdin"
 expected = "deny"
 rule_id = "silvarbor.git_safety:git-ref-delete-plumbing"
 
 [[case]]
-description = "worktree prune removes peer worktree administrative data"
-command = "git worktree prune"
-expected = "deny"
-rule_id = "silvarbor.git_safety:git-worktree-destroy"
-
-[[case]]
-description = "worktree remove destroys a peer agent's worktree and its staged work"
+description = "worktree remove can delete a peer worktree"
 command = "git worktree remove ../peer"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-worktree-destroy"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
 
 [[case]]
-description = "worktree remove --force destroys a peer worktree unconditionally"
+description = "forced worktree removal can delete uncommitted peer files"
 command = "git worktree remove --force ../peer"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-worktree-destroy"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "mirror push force-updates every remote ref"
+command = "git push --mirror origin"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-push-refspec-force"
+
+[[case]]
+description = "leading plus force-updates a remote refspec"
+command = "git push origin +main:main"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-push-refspec-force"
+
+# Upstream core.git owns these common destructive forms.
+[[case]]
+description = "plain long force push is covered upstream"
+command = "git push --force origin main"
+expected = "deny"
+rule_id = "core.git:push-force-long"
+
+[[case]]
+description = "plain short force push is covered upstream"
+command = "git push -f origin main"
+expected = "deny"
+rule_id = "core.git:push-force-short"
+
+[[case]]
+description = "stash clear is covered upstream"
+command = "git stash clear"
+expected = "deny"
+rule_id = "core.git:stash-clear"
+
+[[case]]
+description = "stash drop is covered upstream"
+command = "git stash drop"
+expected = "deny"
+rule_id = "core.git:stash-drop"

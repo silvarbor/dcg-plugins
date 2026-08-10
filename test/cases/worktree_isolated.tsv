@@ -4,15 +4,16 @@
 #   expected : ALLOW or DENY
 #   command  : the command line handed to `dcg explain`.
 #              A literal \n in this column becomes a real newline.
+#              @fixture:<name> loads a multiline command from test/fixtures/.
 #
 # Blank lines and lines starting with # are ignored.
 #
-# WHY ONLY SIX CASES ARE LEFT HERE
+# WHY EFFECTIVE-POLICY CASES LIVE HERE
 #
-# The other 45 moved to tests/corpus/, which dcg evaluates natively via
-# `dcg corpus` with rule_id assertions and baseline diffing.
+# Native pack-matching cases live under tests/corpus/, where dcg evaluates
+# them with rule_id assertions and baseline diffing.
 #
-# These six cannot move. `dcg corpus` evaluates PACK MATCHING and does not
+# The cases below cannot all move. `dcg corpus` evaluates PACK MATCHING and does not
 # apply allowlist.toml. Each command below is blocked by a built-in core.git
 # rule and is permitted only because ../allowlist.toml switches that rule off.
 # Under corpus every one reports "deny"; against the live guard every one is
@@ -25,7 +26,7 @@
 #   git branch -d feature/x       corpus: deny (core.git:branch-force-delete) live: ALLOW
 #   git branch -D feature/x       corpus: deny (core.git:branch-force-delete) live: ALLOW
 #
-# These are the charter's signature claims - the operations deliberately
+# The first six are the charter's signature claims - the operations deliberately
 # permitted because they cannot cross the worktree boundary. They are exactly
 # the assertions the corpus cannot make, so they are tested here against
 # effective policy. If allowlist.toml is ever trimmed, this suite fails while
@@ -36,3 +37,87 @@ ALLOW	tn_checkout_path	git checkout -- src/main.rs
 ALLOW	tn_reset_hard	git reset --hard HEAD~1
 ALLOW	tn_reset_merge	git reset --merge
 ALLOW	tn_restore	git restore src/main.rs
+
+# Help commands require effective-policy coverage because the user allowlist,
+# not any individual pack, owns the cross-pack carve-out. Immediate `help`
+# subcommands are limited to named CLIs. `--help` is accepted anywhere in a
+# complete command unless a known value-taking option consumes it. Git's
+# global options are parsed separately before a help subcommand.
+# A pager or final background marker may follow the help segment. A redirect
+# remains visible to filesystem rules, and destructive neighbours stay guarded.
+ALLOW	help_gh_pr_create	gh pr create --help
+ALLOW	help_gh_subcommand	gh help pr create
+ALLOW	help_gh_repo_edit	gh repo edit --help --visibility public
+ALLOW	help_gh_repo_edit_trailing	gh repo edit --visibility public --help
+ALLOW	help_gh_secret_set	gh secret set TOKEN --help
+ALLOW	help_gh_repo_edit_flags	gh repo edit --enable-issues --visibility public --help
+ALLOW	help_gh_secret_value_flag	gh secret set TOKEN --app actions --help
+ALLOW	help_gh_secret_zero_flag	gh secret set TOKEN --no-store --help
+ALLOW	help_gh_run_watch	gh run watch --help
+ALLOW	help_git_clean	git clean --help -fd
+ALLOW	help_git_push	git push --help --force
+ALLOW	help_git_stash	git stash --help drop
+ALLOW	help_git_global_C	git -C /repo help worktree remove
+ALLOW	help_git_global_C_flag	git -C /repo worktree remove --help
+ALLOW	help_git_global_unlisted	git --no-optional-locks worktree remove --force --help
+ALLOW	help_git_global_subcommand	git --no-optional-locks help worktree remove
+ALLOW	help_git_worktree_trailing	git worktree remove --force --help
+ALLOW	help_pipe_pager	gh pr create --help | less
+ALLOW	help_redirect	gh pr create --help > help.txt
+ALLOW	help_background_sleep	sleep --help &
+ALLOW	help_shell_builtin	help cd
+ALLOW	help_npm_publish	npm publish --help
+ALLOW	help_pnpm_publish	pnpm publish --help
+ALLOW	help_yarn_publish	yarn publish --help
+ALLOW	help_poetry_publish	poetry publish --help
+ALLOW	help_cargo_publish	cargo publish --help
+ALLOW	help_twine_upload	twine upload --help
+ALLOW	help_gem_push	gem push --help
+DENY	help_C_value	git -C help worktree remove ../peer
+DENY	help_C_long_value	git -C --help worktree remove ../peer
+DENY	help_neighbour	gh repo edit --help; gh repo edit --visibility public
+DENY	help_option_value	gh secret set TOKEN --body --help
+DENY	help_description_value	gh repo edit --description --help --visibility public
+DENY	help_secret_app_value	gh secret set TOKEN --app --help
+DENY	help_publish_tag_value	npm publish --tag --help
+DENY	help_quoted_data	gh secret set TOKEN --body '--help'
+DENY	help_substitution_data	gh secret set TOKEN --body $(printf -- --help)
+DENY	help_sensitive_redirect	gh pr create --help > /etc/passwd
+DENY	help_operand_command	rm help -rf /tmp/victim
+
+# Pull request creation uses gh's repository context. It does not require an
+# explicit --repo option.
+ALLOW	gh_pr_create_implicit	gh pr create --fill
+ALLOW	gh_pr_create_base_head	gh pr create --base main --head feature/x
+ALLOW	gh_pr_create_after_cd	cd /repo; gh pr create --fill
+ALLOW	gh_pr_quoted_heredoc	@fixture:gh-pr-create-quoted-heredoc.txt
+DENY	gh_pr_dynamic_head	@fixture:gh-pr-create-dynamic-head.txt
+DENY	gh_pr_unquoted_heredoc	@fixture:gh-pr-create-unquoted-heredoc.txt
+DENY	gh_pr_heredoc_neighbour	@fixture:gh-pr-create-heredoc-neighbour.txt
+ALLOW	gh_payload_is_data	gh issue create --body 'never run gh repo edit --visibility public'
+ALLOW	git_payload_is_data	git commit -m 'never run git worktree remove ../peer'
+
+# The custom Git pack no longer guards recoverable configuration, normal
+# maintenance, or stash pop. Upstream core.git still guards stash drop/clear
+# and plain force pushes.
+ALLOW	git_remote_remove	git remote remove origin
+ALLOW	git_remote_set_url	git remote set-url origin git@example.invalid:x/y.git
+ALLOW	git_stash_pop	git stash pop
+ALLOW	git_worktree_prune	git worktree prune
+ALLOW	git_prune_dry_run	git prune --dry-run
+
+# Process-hygiene policy is disabled. Execution style belongs in workflow
+# guidance rather than the destructive command guard.
+ALLOW	process_background_sleep	sleep 30 &
+ALLOW	process_until_loop	until false; do echo waiting; done
+ALLOW	process_gh_run_watch	gh run watch 123
+
+# Effective-policy canaries: one representative destructive command per active
+# custom pack. These catch a fail-open regex timeout even when corpus matching
+# and allowlist validation remain individually green.
+DENY	canary_access_boundary	gh repo edit --visibility public
+DENY	canary_git_safety	git worktree remove ../peer
+DENY	canary_git_global_option	git --no-optional-locks worktree remove ../peer
+DENY	canary_git_quoted_path	git -C '/tmp/path with spaces' worktree remove ../peer
+DENY	canary_git_split_expire	git reflog expire --all --expire-unreachable now
+DENY	canary_git_long	git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b worktree remove ../peer

@@ -1,0 +1,38 @@
+# Long-prefix evaluation-budget cases
+#
+# Format: <expected>\t<label>\t<rule_id-or-dash>\t<prefix-kind>\t<command-suffix>
+# Each generated prefix contains 65 assignments, wrappers, or Git options.
+# test/run.sh enforces a 200 ms analysis budget for every case.
+DENY	env_git_worktree	silvarbor.git_safety:git-worktree-remove	env	git worktree remove ../peer
+DENY	wrappers_git_worktree	silvarbor.git_safety:git-worktree-remove	wrappers	git worktree remove ../peer
+DENY	options_git_worktree	silvarbor.git_safety:git-worktree-remove	git-options	worktree remove ../peer
+DENY	env_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	env	git gc --prune=now
+DENY	wrappers_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	wrappers	git gc --prune=now
+DENY	options_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	git-options	gc --prune=now
+DENY	env_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	env	git update-ref -d refs/heads/x
+DENY	wrappers_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	wrappers	git update-ref -d refs/heads/x
+DENY	options_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	git-options	update-ref -d refs/heads/x
+DENY	env_git_push	silvarbor.git_safety:git-push-refspec-force	env	git push origin +main:main
+DENY	wrappers_git_push	silvarbor.git_safety:git-push-refspec-force	wrappers	git push origin +main:main
+DENY	options_git_push	silvarbor.git_safety:git-push-refspec-force	git-options	push origin +main:main
+DENY	env_gh_visibility	silvarbor.access_boundary:gh-repo-visibility-change	env	gh repo edit --visibility public
+DENY	wrappers_gh_visibility	silvarbor.access_boundary:gh-repo-visibility-change	wrappers	gh repo edit --visibility public
+DENY	env_gh_secret	silvarbor.access_boundary:gh-secret-write	env	gh secret set TOKEN --body value
+DENY	wrappers_gh_secret	silvarbor.access_boundary:gh-secret-write	wrappers	gh secret set TOKEN --body value
+DENY	env_npm_publish	silvarbor.access_boundary:registry-publish	env	npm publish
+DENY	wrappers_npm_publish	silvarbor.access_boundary:registry-publish	wrappers	npm publish
+ALLOW	env_help_subcommand	-	env	gh help repo edit --visibility public
+ALLOW	wrappers_help_subcommand	-	wrappers	gh help repo edit --visibility public
+ALLOW	env_help_flag	-	env	git push --help --force
+ALLOW	wrappers_help_flag	-	wrappers	git push --help --force
+ALLOW	env_gh_repo_help	-	env	gh repo edit --visibility public --help
+ALLOW	wrappers_gh_repo_help	-	wrappers	gh repo edit --visibility public --help
+ALLOW	env_gh_secret_help	-	env	gh secret set TOKEN --app actions --help
+ALLOW	wrappers_gh_secret_help	-	wrappers	gh secret set TOKEN --app actions --help
+ALLOW	env_git_worktree_help	-	env	git worktree remove ../peer --help
+ALLOW	wrappers_git_worktree_help	-	wrappers	git worktree remove ../peer --help
+ALLOW	options_git_worktree_help	-	git-options	worktree remove ../peer --help
+ALLOW	env_git_global_help	-	env	git --no-optional-locks help worktree remove
+ALLOW	wrappers_git_global_help	-	wrappers	git --no-optional-locks help worktree remove
+ALLOW	options_git_global_help	-	git-options	help worktree remove
+ALLOW	env_gh_heredoc	-	env	@fixture:gh-pr-create-quoted-heredoc.txt

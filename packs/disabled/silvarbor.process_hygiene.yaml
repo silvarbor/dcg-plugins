@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Simon Heimlicher
 # Part of https://github.com/silvarbor/dcg-plugins
 #
-# Custom Pack for dcg — Process-hygiene protection for harnessed agents
+# Disabled Custom Pack for dcg — Process-hygiene policy for harnessed agents
 #
 # Agent harnesses (Claude Code, Codex, and similar) spawn a helper process
 # tree for every shell call and a periodic monitor that polls background
@@ -28,7 +28,7 @@ id: silvarbor.process_hygiene
 
 name: Process Hygiene — Harnessed Agents
 
-version: 1.1.0
+version: 1.1.2
 
 description: |
   Blocks the shell constructs that leak unreaped processes under an agent

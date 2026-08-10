@@ -59,20 +59,21 @@ Two suites, because one tool cannot express both:
 
 - **`tests/corpus/`** runs under `dcg corpus`, dcg's own regression
   harness, in the upstream `true_positives` / `false_positives` /
-  `bypass_attempts` taxonomy. Each case asserts a `rule_id`, so a command
-  denied by the *wrong* rule is a failure, and `tests/baseline.json` turns
-  regressions into a non-zero exit.
-- **`test/cases/`** runs against `dcg explain`. `dcg corpus` evaluates pack
+  `bypass_attempts` taxonomy. Each case asserts a `rule_id`. dcg 0.10 can mark
+  a wrong-rule denial as passed, so `test/run.sh` independently compares every
+  expected rule ID with the current run's actual rule ID. A rejection fixture
+  verifies that check. `tests/baseline.json` records the full result.
+- **`test/cases/`** covers effective policy through `dcg explain` and custom
+  pack attribution through `dcg test --config`. `dcg corpus` evaluates pack
   matching *without* applying `allowlist.toml` and has no `--config` flag, so
-  neither the allowlist-dependent ALLOWs nor the shared_checkout pack can be
-  expressed there.
+  neither allowlist-dependent ALLOWs nor isolated attribution fit there.
 
 That second point matters if you adopt these packs: **a corpus run alone will
 not tell you the allowlist is installed**, and without it the git pack does not
 behave as this repo documents.
 
 `dcg pack validate` proves a pack parses, not that a rule still matches. Always
-run the matrices. Verified against dcg 0.9.2.
+run the matrices. Verified against dcg 0.10.0.
 
 CI runs both suites on every push and pull request. It pins the dcg version and
 the release tarball's checksum in
@@ -84,8 +85,8 @@ checksum and the baseline together.
 ## Three things that will trip you up
 
 **dcg hooks your own shell.** A command line containing `git worktree remove`
-or a poll loop is blocked *for you*, including when testing the rule that
-blocks it. That is why cases live in files and reach dcg through a variable.
+is blocked *for you*, including when testing the rule that blocks it. That is
+why cases live in files and reach dcg through a variable.
 `dcg test --stdin` exists for the same reason. Same for prose: in shell
 `` `cmd` `` **is** command substitution, so a markdown code span containing a
 guarded command is byte-identical to the real thing. Pass document bodies by
@@ -113,8 +114,8 @@ which ones and how they were caught.
 
 ## Pattern conventions
 
-Every pattern, destructive and safe alike, anchors to a real command position
-and walks intervening tokens with a bounded character class. Neither is
-cosmetic — the reasoning, including the prose-matching bug and the fail-open
-safe pattern that motivated them, is in `README.md` and `packs/readme.md`. A
-new rule that does not follow both will be wrong in one of those two ways.
+Active destructive pack patterns anchor to a real command position. Allowlist
+patterns anchor to the entire input line, so a neighbouring command cannot
+satisfy an exception. Both walk intervening tokens with a bounded character
+class. These choices are not cosmetic: `README.md` and `packs/readme.md`
+explain the prose-matching and fail-open bugs behind them.

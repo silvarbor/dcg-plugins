@@ -1,35 +1,97 @@
-# bypass attempts / wrappers
-#
-# Corpus cases for the silvarbor dcg packs, in the format documented at
-# tests/corpus/README.md upstream. Run with:
-#
-#     dcg corpus -d tests/corpus --baseline tests/baseline.json
-#
-# NOTE: `dcg corpus` evaluates PACK MATCHING and does not apply allowlist.toml.
-# Cases whose expected verdict depends on an allowlist entry cannot live here;
-# they are in test/cases/*.tsv and run by test/run.sh. See test/README.md.
-
+# bypass attempts / wrapper and segment handling
 
 [[case]]
-description = "git -C <path> must not evade the guard"
+description = "git -C must not hide worktree removal"
 command = "git -C /r worktree remove ../peer"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-worktree-destroy"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
 
 [[case]]
-description = "a guarded command after ; must still match"
-command = "cd /r; git stash clear"
+description = "an assignment must not hide immediate reflog expiration"
+command = "GIT_DIR=/r git reflog expire --expire=now --all"
 expected = "deny"
-rule_id = "core.git:stash-clear"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 
 [[case]]
-description = "environment-assignment prefix must not evade the guard"
-command = "GIT_DIR=/r git reflog expire --all"
+description = "sudo must not hide worktree removal"
+command = "sudo git worktree remove ../peer"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-shared-object-store-destroy"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
 
 [[case]]
-description = "sudo prefix must not evade the guard"
-command = "sudo git worktree prune"
+description = "an unlisted zero-argument Git option must not hide worktree removal"
+command = "git --no-optional-locks worktree remove ../peer"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-worktree-destroy"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "an unlisted zero-argument Git option must not hide immediate pruning"
+command = "git --no-optional-locks gc --prune=now"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+
+[[case]]
+description = "an unlisted zero-argument Git option must not hide ref deletion"
+command = "git --no-optional-locks update-ref -d refs/heads/x"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-ref-delete-plumbing"
+
+[[case]]
+description = "an unlisted zero-argument Git option must not hide a mirror push"
+command = "git --no-optional-locks push --mirror origin"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-push-refspec-force"
+
+[[case]]
+description = "help as a -C path is data"
+command = "git -C help worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "--help as a -C path is data"
+command = "git -C --help worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "help on one segment must not protect neighbouring removal"
+command = "git worktree remove --help; git worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "seventeen global options must not hide worktree removal"
+command = "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "seventeen global options must not hide immediate pruning"
+command = "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b gc --prune=now"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+
+[[case]]
+description = "seventeen global options must not hide ref deletion"
+command = "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b update-ref -d refs/heads/x"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-ref-delete-plumbing"
+
+[[case]]
+description = "seventeen global options must not hide a mirror push"
+command = "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b push --mirror origin"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-push-refspec-force"
+
+[[case]]
+description = "five assignments must not hide worktree removal"
+command = "A=1 B=2 C=3 D=4 E=5 git worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "three wrappers must not hide worktree removal"
+command = "command nohup sudo git worktree remove ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"

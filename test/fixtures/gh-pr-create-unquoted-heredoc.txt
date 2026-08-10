@@ -1,0 +1,37 @@
+GIT_TERMINAL_PROMPT=0 gh pr create \
+  --title "fix(decompose-next): align with the seven-kind and Probe model" \
+  --body-file - \
+  --head "work/decompose-next-disclosure" <<EOF
+## Summary
+
+- Bring the `decompose-next` skill package onto the merged seven-kind and Probe methodology, so a projection it produces classifies verification the way the chapters now do.
+- Move the decomposition design and its open discriminator out of `versions/next/` into the knowledge bundle, where dated rationale belongs.
+
+## Background
+
+The package transcribed the methodology as it stood before PR #49: two verdict modes, a node-level judged result named Trial, and a package at `trials/trial.md`. The merged chapters carry six types over three verdict modes, name the attested result Probe, and fix its package at `probes/`. A projection built from the old transcription would classify verification by a retired vocabulary and instruct authoring at a path the methodology does not name.
+
+Two changes go beyond renaming. Probe is required at every tier rather than at prototype alone, so rows that scoped the requirement to prototype receivers now cover every output receiver — a tree omitting `probes/` reaches Passing nowhere. And ownership for pruning follows a live Probe implementation list alone: Test, Evaluate, and current Audit paths expose implementation to verification without declaring ownership, so `structural-quality.md` gains that as a validity check rather than leaving a projection to argue retention from evidence reach.
+
+The coordination note recording the template design failed the Durable Truth Boundary's completion test by its own admission — its entries resolve by being written into a chapter — and that rule exempts no artifact class. The content moves to `knowledge/outcome-engineering/`, where the reading status can state plainly that it carries no authority.
+
+## Changes
+
+- `references/tier-and-state.md` — three verdict modes, the six-type table, the Probe package contract and frontmatter coverage declaration, the pin rule, the per-tier requirement, Validate as a changeset gate, and the merge-state rule.
+- `references/toolchain-limits.md` — the Probe rows split a measured signal from an unmeasured one; the file's own use of "probe" for a measurement yields to the verification type.
+- `references/structural-quality.md` — a pruning-ownership validity check mapped to Reconcile continuously.
+- `references/projection-views.md`, `workflows/*` — Probe vocabulary and output-receiver scope.
+- `scripts/remeasure.sh` — measures `probes/`, `probe.md`, and `attestation`; drops "probe" as a measurement noun.
+- `knowledge/outcome-engineering/decomposition-templates.md` — the design, with `versions/next/ISSUES.md` removed.
+
+## Test plan
+
+- [ ] `git diff --check origin/main..HEAD` reports nothing.
+- [ ] The mirrored-skill check from `CLAUDE.md` passes; `decompose-next` lives only under `.claude/skills/` because it binds the Claude-only skill-directory token.
+- [ ] `bash .claude/skills/decompose-next/scripts/remeasure.sh` exits zero and reproduces the toolchain rows, including zero occurrences of `probes/`, `probe.md`, and `attestation`.
+- [ ] No occurrence of `Trial`, `trials/`, `Computed`, or `Judged` remains in the package.
+
+## Refs
+
+- `versions/next/07-verification.md`, `versions/next/08-tier-and-state.md`, `versions/next/09-projection.md`, `versions/next/05-context-loading.md`, `versions/next/16-grammar.md`
+EOF

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Install a pinned dcg release binary.
 #
-#   DCG_VERSION=v0.9.2 DCG_SHA256=<hex> .github/scripts/install-dcg.sh [dest]
+#   DCG_VERSION=v0.10.0 DCG_SHA256=<hex> .github/scripts/install-dcg.sh [dest]
 #
 # The version is pinned because tests/baseline.json records the binary that
 # produced it, and a newer dcg can change a built-in pack's verdict without any
@@ -34,8 +34,11 @@ mkdir -p "$dest"
 install -m 0755 "$tmp/dcg" "$dest/dcg"
 
 # `dcg --version` prints the bare version on the first line and then a boxed
-# banner, so take the first line only.
-got="$("$dest/dcg" --version 2>&1 | head -n 1 | tr -d '[:space:]')"
+# banner. Capture all output before line selection. A live `head` pipeline can
+# close the merged output pipe before dcg finishes the banner.
+version_output="$("$dest/dcg" --version 2>&1)"
+got="${version_output%%$'\n'*}"
+got="${got//[[:space:]]/}"
 want="${DCG_VERSION#v}"
 if [ "$got" != "$want" ]; then
   echo "expected dcg $want but installed '$got'" >&2

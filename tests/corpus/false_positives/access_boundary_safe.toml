@@ -1,17 +1,51 @@
 # false positives / silvarbor.access_boundary
 #
-# Two classes: commands that name their target or do not publish, and prose
-# that mentions a guarded command without performing one. The prose cases are
-# the ones the anchoring convention in packs/readme.md exists for.
+# Commands that do not change access or publish, supported publish dry runs,
+# and prose that mentions a guarded command without performing one.
 
 [[case]]
-description = "gh pr create --repo names its target"
+description = "gh pr create without --repo is allowed"
+command = "gh pr create --fill"
+expected = "allow"
+
+[[case]]
+description = "gh pr create with an explicit --repo is allowed"
 command = "gh pr create --repo silvarbor/prowl --fill"
 expected = "allow"
 
 [[case]]
-description = "--repo followed by more flags still carves out"
+description = "gh pr create allows flags after --repo"
 command = "gh pr create --repo acme/x --title t --body b"
+expected = "allow"
+
+[[case]]
+description = "gh pr create allows --repo after a quoted flag value"
+command = "gh pr create --title \"ordinary title\" --repo acme/x --fill"
+expected = "allow"
+
+[[case]]
+description = "gh pr create allows the --repo equals form"
+command = "gh pr create --title 'ordinary title' --repo=acme/x --fill"
+expected = "allow"
+
+[[case]]
+description = "gh pr create is allowed after a neighbouring command"
+command = "cd /repo; gh pr create --repo acme/x --fill"
+expected = "allow"
+
+[[case]]
+description = "gh pr create allows a multiline heredoc body"
+command = '''cd /Users/example/project
+GIT_TERMINAL_PROMPT=0 gh pr create \
+  --repo outcomeeng/claude-status \
+  --base main \
+  --head fix/always-output \
+  --title "fix: guarantee one status line" \
+  --body-file - <<'EOF'
+## Summary
+
+- The command names its target repository.
+EOF'''
 expected = "allow"
 
 [[case]]
@@ -54,6 +88,21 @@ description = "cargo build is not cargo publish"
 command = "cargo build --release"
 expected = "allow"
 
+[[case]]
+description = "npm publish dry run"
+command = "npm publish --dry-run"
+expected = "allow"
+
+[[case]]
+description = "cargo publish dry run"
+command = "cargo publish --dry-run"
+expected = "allow"
+
+[[case]]
+description = "poetry publish dry run"
+command = "poetry publish --dry-run"
+expected = "allow"
+
 # Prose. A document or message that names a guarded command must not block.
 # packs/readme.md records a handoff document blocked on 2026-07-27 for
 # containing the words, which is what the command-position anchor prevents.
@@ -70,4 +119,54 @@ expected = "allow"
 [[case]]
 description = "prose mentioning npm publish, unquoted in a commit message"
 command = "git commit -m do not npm publish from a laptop"
+expected = "allow"
+
+[[case]]
+description = "a prowl payload mentioning a guarded gh command is data"
+command = "prowl send agent --prompt 'run gh repo edit --visibility public'"
+expected = "allow"
+
+[[case]]
+description = "a guarded gh executable name inside another gh argument is data"
+command = "gh issue create --body 'never run gh repo edit --visibility public'"
+expected = "allow"
+
+[[case]]
+description = "secret list may use set as a jq expression"
+command = "gh secret list --jq set"
+expected = "allow"
+
+[[case]]
+description = "repo list may use edit as a jq expression before its visibility filter"
+command = "gh repo list --jq edit --visibility public"
+expected = "allow"
+
+[[case]]
+description = "an npm script named publish is not a registry publish"
+command = "npm run publish"
+expected = "allow"
+
+[[case]]
+description = "a pnpm script named publish is not a registry publish"
+command = "pnpm run publish"
+expected = "allow"
+
+[[case]]
+description = "a Yarn script named publish is not a registry publish"
+command = "yarn run publish"
+expected = "allow"
+
+[[case]]
+description = "a Poetry command named publish is data passed to run"
+command = "poetry run publish"
+expected = "allow"
+
+[[case]]
+description = "a Cargo binary named publish is not a registry publish"
+command = "cargo run --bin publish"
+expected = "allow"
+
+[[case]]
+description = "a dry-run remains safe after more than sixty-four publish arguments"
+command = "npm publish arg01 arg02 arg03 arg04 arg05 arg06 arg07 arg08 arg09 arg10 arg11 arg12 arg13 arg14 arg15 arg16 arg17 arg18 arg19 arg20 arg21 arg22 arg23 arg24 arg25 arg26 arg27 arg28 arg29 arg30 arg31 arg32 arg33 arg34 arg35 arg36 arg37 arg38 arg39 arg40 arg41 arg42 arg43 arg44 arg45 arg46 arg47 arg48 arg49 arg50 arg51 arg52 arg53 arg54 arg55 arg56 arg57 arg58 arg59 arg60 arg61 arg62 arg63 arg64 arg65 --dry-run"
 expected = "allow"

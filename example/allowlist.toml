@@ -45,18 +45,6 @@ added_by = "shz"
 added_at = "2026-07-15T16:13:34Z"
 
 [[allow]]
-rule = "core.git:stash-drop"
-reason = "Replaced by silvarbor.git_safety:git-stash-shared-stack-mutation, which treats refs/stash as shared across the worktree pool and also covers stash pop."
-added_by = "shz"
-added_at = "2026-07-15T16:13:34Z"
-
-[[allow]]
-rule = "core.git:stash-clear"
-reason = "Replaced by silvarbor.git_safety:git-stash-shared-stack-mutation so every shared-stack removal uses the cross-worktree risk explanation."
-added_by = "shz"
-added_at = "2026-07-15T16:13:34Z"
-
-[[allow]]
 rule = "core.git:reset-hard"
 reason = "Worktree-pool policy permits reset in every mode. HEAD, the index, and the working tree are per-worktree: verified that `git reset --hard` in worktree A leaves worktree B's HEAD and working tree untouched, so reset cannot cross the boundary this policy exists to protect. Blocking it produced a real false positive on 2026-07-26 (a legitimate branch rebuild in the prowl repo: checkout, `reset --hard <sha>`, merge, push --force-with-lease). Supersedes the shz.git_safety:git-reset rule added in ece834b, now removed (the pack namespace was later renamed shz.* -> silvarbor.*)."
 added_by = "shz"
@@ -68,8 +56,59 @@ reason = "Worktree-pool policy permits reset in every mode; --merge is worktree-
 added_by = "shz"
 added_at = "2026-07-27T00:00:00Z"
 
+# dcg 0.10's legacy launcher detector treats Markdown code spans in a
+# single-quoted EOF heredoc for gh pr create --body-file - as shell commands.
+
 [[allow]]
-rule = "silvarbor.process_hygiene:poll-loop-sleep"
-reason = "Temporarily disabled because the regex mistakes transported prompt text for a locally executed sleep loop. Restore when dcg exposes execution-context matching to custom packs or a real sleep-loop incident demonstrates that the protection outweighs the false-positive cost."
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\`$]|\$(?!\()|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']*/)?gh(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)pr(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)create(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\`$]|\$(?!\()|\\.)*"))*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)--body-file(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)-(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\`$]|\$(?!\()|\\.)*"))*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)<<[ \t]*'EOF'[ \t]*\r?\n(?m:(?:(?!^EOF[ \t]*\r?$)[\s\S])*^EOF[ \t]*\r?$)\s*\z'''
+reason = "gh pr create --body-file - reads a single-quoted EOF heredoc as inert data. The command prefix excludes substitutions and shell operators. The pattern rejects command text after the first EOF delimiter."
+risk_acknowledged = true
 added_by = "shz"
-added_at = "2026-08-07T11:12:34Z"
+added_at = "2026-08-10T00:00:00Z"
+
+# Help is an effective-policy concern. Pack-local safe patterns cannot override
+# a matching rule from another pack. These entries accept only complete help
+# commands, a known pager pipeline, or a final background marker. Redirects
+# remain visible to filesystem rules.
+
+[[allow]]
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:help|(?:[^\s&;|`()<>"']*/)?(?:cargo|chezmoi|dcg|gem|gh|git|npm|pnpm|poetry|spx|twine|yarn)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)help)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "Shell help and the listed CLIs' immediate help subcommands only display usage. The explicit command set excludes operand-oriented executables. The full-line anchor permits a known pager or final background marker and rejects destructive neighbours."
+risk_acknowledged = true
+added_by = "shz"
+added_at = "2026-08-07T00:00:00Z"
+
+[[allow]]
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"'\-][^\s&;|`()<>"']*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))*--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "An unquoted --help after an option-free command path displays usage. Pre-help option tokens require an executable-scoped rule with declared arity."
+risk_acknowledged = true
+added_by = "shz"
+added_at = "2026-08-08T00:00:00Z"
+
+[[allow]]
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']*/)?gh(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)repo(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)edit(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"'\-][^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*"))?(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:(?:--accept-visibility-change-consequences|--allow-forking|--allow-update-branch|--delete-branch-on-merge|--enable-advanced-security|--enable-auto-merge|--enable-discussions|--enable-issues|--enable-merge-commit|--enable-projects|--enable-rebase-merge|--enable-secret-scanning|--enable-secret-scanning-push-protection|--enable-squash-merge|--enable-wiki|--template)(?:=(?:true|false))?|(?:--add-topic|--default-branch|-d|--description|-h|--homepage|--remove-topic|--squash-merge-commit-message|--visibility)(?:=(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))))*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "GitHub repository-edit help allows only declared zero-argument and value-taking flags before --help. A flag value cannot impersonate help."
+risk_acknowledged = true
+added_by = "shz"
+added_at = "2026-08-09T00:00:00Z"
+
+[[allow]]
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']*/)?gh(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)secret(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)set(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"'\-][^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*"))?(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:--no-repos-selected|--no-store|-u|--user|(?:-a|--app|-b|--body|-e|--env|-f|--env-file|-o|--org|-r|--repos|-v|--visibility|-R|--repo)(?:=(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))))*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "GitHub secret-set help declares which flags consume values before --help. A secret value cannot impersonate help."
+risk_acknowledged = true
+added_by = "shz"
+added_at = "2026-08-09T00:00:00Z"
+
+[[allow]]
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']*/)?git(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:(?:(?:-C|-c|--exec-path)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|-(?:C|c)[^\s&;|`()<>"']+|--exec-path=(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|(?!-(?:C|c|--exec-path)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))-[^\s&;|`()<>"']+)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))*worktree(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)remove(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:-f|--force|[^\s&;|`()<>"'\-][^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)--help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "Git worktree-remove help accepts only its zero-argument force flag and worktree operand before --help. Git global option values keep their declared arity."
+risk_acknowledged = true
+added_by = "shz"
+added_at = "2026-08-09T00:00:00Z"
+
+[[allow]]
+pattern = '''^\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>"']*/)?git(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:(?:(?:-C|-c|--exec-path)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|-(?:C|c)[^\s&;|`()<>"']+|--exec-path=(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")|(?!-(?:C|c|--exec-path)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))-[^\s&;|`()<>"']+)(?:[ \t]*\\\r?\n[ \t]*|[ \t]+))+help(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*(?:[ \t]*(?:&|\|[ \t]*(?:less|more|cat)(?:(?:[ \t]*\\\r?\n[ \t]*|[ \t]+)(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*"))*))?\s*$'''
+reason = "Git global options have declared arity before help matching. Their values are consumed before a later help subcommand is recognized."
+risk_acknowledged = true
+added_by = "shz"
+added_at = "2026-08-08T00:00:00Z"

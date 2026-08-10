@@ -9,32 +9,32 @@ command = "gh pr create --fill"
 expected = "allow"
 
 [[case]]
-description = "gh pr create --repo names its target"
+description = "gh pr create with an explicit --repo is allowed"
 command = "gh pr create --repo silvarbor/prowl --fill"
 expected = "allow"
 
 [[case]]
-description = "--repo followed by more flags still carves out"
+description = "gh pr create allows flags after --repo"
 command = "gh pr create --repo acme/x --title t --body b"
 expected = "allow"
 
 [[case]]
-description = "--repo after a quoted flag value still carves out"
+description = "gh pr create allows --repo after a quoted flag value"
 command = "gh pr create --title \"ordinary title\" --repo acme/x --fill"
 expected = "allow"
 
 [[case]]
-description = "--repo equals form names its target"
+description = "gh pr create allows the --repo equals form"
 command = "gh pr create --title 'ordinary title' --repo=acme/x --fill"
 expected = "allow"
 
 [[case]]
-description = "named-target PR after a neighbouring command"
+description = "gh pr create is allowed after a neighbouring command"
 command = "cd /repo; gh pr create --repo acme/x --fill"
 expected = "allow"
 
 [[case]]
-description = "named-target multiline PR with heredoc body"
+description = "gh pr create allows a multiline heredoc body"
 command = '''cd /Users/example/project
 GIT_TERMINAL_PROMPT=0 gh pr create \
   --repo outcomeeng/claude-status \

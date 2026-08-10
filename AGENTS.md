@@ -114,8 +114,8 @@ which ones and how they were caught.
 
 ## Pattern conventions
 
-Every pattern, destructive and safe alike, anchors to a real command position
-and walks intervening tokens with a bounded character class. Neither is
-cosmetic — the reasoning, including the prose-matching bug and the fail-open
-safe pattern that motivated them, is in `README.md` and `packs/readme.md`. A
-new rule that does not follow both will be wrong in one of those two ways.
+Active destructive pack patterns anchor to a real command position. Allowlist
+patterns anchor to the entire input line, so a neighbouring command cannot
+satisfy an exception. Both walk intervening tokens with a bounded character
+class. These choices are not cosmetic: `README.md` and `packs/readme.md`
+explain the prose-matching and fail-open bugs behind them.

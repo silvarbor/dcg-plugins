@@ -151,6 +151,12 @@ also contains every executable name because dcg evaluates that pre-filter
 before any pattern. A missing executable silently makes its ecosystem ALLOW,
 even when the regex itself is correct.
 
+This omission previously disabled the `twine upload` and `gem push` branches
+of the registry rule. Neither command contained a listed keyword, while
+`npm publish` and `cargo publish` worked because `publish` was present. Direct
+true-positive cases exposed the gap. Keep one such case for every executable
+whose command does not contain another listed keyword.
+
 ## Disabled process-hygiene pack
 
 The repository retains `disabled/silvarbor.process_hygiene.yaml` only as

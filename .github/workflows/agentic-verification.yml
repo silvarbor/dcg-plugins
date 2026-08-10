@@ -1,0 +1,41 @@
+# Agentic verification (audit + review verdict modes). The deterministic
+# workflow carries validation and test verdicts.
+#
+# Required setup:
+# 1. Add CLAUDE_CODE_OAUTH_TOKEN to the repository secrets.
+# 2. Optional behavior uses SPEC_TREE_REVIEW_* repository variables.
+
+name: Agentic Verification
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
+
+jobs:
+  agentic-verification:
+    # Keep this full commit pin aligned with the mention-triggered workflow.
+    uses: outcomeeng/gh-actions/.github/workflows/spec-tree-review.yml@164cdfdf2de83f0cc9c091aea5b40a2864c7f0df
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+    # The reusable workflow accepts only PR authors with admin, maintain, or
+    # write permission on this repository.
+    with:
+      runner: ${{ vars.RUNNER_X2 || 'ubuntu-latest' }}
+      trigger_phrase: ${{ vars.SPEC_TREE_REVIEW_TRIGGER_PHRASE || '@spec-tree' }}
+      concurrency_cancel: ${{ vars.SPEC_TREE_REVIEW_CONCURRENCY_CANCEL != 'false' }}
+      timeout_minutes: ${{ vars.SPEC_TREE_REVIEW_TIMEOUT_MINUTES || '30' }}
+      model: ${{ vars.SPEC_TREE_REVIEW_MODEL || '' }}
+      claude_args: ${{ vars.SPEC_TREE_REVIEW_CLAUDE_ARGS || '' }}
+      append_allow_list: ${{ vars.SPEC_TREE_REVIEW_APPEND_ALLOW_LIST || 'Read,Grep,Glob' }}
+      use_project_plugins: ${{ vars.SPEC_TREE_REVIEW_USE_PROJECT_PLUGINS == 'true' }}
+      # Full output can expose secrets from tool results. Enable it only for
+      # targeted debugging.
+      show_full_output: ${{ vars.SPEC_TREE_REVIEW_SHOW_FULL_OUTPUT == 'true' }}

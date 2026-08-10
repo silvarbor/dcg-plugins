@@ -1,0 +1,46 @@
+# Mention-triggered spec-tree agent and fallback review path.
+#
+# Required setup:
+# 1. Add CLAUDE_CODE_OAUTH_TOKEN to the repository secrets.
+# 2. Optional behavior uses SPEC_TREE_* repository variables.
+
+name: Spec Tree
+
+on:
+  issue_comment:
+    types: [created, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+  issues:
+    types: [opened, assigned]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
+
+jobs:
+  spec-tree:
+    # Keep this full commit pin aligned with the automatic review workflow.
+    uses: outcomeeng/gh-actions/.github/workflows/spec-tree.yml@164cdfdf2de83f0cc9c091aea5b40a2864c7f0df
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+    # The reusable workflow accepts only actors with admin, maintain, or write
+    # permission on this repository.
+    with:
+      runner: ${{ vars.RUNNER_X2 || 'ubuntu-latest' }}
+      trigger_phrase: ${{ vars.SPEC_TREE_TRIGGER_PHRASE || '@spec-tree' }}
+      concurrency_cancel: ${{ vars.SPEC_TREE_CONCURRENCY_CANCEL != 'false' }}
+      timeout_minutes: ${{ vars.SPEC_TREE_TIMEOUT_MINUTES || '15' }}
+      model: ${{ vars.SPEC_TREE_MODEL || '' }}
+      claude_args: ${{ vars.SPEC_TREE_CLAUDE_ARGS || '' }}
+      custom_prompt: ${{ vars.SPEC_TREE_CUSTOM_PROMPT || '' }}
+      use_project_plugins: ${{ vars.SPEC_TREE_USE_PROJECT_PLUGINS == 'true' }}
+      # Full output can expose secrets from tool results. Enable it only for
+      # targeted debugging.
+      show_full_output: ${{ vars.SPEC_TREE_SHOW_FULL_OUTPUT == 'true' }}

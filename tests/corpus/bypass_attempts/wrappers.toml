@@ -95,3 +95,33 @@ description = "three wrappers must not hide worktree removal"
 command = "command nohup sudo git worktree remove ../peer"
 expected = "deny"
 rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "quoted worktree subcommand must not hide removal"
+command = "git worktree 'remove' ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "quoted prune option must not hide immediate pruning"
+command = "git gc '--prune=now'"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+
+[[case]]
+description = "quoted delete option must not hide ref deletion"
+command = "git update-ref '-d' refs/heads/x"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-ref-delete-plumbing"
+
+[[case]]
+description = "quoted force refspec must not hide a forced push"
+command = "git push origin '+main:main'"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-push-refspec-force"
+
+[[case]]
+description = "quoted mirror option must not hide a mirror push"
+command = "git push '--mirror' origin"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-push-refspec-force"

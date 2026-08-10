@@ -23,3 +23,33 @@ description = "three wrappers must not hide a repository visibility change"
 command = "command nohup sudo gh repo edit --visibility public"
 expected = "deny"
 rule_id = "silvarbor.access_boundary:gh-repo-visibility-change"
+
+[[case]]
+description = "quoted repository subcommand must not hide a visibility change"
+command = "gh 'repo' edit '--visibility' public"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:gh-repo-visibility-change"
+
+[[case]]
+description = "quoted secret subcommand must not hide a secret write"
+command = "gh secret 'set' TOKEN --body value"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:gh-secret-write"
+
+[[case]]
+description = "quoted publish subcommand must not hide an npm publish"
+command = "npm 'publish'"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
+description = "npm registry selection must not hide a publish"
+command = "npm --registry=https://registry.npmjs.org publish"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"
+
+[[case]]
+description = "Poetry noninteractive mode must not hide a publish"
+command = "poetry --no-interaction publish"
+expected = "deny"
+rule_id = "silvarbor.access_boundary:registry-publish"

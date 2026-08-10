@@ -22,7 +22,7 @@ id: silvarbor.git_safety
 
 name: Git Safety - Worktree-Isolated Agents
 
-version: 2.0.0
+version: 2.0.1
 
 description: |
   Protects resources that remain shared when each agent uses a separate Git
@@ -54,7 +54,7 @@ keywords:
 
 destructive_patterns:
   - name: git-worktree-remove
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*worktree\s+remove\b
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?(?:git|'git'|"git")\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*(?:worktree\b|'worktree'|"worktree")\s+(?:remove\b|'remove'|"remove")
     executables:
       - git
     severity: critical
@@ -70,7 +70,7 @@ destructive_patterns:
       Ask the user to remove a worktree after they confirm that it is idle.
 
   - name: git-shared-recovery-data-destroy
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*(?:gc\s+(?:[^\s&;|`()<>]+\s+)*--prune=(?:now|all)\b|prune\b(?!-)(?!(?:\s+[^\s&;|`()<>]+)*\s+(?:-n|--dry-run)\b)|reflog\s+expire\s+(?:[^\s&;|`()<>]+\s+)*--expire(?:-unreachable)?(?:=|\s+)(?:now|all)\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?(?:git|'git'|"git")\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*(?:(?:gc\b|'gc'|"gc")\s+(?:[^\s&;|`()<>]+\s+)*(?:--prune=(?:now|all)\b|'--prune=(?:now|all)'|"--prune=(?:now|all)")|(?:prune\b|'prune'|"prune")(?!-)(?!(?:\s+[^\s&;|`()<>]+)*\s+(?:-n\b|'-n'|"-n"|--dry-run\b|'--dry-run'|"--dry-run"))|(?:reflog\b|'reflog'|"reflog")\s+(?:expire\b|'expire'|"expire")\s+(?:[^\s&;|`()<>]+\s+)*(?:--expire(?:-unreachable)?(?:=(?:now|all)\b|\s+(?:now\b|'now'|"now"|all\b|'all'|"all"))|'--expire(?:-unreachable)?=(?:now|all)'|"--expire(?:-unreachable)?=(?:now|all)"))
     executables:
       - git
     severity: critical
@@ -84,7 +84,7 @@ destructive_patterns:
       configured retention period.
 
   - name: git-ref-delete-plumbing
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*update-ref\s+(?:[^\s&;|`()<>]+\s+)*(?:-d\b|--stdin\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?(?:git|'git'|"git")\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*(?:update-ref\b|'update-ref'|"update-ref")\s+(?:[^\s&;|`()<>]+\s+)*(?:-d\b|'-d'|"-d"|--stdin\b|'--stdin'|"--stdin")
     executables:
       - git
     severity: critical
@@ -99,7 +99,7 @@ destructive_patterns:
       plumbing operation.
 
   - name: git-push-refspec-force
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*push\s+(?:[^\s&;|`()<>]+\s+)*(?:\+[^\s&;|`()<>]+|--mirror\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?(?:git|'git'|"git")\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*(?:push\b|'push'|"push")\s+(?:[^\s&;|`()<>]+\s+)*(?:\+[^\s&;|`()<>]+|'\+[^']+'|"\+[^\"]+"|--mirror\b|'--mirror'|"--mirror")
     executables:
       - git
     severity: critical

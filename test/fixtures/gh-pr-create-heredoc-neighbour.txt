@@ -1,0 +1,4 @@
+gh pr create --title x --body-file - <<'EOF'
+body
+EOF
+gh repo edit --visibility public

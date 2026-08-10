@@ -91,6 +91,7 @@ ALLOW	gh_pr_create_after_cd	cd /repo; gh pr create --fill
 ALLOW	gh_pr_quoted_heredoc	@fixture:gh-pr-create-quoted-heredoc.txt
 DENY	gh_pr_dynamic_head	@fixture:gh-pr-create-dynamic-head.txt
 DENY	gh_pr_unquoted_heredoc	@fixture:gh-pr-create-unquoted-heredoc.txt
+DENY	gh_pr_heredoc_neighbour	@fixture:gh-pr-create-heredoc-neighbour.txt
 ALLOW	gh_payload_is_data	gh issue create --body 'never run gh repo edit --visibility public'
 ALLOW	git_payload_is_data	git commit -m 'never run git worktree remove ../peer'
 

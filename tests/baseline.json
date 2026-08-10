@@ -1,35 +1,35 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-09T17:47:01.879598+00:00",
+  "generated_at": "2026-08-10T09:01:47.013134+00:00",
   "binary_version": "0.10.0",
   "corpus_dir": "tests/corpus",
-  "total_cases": 120,
-  "total_passed": 120,
+  "total_cases": 132,
+  "total_passed": 132,
   "total_failed": 0,
   "summary": {
     "decision": {
-      "allow": 65,
-      "deny": 55
+      "allow": 67,
+      "deny": 65
     },
     "pack": {
-      "core.git": 4,
-      "silvarbor.access_boundary": 18,
-      "silvarbor.git_safety": 33
+      "silvarbor.access_boundary": 23,
+      "silvarbor.git_safety": 38,
+      "core.git": 4
     },
     "category": {
-      "false_positives": {
-        "total": 65,
-        "passed": 65,
-        "failed": 0
-      },
-      "bypass_attempts": {
-        "total": 20,
-        "passed": 20,
-        "failed": 0
-      },
       "true_positives": {
         "total": 35,
         "passed": 35,
+        "failed": 0
+      },
+      "false_positives": {
+        "total": 67,
+        "passed": 67,
+        "failed": 0
+      },
+      "bypass_attempts": {
+        "total": 30,
+        "passed": 30,
         "failed": 0
       }
     }
@@ -50,7 +50,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 126
+      "duration_us": 107
     },
     {
       "id": "bypass_attempts/access_boundary.toml:1",
@@ -67,7 +67,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 69
+      "duration_us": 78
     },
     {
       "id": "bypass_attempts/access_boundary.toml:2",
@@ -84,7 +84,7 @@
       "pattern_name": "gh-repo-visibility-change",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 146
+      "duration_us": 204
     },
     {
       "id": "bypass_attempts/access_boundary.toml:3",
@@ -101,7 +101,92 @@
       "pattern_name": "gh-repo-visibility-change",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 88
+      "duration_us": 132
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:4",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "quoted repository subcommand must not hide a visibility change",
+      "command": "gh 'repo' edit '--visibility' public",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-repo-visibility-change",
+      "actual_rule_id": "silvarbor.access_boundary:gh-repo-visibility-change",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-repo-visibility-change",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 151
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:5",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "quoted secret subcommand must not hide a secret write",
+      "command": "gh secret 'set' TOKEN --body value",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:gh-secret-write",
+      "actual_rule_id": "silvarbor.access_boundary:gh-secret-write",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "gh-secret-write",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 153
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:6",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "quoted publish subcommand must not hide an npm publish",
+      "command": "npm 'publish'",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:registry-publish",
+      "actual_rule_id": "silvarbor.access_boundary:registry-publish",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "registry-publish",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 106
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:7",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "npm registry selection must not hide a publish",
+      "command": "npm --registry=https://registry.npmjs.org publish",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:registry-publish",
+      "actual_rule_id": "silvarbor.access_boundary:registry-publish",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "registry-publish",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 145
+    },
+    {
+      "id": "bypass_attempts/access_boundary.toml:8",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/access_boundary.toml",
+      "description": "Poetry noninteractive mode must not hide a publish",
+      "command": "poetry --no-interaction publish",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.access_boundary:registry-publish",
+      "actual_rule_id": "silvarbor.access_boundary:registry-publish",
+      "pack_id": "silvarbor.access_boundary",
+      "pattern_name": "registry-publish",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 111
     },
     {
       "id": "bypass_attempts/wrappers.toml:0",
@@ -118,7 +203,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 173
+      "duration_us": 200
     },
     {
       "id": "bypass_attempts/wrappers.toml:1",
@@ -135,7 +220,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 108
+      "duration_us": 178
     },
     {
       "id": "bypass_attempts/wrappers.toml:10",
@@ -152,7 +237,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 366
+      "duration_us": 518
     },
     {
       "id": "bypass_attempts/wrappers.toml:11",
@@ -169,7 +254,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 413
+      "duration_us": 480
     },
     {
       "id": "bypass_attempts/wrappers.toml:12",
@@ -186,7 +271,7 @@
       "pattern_name": "git-ref-delete-plumbing",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 492
+      "duration_us": 537
     },
     {
       "id": "bypass_attempts/wrappers.toml:13",
@@ -203,7 +288,7 @@
       "pattern_name": "git-push-refspec-force",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 498
+      "duration_us": 723
     },
     {
       "id": "bypass_attempts/wrappers.toml:14",
@@ -220,7 +305,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 126
+      "duration_us": 131
     },
     {
       "id": "bypass_attempts/wrappers.toml:15",
@@ -237,7 +322,75 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 99
+      "duration_us": 146
+    },
+    {
+      "id": "bypass_attempts/wrappers.toml:16",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/wrappers.toml",
+      "description": "quoted worktree subcommand must not hide removal",
+      "command": "git worktree 'remove' ../peer",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "actual_rule_id": "silvarbor.git_safety:git-worktree-remove",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-worktree-remove",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 110
+    },
+    {
+      "id": "bypass_attempts/wrappers.toml:17",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/wrappers.toml",
+      "description": "quoted prune option must not hide immediate pruning",
+      "command": "git gc '--prune=now'",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
+      "actual_rule_id": "silvarbor.git_safety:git-shared-recovery-data-destroy",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-shared-recovery-data-destroy",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 107
+    },
+    {
+      "id": "bypass_attempts/wrappers.toml:18",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/wrappers.toml",
+      "description": "quoted delete option must not hide ref deletion",
+      "command": "git update-ref '-d' refs/heads/x",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
+      "actual_rule_id": "silvarbor.git_safety:git-ref-delete-plumbing",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-ref-delete-plumbing",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 122
+    },
+    {
+      "id": "bypass_attempts/wrappers.toml:19",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/wrappers.toml",
+      "description": "quoted force refspec must not hide a forced push",
+      "command": "git push origin '+main:main'",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-push-refspec-force",
+      "actual_rule_id": "silvarbor.git_safety:git-push-refspec-force",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-push-refspec-force",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 138
     },
     {
       "id": "bypass_attempts/wrappers.toml:2",
@@ -254,7 +407,24 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 107
+      "duration_us": 140
+    },
+    {
+      "id": "bypass_attempts/wrappers.toml:20",
+      "category": "bypass_attempts",
+      "file": "bypass_attempts/wrappers.toml",
+      "description": "quoted mirror option must not hide a mirror push",
+      "command": "git push '--mirror' origin",
+      "expected": "deny",
+      "actual": "deny",
+      "passed": true,
+      "expected_rule_id": "silvarbor.git_safety:git-push-refspec-force",
+      "actual_rule_id": "silvarbor.git_safety:git-push-refspec-force",
+      "pack_id": "silvarbor.git_safety",
+      "pattern_name": "git-push-refspec-force",
+      "match_source": "pack",
+      "quick_rejected": false,
+      "duration_us": 131
     },
     {
       "id": "bypass_attempts/wrappers.toml:3",
@@ -271,7 +441,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 176
+      "duration_us": 229
     },
     {
       "id": "bypass_attempts/wrappers.toml:4",
@@ -288,7 +458,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 116
+      "duration_us": 140
     },
     {
       "id": "bypass_attempts/wrappers.toml:5",
@@ -305,7 +475,7 @@
       "pattern_name": "git-ref-delete-plumbing",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 167
+      "duration_us": 197
     },
     {
       "id": "bypass_attempts/wrappers.toml:6",
@@ -322,7 +492,7 @@
       "pattern_name": "git-push-refspec-force",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 157
+      "duration_us": 186
     },
     {
       "id": "bypass_attempts/wrappers.toml:7",
@@ -339,7 +509,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 125
+      "duration_us": 162
     },
     {
       "id": "bypass_attempts/wrappers.toml:8",
@@ -356,7 +526,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 140
+      "duration_us": 145
     },
     {
       "id": "bypass_attempts/wrappers.toml:9",
@@ -373,7 +543,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 171
+      "duration_us": 193
     },
     {
       "id": "false_positives/access_boundary_safe.toml:0",
@@ -385,7 +555,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 75
+      "duration_us": 130
     },
     {
       "id": "false_positives/access_boundary_safe.toml:1",
@@ -397,7 +567,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 94
+      "duration_us": 124
     },
     {
       "id": "false_positives/access_boundary_safe.toml:10",
@@ -409,7 +579,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 111
+      "duration_us": 150
     },
     {
       "id": "false_positives/access_boundary_safe.toml:11",
@@ -421,7 +591,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 45
+      "duration_us": 73
     },
     {
       "id": "false_positives/access_boundary_safe.toml:12",
@@ -433,7 +603,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 111
+      "duration_us": 138
     },
     {
       "id": "false_positives/access_boundary_safe.toml:13",
@@ -445,7 +615,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 97
+      "duration_us": 110
     },
     {
       "id": "false_positives/access_boundary_safe.toml:14",
@@ -457,7 +627,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 70
+      "duration_us": 94
     },
     {
       "id": "false_positives/access_boundary_safe.toml:15",
@@ -469,7 +639,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 80
+      "duration_us": 105
     },
     {
       "id": "false_positives/access_boundary_safe.toml:16",
@@ -481,7 +651,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 79
+      "duration_us": 111
     },
     {
       "id": "false_positives/access_boundary_safe.toml:17",
@@ -493,31 +663,31 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 75
+      "duration_us": 110
     },
     {
       "id": "false_positives/access_boundary_safe.toml:18",
       "category": "false_positives",
       "file": "false_positives/access_boundary_safe.toml",
-      "description": "prose mentioning gh pr create, single-quoted",
-      "command": "echo 'run gh pr create to open one'",
+      "description": "quoted npm publish dry run",
+      "command": "npm 'publish' '--dry-run'",
       "expected": "allow",
       "actual": "allow",
       "passed": true,
-      "quick_rejected": true,
-      "duration_us": 23
+      "quick_rejected": false,
+      "duration_us": 103
     },
     {
       "id": "false_positives/access_boundary_safe.toml:19",
       "category": "false_positives",
       "file": "false_positives/access_boundary_safe.toml",
-      "description": "prose mentioning npm publish, double-quoted",
-      "command": "echo \"never run npm publish from a laptop\"",
+      "description": "quoted Poetry publish dry run",
+      "command": "poetry \"publish\" \"--dry-run=true\"",
       "expected": "allow",
       "actual": "allow",
       "passed": true,
-      "quick_rejected": true,
-      "duration_us": 24
+      "quick_rejected": false,
+      "duration_us": 126
     },
     {
       "id": "false_positives/access_boundary_safe.toml:2",
@@ -529,10 +699,34 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 140
+      "duration_us": 154
     },
     {
       "id": "false_positives/access_boundary_safe.toml:20",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "prose mentioning gh pr create, single-quoted",
+      "command": "echo 'run gh pr create to open one'",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": true,
+      "duration_us": 32
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:21",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "prose mentioning npm publish, double-quoted",
+      "command": "echo \"never run npm publish from a laptop\"",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": true,
+      "duration_us": 53
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:22",
       "category": "false_positives",
       "file": "false_positives/access_boundary_safe.toml",
       "description": "prose mentioning npm publish, unquoted in a commit message",
@@ -541,10 +735,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 165
+      "duration_us": 258
     },
     {
-      "id": "false_positives/access_boundary_safe.toml:21",
+      "id": "false_positives/access_boundary_safe.toml:23",
       "category": "false_positives",
       "file": "false_positives/access_boundary_safe.toml",
       "description": "a prowl payload mentioning a guarded gh command is data",
@@ -553,10 +747,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 30
+      "duration_us": 46
     },
     {
-      "id": "false_positives/access_boundary_safe.toml:22",
+      "id": "false_positives/access_boundary_safe.toml:24",
       "category": "false_positives",
       "file": "false_positives/access_boundary_safe.toml",
       "description": "a guarded gh executable name inside another gh argument is data",
@@ -565,10 +759,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 122
+      "duration_us": 234
     },
     {
-      "id": "false_positives/access_boundary_safe.toml:23",
+      "id": "false_positives/access_boundary_safe.toml:25",
       "category": "false_positives",
       "file": "false_positives/access_boundary_safe.toml",
       "description": "secret list may use set as a jq expression",
@@ -577,10 +771,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 51
+      "duration_us": 84
     },
     {
-      "id": "false_positives/access_boundary_safe.toml:24",
+      "id": "false_positives/access_boundary_safe.toml:26",
       "category": "false_positives",
       "file": "false_positives/access_boundary_safe.toml",
       "description": "repo list may use edit as a jq expression before its visibility filter",
@@ -589,10 +783,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 56
+      "duration_us": 129
     },
     {
-      "id": "false_positives/access_boundary_safe.toml:25",
+      "id": "false_positives/access_boundary_safe.toml:27",
       "category": "false_positives",
       "file": "false_positives/access_boundary_safe.toml",
       "description": "an npm script named publish is not a registry publish",
@@ -601,10 +795,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 59
+      "duration_us": 84
     },
     {
-      "id": "false_positives/access_boundary_safe.toml:26",
+      "id": "false_positives/access_boundary_safe.toml:28",
       "category": "false_positives",
       "file": "false_positives/access_boundary_safe.toml",
       "description": "a pnpm script named publish is not a registry publish",
@@ -613,10 +807,10 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 59
+      "duration_us": 85
     },
     {
-      "id": "false_positives/access_boundary_safe.toml:27",
+      "id": "false_positives/access_boundary_safe.toml:29",
       "category": "false_positives",
       "file": "false_positives/access_boundary_safe.toml",
       "description": "a Yarn script named publish is not a registry publish",
@@ -625,31 +819,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 57
-    },
-    {
-      "id": "false_positives/access_boundary_safe.toml:28",
-      "category": "false_positives",
-      "file": "false_positives/access_boundary_safe.toml",
-      "description": "a Poetry command named publish is data passed to run",
-      "command": "poetry run publish",
-      "expected": "allow",
-      "actual": "allow",
-      "passed": true,
-      "quick_rejected": false,
-      "duration_us": 63
-    },
-    {
-      "id": "false_positives/access_boundary_safe.toml:29",
-      "category": "false_positives",
-      "file": "false_positives/access_boundary_safe.toml",
-      "description": "a Cargo binary named publish is not a registry publish",
-      "command": "cargo run --bin publish",
-      "expected": "allow",
-      "actual": "allow",
-      "passed": true,
-      "quick_rejected": false,
-      "duration_us": 71
+      "duration_us": 82
     },
     {
       "id": "false_positives/access_boundary_safe.toml:3",
@@ -661,10 +831,34 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 349
+      "duration_us": 233
     },
     {
       "id": "false_positives/access_boundary_safe.toml:30",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "a Poetry command named publish is data passed to run",
+      "command": "poetry run publish",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 85
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:31",
+      "category": "false_positives",
+      "file": "false_positives/access_boundary_safe.toml",
+      "description": "a Cargo binary named publish is not a registry publish",
+      "command": "cargo run --bin publish",
+      "expected": "allow",
+      "actual": "allow",
+      "passed": true,
+      "quick_rejected": false,
+      "duration_us": 102
+    },
+    {
+      "id": "false_positives/access_boundary_safe.toml:32",
       "category": "false_positives",
       "file": "false_positives/access_boundary_safe.toml",
       "description": "a dry-run remains safe after more than sixty-four publish arguments",
@@ -673,7 +867,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 641
+      "duration_us": 896
     },
     {
       "id": "false_positives/access_boundary_safe.toml:4",
@@ -685,7 +879,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 169
+      "duration_us": 187
     },
     {
       "id": "false_positives/access_boundary_safe.toml:5",
@@ -697,7 +891,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 169
+      "duration_us": 193
     },
     {
       "id": "false_positives/access_boundary_safe.toml:6",
@@ -709,7 +903,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 15409,
+      "duration_us": 7102,
       "heredoc_triggers": [
         18
       ],
@@ -727,7 +921,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 1246
+      "duration_us": 1422
     },
     {
       "id": "false_positives/access_boundary_safe.toml:8",
@@ -739,7 +933,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 93
+      "duration_us": 148
     },
     {
       "id": "false_positives/access_boundary_safe.toml:9",
@@ -751,7 +945,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 73
+      "duration_us": 94
     },
     {
       "id": "false_positives/git_worktree_local.toml:0",
@@ -763,7 +957,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 17
+      "duration_us": 40
     },
     {
       "id": "false_positives/git_worktree_local.toml:1",
@@ -775,7 +969,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 17
+      "duration_us": 24
     },
     {
       "id": "false_positives/git_worktree_local.toml:10",
@@ -787,7 +981,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 50
+      "duration_us": 76
     },
     {
       "id": "false_positives/git_worktree_local.toml:11",
@@ -799,7 +993,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 79
+      "duration_us": 117
     },
     {
       "id": "false_positives/git_worktree_local.toml:12",
@@ -811,7 +1005,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 78
+      "duration_us": 130
     },
     {
       "id": "false_positives/git_worktree_local.toml:13",
@@ -823,7 +1017,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 67
+      "duration_us": 102
     },
     {
       "id": "false_positives/git_worktree_local.toml:14",
@@ -835,7 +1029,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 101
+      "duration_us": 120
     },
     {
       "id": "false_positives/git_worktree_local.toml:15",
@@ -847,7 +1041,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 93
+      "duration_us": 140
     },
     {
       "id": "false_positives/git_worktree_local.toml:16",
@@ -859,7 +1053,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 1637
+      "duration_us": 1946
     },
     {
       "id": "false_positives/git_worktree_local.toml:17",
@@ -871,7 +1065,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 145
+      "duration_us": 197
     },
     {
       "id": "false_positives/git_worktree_local.toml:18",
@@ -883,7 +1077,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 133
+      "duration_us": 176
     },
     {
       "id": "false_positives/git_worktree_local.toml:19",
@@ -895,7 +1089,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 77
+      "duration_us": 102
     },
     {
       "id": "false_positives/git_worktree_local.toml:2",
@@ -907,7 +1101,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 17
+      "duration_us": 24
     },
     {
       "id": "false_positives/git_worktree_local.toml:20",
@@ -919,7 +1113,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 79
+      "duration_us": 103
     },
     {
       "id": "false_positives/git_worktree_local.toml:21",
@@ -931,7 +1125,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 226
+      "duration_us": 313
     },
     {
       "id": "false_positives/git_worktree_local.toml:22",
@@ -943,7 +1137,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 67
+      "duration_us": 91
     },
     {
       "id": "false_positives/git_worktree_local.toml:23",
@@ -955,7 +1149,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 73
+      "duration_us": 163
     },
     {
       "id": "false_positives/git_worktree_local.toml:24",
@@ -967,7 +1161,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 135
+      "duration_us": 276
     },
     {
       "id": "false_positives/git_worktree_local.toml:25",
@@ -979,7 +1173,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 95
+      "duration_us": 119
     },
     {
       "id": "false_positives/git_worktree_local.toml:26",
@@ -991,7 +1185,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 65
+      "duration_us": 108
     },
     {
       "id": "false_positives/git_worktree_local.toml:27",
@@ -1003,7 +1197,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 59
+      "duration_us": 101
     },
     {
       "id": "false_positives/git_worktree_local.toml:28",
@@ -1015,7 +1209,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 100
+      "duration_us": 132
     },
     {
       "id": "false_positives/git_worktree_local.toml:29",
@@ -1027,7 +1221,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 69
+      "duration_us": 88
     },
     {
       "id": "false_positives/git_worktree_local.toml:3",
@@ -1039,7 +1233,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 31
+      "duration_us": 52
     },
     {
       "id": "false_positives/git_worktree_local.toml:30",
@@ -1051,7 +1245,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 107
+      "duration_us": 138
     },
     {
       "id": "false_positives/git_worktree_local.toml:31",
@@ -1063,7 +1257,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 117
+      "duration_us": 167
     },
     {
       "id": "false_positives/git_worktree_local.toml:32",
@@ -1075,7 +1269,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 63
+      "duration_us": 110
     },
     {
       "id": "false_positives/git_worktree_local.toml:33",
@@ -1087,7 +1281,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 82
+      "duration_us": 86
     },
     {
       "id": "false_positives/git_worktree_local.toml:4",
@@ -1099,7 +1293,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": true,
-      "duration_us": 32
+      "duration_us": 56
     },
     {
       "id": "false_positives/git_worktree_local.toml:5",
@@ -1111,7 +1305,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 194
+      "duration_us": 198
     },
     {
       "id": "false_positives/git_worktree_local.toml:6",
@@ -1123,7 +1317,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 4387
+      "duration_us": 5356
     },
     {
       "id": "false_positives/git_worktree_local.toml:7",
@@ -1135,7 +1329,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 844
+      "duration_us": 1286
     },
     {
       "id": "false_positives/git_worktree_local.toml:8",
@@ -1147,7 +1341,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 159
+      "duration_us": 236
     },
     {
       "id": "false_positives/git_worktree_local.toml:9",
@@ -1159,7 +1353,7 @@
       "actual": "allow",
       "passed": true,
       "quick_rejected": false,
-      "duration_us": 93
+      "duration_us": 162
     },
     {
       "id": "true_positives/access_boundary.toml:0",
@@ -1176,7 +1370,7 @@
       "pattern_name": "gh-repo-visibility-change",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 1338
+      "duration_us": 1818
     },
     {
       "id": "true_positives/access_boundary.toml:1",
@@ -1193,7 +1387,7 @@
       "pattern_name": "gh-repo-visibility-change",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 154
+      "duration_us": 143
     },
     {
       "id": "true_positives/access_boundary.toml:10",
@@ -1210,7 +1404,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 59
+      "duration_us": 87
     },
     {
       "id": "true_positives/access_boundary.toml:11",
@@ -1227,7 +1421,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 58
+      "duration_us": 81
     },
     {
       "id": "true_positives/access_boundary.toml:12",
@@ -1244,7 +1438,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 10918
+      "duration_us": 16268
     },
     {
       "id": "true_positives/access_boundary.toml:13",
@@ -1261,7 +1455,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 87
+      "duration_us": 133
     },
     {
       "id": "true_positives/access_boundary.toml:2",
@@ -1278,7 +1472,7 @@
       "pattern_name": "gh-secret-write",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 280
+      "duration_us": 416
     },
     {
       "id": "true_positives/access_boundary.toml:3",
@@ -1295,7 +1489,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 538
+      "duration_us": 821
     },
     {
       "id": "true_positives/access_boundary.toml:4",
@@ -1312,7 +1506,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 99
+      "duration_us": 134
     },
     {
       "id": "true_positives/access_boundary.toml:5",
@@ -1329,7 +1523,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 86
+      "duration_us": 117
     },
     {
       "id": "true_positives/access_boundary.toml:6",
@@ -1346,7 +1540,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 80
+      "duration_us": 107
     },
     {
       "id": "true_positives/access_boundary.toml:7",
@@ -1363,7 +1557,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 94
+      "duration_us": 132
     },
     {
       "id": "true_positives/access_boundary.toml:8",
@@ -1380,7 +1574,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 73
+      "duration_us": 97
     },
     {
       "id": "true_positives/access_boundary.toml:9",
@@ -1397,7 +1591,7 @@
       "pattern_name": "registry-publish",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 85
+      "duration_us": 112
     },
     {
       "id": "true_positives/git_cross_boundary.toml:0",
@@ -1414,7 +1608,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 1799
+      "duration_us": 2893
     },
     {
       "id": "true_positives/git_cross_boundary.toml:1",
@@ -1431,7 +1625,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 97
+      "duration_us": 138
     },
     {
       "id": "true_positives/git_cross_boundary.toml:10",
@@ -1448,7 +1642,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 134
+      "duration_us": 169
     },
     {
       "id": "true_positives/git_cross_boundary.toml:11",
@@ -1465,7 +1659,7 @@
       "pattern_name": "git-ref-delete-plumbing",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 332
+      "duration_us": 595
     },
     {
       "id": "true_positives/git_cross_boundary.toml:12",
@@ -1482,7 +1676,7 @@
       "pattern_name": "git-ref-delete-plumbing",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 94
+      "duration_us": 122
     },
     {
       "id": "true_positives/git_cross_boundary.toml:13",
@@ -1499,7 +1693,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 144
+      "duration_us": 200
     },
     {
       "id": "true_positives/git_cross_boundary.toml:14",
@@ -1516,7 +1710,7 @@
       "pattern_name": "git-worktree-remove",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 123
+      "duration_us": 162
     },
     {
       "id": "true_positives/git_cross_boundary.toml:15",
@@ -1533,7 +1727,7 @@
       "pattern_name": "git-push-refspec-force",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 330
+      "duration_us": 567
     },
     {
       "id": "true_positives/git_cross_boundary.toml:16",
@@ -1550,7 +1744,7 @@
       "pattern_name": "git-push-refspec-force",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 101
+      "duration_us": 139
     },
     {
       "id": "true_positives/git_cross_boundary.toml:17",
@@ -1567,7 +1761,7 @@
       "pattern_name": "push-force-long",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 87
+      "duration_us": 117
     },
     {
       "id": "true_positives/git_cross_boundary.toml:18",
@@ -1584,7 +1778,7 @@
       "pattern_name": "push-force-short",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 91
+      "duration_us": 105
     },
     {
       "id": "true_positives/git_cross_boundary.toml:19",
@@ -1601,7 +1795,7 @@
       "pattern_name": "stash-clear",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 87
+      "duration_us": 125
     },
     {
       "id": "true_positives/git_cross_boundary.toml:2",
@@ -1618,7 +1812,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 70
+      "duration_us": 94
     },
     {
       "id": "true_positives/git_cross_boundary.toml:20",
@@ -1635,7 +1829,7 @@
       "pattern_name": "stash-drop",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 71
+      "duration_us": 142
     },
     {
       "id": "true_positives/git_cross_boundary.toml:3",
@@ -1652,7 +1846,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 102
+      "duration_us": 142
     },
     {
       "id": "true_positives/git_cross_boundary.toml:4",
@@ -1669,7 +1863,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 115
+      "duration_us": 204
     },
     {
       "id": "true_positives/git_cross_boundary.toml:5",
@@ -1686,7 +1880,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 88
+      "duration_us": 194
     },
     {
       "id": "true_positives/git_cross_boundary.toml:6",
@@ -1703,7 +1897,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 113
+      "duration_us": 174
     },
     {
       "id": "true_positives/git_cross_boundary.toml:7",
@@ -1720,7 +1914,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 96
+      "duration_us": 164
     },
     {
       "id": "true_positives/git_cross_boundary.toml:8",
@@ -1737,7 +1931,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 104
+      "duration_us": 129
     },
     {
       "id": "true_positives/git_cross_boundary.toml:9",
@@ -1754,7 +1948,7 @@
       "pattern_name": "git-shared-recovery-data-destroy",
       "match_source": "pack",
       "quick_rejected": false,
-      "duration_us": 93
+      "duration_us": 137
     }
   ]
 }

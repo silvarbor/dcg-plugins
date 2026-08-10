@@ -23,7 +23,7 @@ id: silvarbor.access_boundary
 
 name: Access Boundary — Harnessed Agents
 
-version: 2.0.0
+version: 2.0.1
 
 description: |
   Blocks outward actions that a harnessed agent cannot undo: publishing to a
@@ -69,7 +69,7 @@ destructive_patterns:
     # `gh repo edit --visibility`. Reversible in one call and permanent in
     # fact: a repository made public is in the events firehose, GHArchive,
     # and scraper caches before it can be made private again.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?gh\s+repo\s+edit\s+(?:[^\s&;|`()<>]+\s+)*--visibility\b
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?(?:gh|'gh'|"gh")\s+(?:repo\b|'repo'|"repo")\s+(?:edit\b|'edit'|"edit")\s+(?:[^\s&;|`()<>]+\s+)*(?:--visibility\b|'--visibility'|"--visibility")
     executables:
       - gh
     severity: critical
@@ -92,7 +92,7 @@ destructive_patterns:
     # places credential material into a repository's Actions environment,
     # where every workflow — including one added later by someone else — can
     # read it. Reading and listing are untouched.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?gh\s+secret\s+set\b
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?(?:gh|'gh'|"gh")\s+(?:secret\b|'secret'|"secret")\s+(?:set\b|'set'|"set")
     executables:
       - gh
     severity: high
@@ -109,7 +109,7 @@ destructive_patterns:
     # Publishing to a package registry. npm's unpublish window is 72 hours
     # and narrower once others depend on the version; PyPI has no unpublish
     # at all; crates.io yanks but never removes.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:(?:[^\s&;|`()<>]*/)?npm\s+(?:(?:(?:--workspace|-w|--prefix|--location)\s+[^\s&;|`()<>]+|--(?:workspace|prefix|location)=[^\s&;|`()<>]+|--(?:workspaces|include-workspace-root|global))\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+)*\s+--dry-run(?:=true)?(?:\s|$))|(?:[^\s&;|`()<>]*/)?pnpm\s+(?:(?:(?:--filter|--dir|-C)\s+[^\s&;|`()<>]+|--(?:filter|dir)=[^\s&;|`()<>]+|--workspace-root)\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+)*\s+--dry-run(?:=true)?(?:\s|$))|(?:[^\s&;|`()<>]*/)?yarn\s+(?:(?:--cwd\s+[^\s&;|`()<>]+|--cwd=[^\s&;|`()<>]+)\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+)*\s+--dry-run(?:=true)?(?:\s|$))|(?:[^\s&;|`()<>]*/)?poetry\s+(?:(?:(?:--directory|-C|--project|-P)\s+[^\s&;|`()<>]+|--(?:directory|project)=[^\s&;|`()<>]+)\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+)*\s+--dry-run(?:=true)?(?:\s|$))|(?:[^\s&;|`()<>]*/)?cargo\s+(?:\+[^\s&;|`()<>]+\s+)?(?:(?:(?:--color|-C|--config|-Z)\s+[^\s&;|`()<>]+|--(?:color|config)=[^\s&;|`()<>]+|-(?:V|v|q)|--(?:version|list|verbose|quiet|locked|offline|frozen))\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+)*\s+--dry-run(?:=true)?(?:\s|$))|(?:[^\s&;|`()<>]*/)?twine\s+upload\b|(?:[^\s&;|`()<>]*/)?gem\s+push\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:(?:[^\s&;|`()<>]*/)?(?:npm|'npm'|"npm")\s+(?:(?:(?:--workspace|-w|--prefix|--location|--registry)\s+[^\s&;|`()<>]+|--(?:workspace|prefix|location|registry)=[^\s&;|`()<>]+|--(?:workspaces|include-workspace-root|global))\s+)*(?:publish\b|'publish'|"publish")(?!(?:\s+[^\s&;|`()<>]+)*\s+(?:--dry-run(?:=true)?|'--dry-run(?:=true)?'|"--dry-run(?:=true)?")(?:\s|$))|(?:[^\s&;|`()<>]*/)?(?:pnpm|'pnpm'|"pnpm")\s+(?:(?:(?:--filter|--dir|-C)\s+[^\s&;|`()<>]+|--(?:filter|dir)=[^\s&;|`()<>]+|--workspace-root)\s+)*(?:publish\b|'publish'|"publish")(?!(?:\s+[^\s&;|`()<>]+)*\s+(?:--dry-run(?:=true)?|'--dry-run(?:=true)?'|"--dry-run(?:=true)?")(?:\s|$))|(?:[^\s&;|`()<>]*/)?(?:yarn|'yarn'|"yarn")\s+(?:(?:--cwd\s+[^\s&;|`()<>]+|--cwd=[^\s&;|`()<>]+)\s+)*(?:publish\b|'publish'|"publish")(?!(?:\s+[^\s&;|`()<>]+)*\s+(?:--dry-run(?:=true)?|'--dry-run(?:=true)?'|"--dry-run(?:=true)?")(?:\s|$))|(?:[^\s&;|`()<>]*/)?(?:poetry|'poetry'|"poetry")\s+(?:(?:(?:--directory|-C|--project|-P)\s+[^\s&;|`()<>]+|--(?:directory|project)=[^\s&;|`()<>]+|--no-interaction)\s+)*(?:publish\b|'publish'|"publish")(?!(?:\s+[^\s&;|`()<>]+)*\s+(?:--dry-run(?:=true)?|'--dry-run(?:=true)?'|"--dry-run(?:=true)?")(?:\s|$))|(?:[^\s&;|`()<>]*/)?(?:cargo|'cargo'|"cargo")\s+(?:\+[^\s&;|`()<>]+\s+)?(?:(?:(?:--color|-C|--config|-Z)\s+[^\s&;|`()<>]+|--(?:color|config)=[^\s&;|`()<>]+|-(?:V|v|q)|--(?:version|list|verbose|quiet|locked|offline|frozen))\s+)*(?:publish\b|'publish'|"publish")(?!(?:\s+[^\s&;|`()<>]+)*\s+(?:--dry-run(?:=true)?|'--dry-run(?:=true)?'|"--dry-run(?:=true)?")(?:\s|$))|(?:[^\s&;|`()<>]*/)?(?:twine|'twine'|"twine")\s+(?:upload\b|'upload'|"upload")|(?:[^\s&;|`()<>]*/)?(?:gem|'gem'|"gem")\s+(?:push\b|'push'|"push"))
     executables:
       - npm
       - pnpm

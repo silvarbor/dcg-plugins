@@ -1,8 +1,11 @@
 # Long-prefix evaluation-budget cases
 #
 # Format: <expected>\t<label>\t<rule_id-or-dash>\t<prefix-kind>\t<command-suffix>
-# Each generated prefix contains 65 assignments, wrappers, or Git options.
-# test/run.sh enforces a 200 ms analysis budget for every case.
+# The env, wrappers and git-options prefixes contain 65 tokens each. The
+# env-long and wrappers-long prefixes contain 128, which is past the 96-token
+# point where dcg's evaluator-side `executables` resolution gives up: with that
+# scope declared, every rule here answered ALLOW beyond it. test/run.sh
+# enforces a 200 ms analysis budget for every case.
 DENY	env_git_worktree	silvarbor.git_safety:git-worktree-remove	env	git worktree remove ../peer
 DENY	wrappers_git_worktree	silvarbor.git_safety:git-worktree-remove	wrappers	git worktree remove ../peer
 DENY	options_git_worktree	silvarbor.git_safety:git-worktree-remove	git-options	worktree remove ../peer
@@ -15,8 +18,8 @@ DENY	options_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	git-opt
 DENY	env_git_push	silvarbor.git_safety:git-push-refspec-force	env	git push origin +main:main
 DENY	wrappers_git_push	silvarbor.git_safety:git-push-refspec-force	wrappers	git push origin +main:main
 DENY	options_git_push	silvarbor.git_safety:git-push-refspec-force	git-options	push origin +main:main
-DENY	env_gh_visibility	silvarbor.access_boundary:gh-repo-visibility-change	env	gh repo edit --visibility public
-DENY	wrappers_gh_visibility	silvarbor.access_boundary:gh-repo-visibility-change	wrappers	gh repo edit --visibility public
+DENY	env_gh_visibility	platform.github:gh-repo-visibility-change	env	gh repo edit --visibility public
+DENY	wrappers_gh_visibility	platform.github:gh-repo-visibility-change	wrappers	gh repo edit --visibility public
 DENY	env_gh_secret	silvarbor.access_boundary:gh-secret-write	env	gh secret set TOKEN --body value
 DENY	wrappers_gh_secret	silvarbor.access_boundary:gh-secret-write	wrappers	gh secret set TOKEN --body value
 DENY	env_npm_publish	silvarbor.access_boundary:registry-publish	env	npm publish
@@ -36,3 +39,17 @@ ALLOW	env_git_global_help	-	env	git --no-optional-locks help worktree remove
 ALLOW	wrappers_git_global_help	-	wrappers	git --no-optional-locks help worktree remove
 ALLOW	options_git_global_help	-	git-options	help worktree remove
 ALLOW	env_gh_heredoc	-	env	@fixture:gh-pr-create-quoted-heredoc.txt
+DENY	xlong_env_git_worktree	silvarbor.git_safety:git-worktree-remove	env-long	git worktree remove ../peer
+DENY	xlong_wrappers_git_worktree	silvarbor.git_safety:git-worktree-remove	wrappers-long	git worktree remove ../peer
+DENY	xlong_env_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	env-long	git gc --prune=now
+DENY	xlong_wrappers_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	wrappers-long	git gc --prune=now
+DENY	xlong_env_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	env-long	git update-ref -d refs/heads/x
+DENY	xlong_wrappers_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	wrappers-long	git update-ref -d refs/heads/x
+DENY	xlong_env_git_push	silvarbor.git_safety:git-push-refspec-force	env-long	git push origin +main:main
+DENY	xlong_wrappers_git_push	silvarbor.git_safety:git-push-refspec-force	wrappers-long	git push origin +main:main
+DENY	xlong_env_gh_visibility	platform.github:gh-repo-visibility-change	env-long	gh repo edit --visibility public
+DENY	xlong_wrappers_gh_visibility	platform.github:gh-repo-visibility-change	wrappers-long	gh repo edit --visibility public
+DENY	xlong_env_gh_secret	silvarbor.access_boundary:gh-secret-write	env-long	gh secret set TOKEN --body value
+DENY	xlong_wrappers_gh_secret	silvarbor.access_boundary:gh-secret-write	wrappers-long	gh secret set TOKEN --body value
+DENY	xlong_env_npm_publish	silvarbor.access_boundary:registry-publish	env-long	npm publish
+DENY	xlong_wrappers_npm_publish	silvarbor.access_boundary:registry-publish	wrappers-long	npm publish

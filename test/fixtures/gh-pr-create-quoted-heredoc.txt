@@ -15,6 +15,8 @@ Two changes go beyond renaming. Probe is required at every tier rather than at p
 
 The coordination note recording the template design failed the Durable Truth Boundary's completion test by its own admission — its entries resolve by being written into a chapter — and that rule exempts no artifact class. The content moves to `knowledge/outcome-engineering/`, where the reading status can state plainly that it carries no authority.
 
+`references/tier-and-state.md` — a body line that BEGINS with a Markdown code span. The legacy launcher detector reads that span as a command substitution in command position, which is what the allowlist exception exists to answer. Keep this line first on its line.
+
 ## Changes
 
 - `references/tier-and-state.md` — three verdict modes, the six-type table, the Probe package contract and frontmatter coverage declaration, the pin rule, the per-tier requirement, Validate as a changeset gate, and the merge-state rule.

@@ -41,13 +41,17 @@ changes. It also allows `git push --force-with-lease` and
 
 ## Access boundary
 
-The access pack blocks three classes of outward action:
+The access pack blocks two classes of outward action:
 
-- `gh repo edit --visibility`
 - `gh secret set`
 - package publication through npm, pnpm, Yarn, Poetry, Cargo, Twine, or RubyGems
 
 The pack allows supported registry dry runs.
+
+It carried a third rule for `gh repo edit --visibility` until dcg shipped
+`platform.github:gh-repo-visibility-change`. The corpus keeps those cases and
+asserts the upstream rule ID, so the coverage stays pinned without two rules
+producing two messages for one action.
 
 The custom policy does not block pull-request commands. In particular, `gh pr
 create` does not require `--repo`. GitHub CLI can infer repository context from
@@ -98,13 +102,19 @@ still deny worktree-local operations that this policy intentionally permits.
 
 ## Matching design
 
-The packs use dcg 0.10 executable scoping. dcg resolves assignments, wrappers,
-and executable paths before it applies a custom pattern. A rule for `gh` does
+Every active destructive pattern starts at a command position. The anchor walks
+assignments, wrappers, and an executable path itself, so a rule for `gh` does
 not deny another program merely because its argument text mentions `gh`.
 
-Every active destructive pattern also starts at a command position. This
-anchor limits matches to command positions, not phrases in the scoped
-executable's arguments.
+No rule declares `executables`. dcg resolves that scope in the evaluator rather
+than in the pattern, and the resolution gives up once more than 96 wrapper
+tokens precede the command: past that point every scoped rule is dropped and
+the command is ALLOWed, with nothing on stdout or stderr and no rule named in
+the verdict. dcg 0.11 gave up on long assignment prefixes too; 0.14 resolves
+those and still fails open on `command command … git`. The pattern anchor
+already pins the command name, so the declaration was redundant where it worked
+and a silent fail-open where it did not. `test/cases/performance.tsv` pins both
+prefix kinds at 128 tokens so the gap cannot return unnoticed.
 
 Rules require subcommands at their declared grammar positions. They do not
 search later argument values for a command-shaped phrase.
@@ -130,13 +140,14 @@ test/run.sh
 ```
 
 `tests/corpus/` uses dcg's native regression harness. The runner independently
-checks every expected and actual rule ID because dcg 0.10 can report a mismatch
-as passed. `test/cases/` exercises effective policy and isolates the custom Git
+checks every expected and actual rule ID because dcg 0.14 still reports a
+wrong-rule denial as passed. `test/cases/` exercises effective policy and isolates the custom Git
 pack to avoid built-in-rule precedence. Allowlist-driven results such as Git
 reset and the shared help policy require this suite. Its performance matrix
-also enforces a 200 ms evaluation budget on 65-entry stress chains.
+also enforces a 200 ms evaluation budget on 65-entry stress chains, and pins
+matching again at 128 entries, past the evaluator's scope-resolution ceiling.
 
-The active and disabled pack files validate without warnings under dcg 0.10.0.
+The active and disabled pack files validate without warnings under dcg 0.14.0.
 CI pins that version and its release checksum. CI also asserts that dcg loads
 both active pack IDs. An empty `custom_paths` glob removes all custom
 protection while dcg still reports healthy.

@@ -20,8 +20,10 @@ permissions:
 
 jobs:
   agentic-verification:
-    # Keep this full commit pin aligned with the mention-triggered workflow.
-    uses: outcomeeng/gh-actions/.github/workflows/spec-tree-review.yml@164cdfdf2de83f0cc9c091aea5b40a2864c7f0df
+    # Tracks `main` to match outcomeeng/plugins and outcomeeng/spx while the
+    # reusable workflows are in beta. Keep the ref aligned with the
+    # mention-triggered workflow.
+    uses: outcomeeng/gh-actions/.github/workflows/spec-tree-review.yml@main
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 

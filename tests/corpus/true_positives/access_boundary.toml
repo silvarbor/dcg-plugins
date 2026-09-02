@@ -8,17 +8,20 @@
 # NOTE: `dcg corpus` evaluates PACK MATCHING and does not apply allowlist.toml.
 # Every case here is allowlist-independent.
 
+# Upstream platform.github owns the visibility change. This pack carried its
+# own rule until dcg shipped one; these cases assert the upstream rule ID so a
+# regression upstream shows up here.
 [[case]]
-description = "gh repo edit --visibility"
+description = "gh repo edit --visibility is covered upstream"
 command = "gh repo edit --visibility public"
 expected = "deny"
-rule_id = "silvarbor.access_boundary:gh-repo-visibility-change"
+rule_id = "platform.github:gh-repo-visibility-change"
 
 [[case]]
 description = "gh repo edit --visibility with a repo argument"
 command = "gh repo edit acme/x --visibility private"
 expected = "deny"
-rule_id = "silvarbor.access_boundary:gh-repo-visibility-change"
+rule_id = "platform.github:gh-repo-visibility-change"
 
 [[case]]
 description = "gh secret set"

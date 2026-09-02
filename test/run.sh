@@ -20,8 +20,8 @@
 # The split is forced, not stylistic. `dcg corpus` does not apply
 # allowlist.toml and has no --config flag (and ignores DCG_CONFIG), so it
 # cannot express allowlist-dependent ALLOWs or isolated attribution. Verified
-# against dcg 0.10.0. The runner also checks rule IDs independently because
-# dcg 0.10 can mark a wrong-rule denial as passed.
+# against dcg 0.14.0. The runner also checks rule IDs independently because
+# dcg 0.14 still marks a wrong-rule denial as passed.
 #
 # Test data lives in files rather than inline because dcg hooks the shell it
 # protects: a command line containing a guarded command is blocked even when
@@ -163,7 +163,36 @@ if [ "$WHICH" = all ] || [ "$WHICH" = policy ]; then
     long_git_options+="-c dcg.perf${i}=x "
   done
 
-  budget_canary="${long_env}${long_wrappers}git gc --prune=now"
+  # The -long prefixes sit past 96 tokens on purpose. dcg resolves a rule's
+  # `executables` scope in the evaluator, and that resolution gives up beyond
+  # 96 wrapper tokens, dropping every scoped rule and answering ALLOW with no
+  # diagnostic. 0.11 gave up on long assignment prefixes too; 0.14 resolves
+  # those and still fails open on the wrapper chain. These packs therefore
+  # declare no `executables` and rely on each pattern's own command-position
+  # anchor; the -long cases are what keep that decision honest. Both prefix
+  # kinds stay in the matrix so a regression in either is visible.
+  xlong_env=""
+  xlong_wrappers=""
+  for ((i = 1; i <= 128; i++)); do
+    xlong_env+="DCG_PERF_${i}=x "
+    xlong_wrappers+="command "
+  done
+
+  # The canary proves the evaluation budget still fires, so it needs an input
+  # that cannot finish inside the deadline on any runner. It gets its own,
+  # larger prefixes: the 65-token ones above are sized for the deny cases
+  # below, and at that size dcg 0.14 finishes within 1 ms often enough to make
+  # the canary flaky. A passing canary says the deadline was enforced and
+  # nothing about the verdict; the -long cases below are what pin matching at
+  # this prefix length.
+  canary_env=""
+  canary_wrappers=""
+  for ((i = 1; i <= 200; i++)); do
+    canary_env+="DCG_CANARY_${i}=x "
+    canary_wrappers+="command "
+  done
+
+  budget_canary="${canary_env}${canary_wrappers}git gc --prune=now"
   out="$(printf '%s' "$budget_canary" | DCG_HOOK_TIMEOUT_MS=1 dcg test \
     --stdin --enforce-budget --dialect posix --format json 2>&1)"
   got="$(printf '%s' "$out" | awk -F'"' '/"decision":/ {print $4; exit}')"
@@ -191,6 +220,8 @@ if [ "$WHICH" = all ] || [ "$WHICH" = policy ]; then
       env) command="${long_env}${suffix}" ;;
       wrappers) command="${long_wrappers}${suffix}" ;;
       git-options) command="git ${long_git_options}${suffix}" ;;
+      env-long) command="${xlong_env}${suffix}" ;;
+      wrappers-long) command="${xlong_wrappers}${suffix}" ;;
       *) echo "unknown performance prefix: $prefix_kind" >&2; exit 2 ;;
     esac
 

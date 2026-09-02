@@ -27,33 +27,40 @@ version: 2.0.0
 
 description: |
   Blocks outward actions that a harnessed agent cannot undo: publishing to a
-  package registry, writing a repository secret, and changing repository
-  visibility.
+  package registry and writing a repository secret.
 
-  Each is reversible in state and irreversible in effect. Unpublishing a
-  package is time-limited on npm and impossible on PyPI. A private repository
-  made public is crawled before it is made private again. A secret exposed to
+  Both are reversible in state and irreversible in effect. Unpublishing a
+  package is time-limited on npm and impossible on PyPI. A secret exposed to
   a workflow cannot be made unknown again.
 
-  `gh repo delete` is NOT here — platform.github:gh-repo-delete already
-  covers it, and duplicating a built-in rule means two messages for one
-  action.
+  `gh repo delete` and `gh repo edit --visibility` are NOT here.
+  platform.github:gh-repo-delete and platform.github:gh-repo-visibility-change
+  cover them, and duplicating a built-in rule means two messages for one
+  action. The visibility rule shipped upstream after this pack was written;
+  tests/corpus asserts the upstream rule ID so a regression there is visible
+  here.
 
   Covered:
-    - `gh repo edit --visibility`
     - `gh secret set`
     - npm / pnpm / yarn / poetry / cargo publish, twine upload, gem push
 
   Allowed (not matched):
     - `gh pr create`, `gh pr list`, `gh pr view`, `gh pr merge`
     - package publish commands with a supported `--dry-run` option
-    - `gh secret list`, `gh repo edit` without `--visibility`
+    - `gh secret list`
 
 # Keywords are a PRE-FILTER, not documentation: a command containing none of
 # them never reaches this pack's patterns. `twine upload` and `gem push` were
 # silently unmatched until their command names were listed here, while
 # `npm publish` and `cargo publish` matched from the start. Every command name
 # a pattern can match MUST appear below.
+#
+# The rules deliberately do NOT declare `executables`. dcg resolves that scope
+# in the evaluator, and the resolution gives up past 96 wrapper tokens,
+# dropping the rule and answering ALLOW. 0.11 gave up on long assignment
+# prefixes too; 0.14 still gives up on `command command … gh`. Unlike the Git
+# pack, nothing else catches the long form here. Each pattern anchors its own
+# command name, so the declaration was redundant with the anchor.
 keywords:
   - gh
   - npm
@@ -65,36 +72,12 @@ keywords:
   - gem
 
 destructive_patterns:
-  - name: gh-repo-visibility-change
-    # `gh repo edit --visibility`. Reversible in one call and permanent in
-    # fact: a repository made public is in the events firehose, GHArchive,
-    # and scraper caches before it can be made private again.
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?gh\s+repo\s+edit\s+(?:[^\s&;|`()<>]+\s+)*--visibility\b
-    executables:
-      - gh
-    severity: critical
-    description: "`gh repo edit --visibility` blocked — a repository made public stays public in every cache that saw it"
-    explanation: |
-      Flipping visibility is one call each way, so it reads as reversible. It
-      is not. GitHub's public events firehose, GHArchive, forks, and scrapers
-      ingest a public repository within seconds, and reverting the flag
-      removes none of that.
-
-      The same reasoning applies in the other direction for a repository other
-      people depend on, but the public direction is the one that cannot be
-      walked back.
-
-      Change visibility from the web UI, deliberately, or have the operator
-      run the command.
-
   - name: gh-secret-write
     # `gh secret set`. Writing a secret is not itself destructive, but it
     # places credential material into a repository's Actions environment,
     # where every workflow — including one added later by someone else — can
     # read it. Reading and listing are untouched.
     pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?gh\s+secret\s+set\b
-    executables:
-      - gh
     severity: high
     description: "`gh secret set` blocked — grants every workflow in the repository access to the credential"
     explanation: |
@@ -110,14 +93,6 @@ destructive_patterns:
     # and narrower once others depend on the version; PyPI has no unpublish
     # at all; crates.io yanks but never removes.
     pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:(?:[^\s&;|`()<>]*/)?npm\s+(?:(?:(?:--workspace|-w|--prefix|--location)\s+[^\s&;|`()<>]+|--(?:workspace|prefix|location)=[^\s&;|`()<>]+|--(?:workspaces|include-workspace-root|global))\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+)*\s+--dry-run(?:=true)?(?:\s|$))|(?:[^\s&;|`()<>]*/)?pnpm\s+(?:(?:(?:--filter|--dir|-C)\s+[^\s&;|`()<>]+|--(?:filter|dir)=[^\s&;|`()<>]+|--workspace-root)\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+)*\s+--dry-run(?:=true)?(?:\s|$))|(?:[^\s&;|`()<>]*/)?yarn\s+(?:(?:--cwd\s+[^\s&;|`()<>]+|--cwd=[^\s&;|`()<>]+)\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+)*\s+--dry-run(?:=true)?(?:\s|$))|(?:[^\s&;|`()<>]*/)?poetry\s+(?:(?:(?:--directory|-C|--project|-P)\s+[^\s&;|`()<>]+|--(?:directory|project)=[^\s&;|`()<>]+)\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+)*\s+--dry-run(?:=true)?(?:\s|$))|(?:[^\s&;|`()<>]*/)?cargo\s+(?:\+[^\s&;|`()<>]+\s+)?(?:(?:(?:--color|-C|--config|-Z)\s+[^\s&;|`()<>]+|--(?:color|config)=[^\s&;|`()<>]+|-(?:V|v|q)|--(?:version|list|verbose|quiet|locked|offline|frozen))\s+)*publish\b(?!(?:\s+[^\s&;|`()<>]+)*\s+--dry-run(?:=true)?(?:\s|$))|(?:[^\s&;|`()<>]*/)?twine\s+upload\b|(?:[^\s&;|`()<>]*/)?gem\s+push\b)
-    executables:
-      - npm
-      - pnpm
-      - yarn
-      - poetry
-      - cargo
-      - twine
-      - gem
     severity: critical
     description: "package registry publish blocked — a published version cannot be recalled"
     explanation: |

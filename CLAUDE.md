@@ -288,8 +288,8 @@ Two suites, because one tool cannot express both:
 
 - **`tests/corpus/`** runs under `dcg corpus`, dcg's own regression
   harness, in the upstream `true_positives` / `false_positives` /
-  `bypass_attempts` taxonomy. Each case asserts a `rule_id`. dcg 0.10 can mark
-  a wrong-rule denial as passed, so `test/run.sh` independently compares every
+  `bypass_attempts` taxonomy. Each case asserts a `rule_id`. dcg 0.14 still
+  marks a wrong-rule denial as passed, so `test/run.sh` independently compares every
   expected rule ID with the current run's actual rule ID. A rejection fixture
   verifies that check. `tests/baseline.json` records the full result.
 - **`test/cases/`** covers effective policy through `dcg explain` and custom
@@ -302,7 +302,7 @@ not tell you the allowlist is installed**, and without it the git pack does not
 behave as this repo documents.
 
 `dcg pack validate` proves a pack parses, not that a rule still matches. Always
-run the matrices. Verified against dcg 0.10.0.
+run the matrices. Verified against dcg 0.14.0.
 
 CI runs both suites on every push and pull request. It pins the dcg version and
 the release tarball's checksum in

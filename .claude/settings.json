@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "outcomeeng": {
+      "source": {
+        "source": "github",
+        "repo": "outcomeeng/plugins"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "spec-tree@outcomeeng": true
+  }
+}

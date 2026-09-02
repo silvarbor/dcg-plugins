@@ -52,14 +52,34 @@ Untracked files have no object-store recovery path.
 
 ### Executable scope and token walking
 
-dcg 0.10 resolves the executable before it applies a custom pattern. Every Git
-rule therefore declares `executables: [git]`. Text in another program's stdin
-or argument list does not become a Git command merely because it contains a
-matching phrase.
+No rule declares `executables`. dcg resolves that scope in the evaluator rather
+than in the pattern, and the resolution gives up once more than 96 wrapper
+tokens precede the command. Past that point every scoped rule is dropped and
+the command is ALLOWed. Nothing appears on stdout or stderr, the verdict names
+no rule, and `dcg pack validate` still reports the pack healthy — the same
+silent-ALLOW failure mode as a missing keyword.
 
-Every pattern also starts at a command position. The executable scope rejects
-other programs. The anchor rejects a matching phrase inside the scoped
-executable's own arguments.
+dcg 0.11 gave up on long assignment prefixes as well. 0.14 resolves those and
+still fails open on a wrapper chain: with `executables: [git]` declared, a
+`command command ...` prefix of 97 tokens ahead of a guarded Git subcommand is
+ALLOWed, as is every length tested above it, while the same line without the
+declaration DENYs.
+
+The Git pack hid this for a while: above roughly 540 tokens the built-in
+`core.git:git-alias-semantic-unverified` catches the same command lines, so the
+gap looked like a bounded window. The access-boundary pack has no such backstop
+and failed open at every length tested past 96.
+
+Every pattern starts at a command position, and the anchor itself walks
+assignments, wrappers, and an executable path. That is what rejects another
+program whose argument text merely contains a matching phrase, and it is what
+rejects a matching phrase inside the command's own arguments. The `executables`
+declaration duplicated the first half of that where it worked, so removing it
+loses no coverage: all 120 corpus commands keep their verdict and their rule ID.
+
+`test/cases/performance.tsv` pins every rule again at 128 assignment tokens and
+128 wrapper tokens, past the ceiling, so a reintroduced scope declaration fails
+the suite instead of quietly disarming the pack.
 
 The Git patterns consume global options before they identify the subcommand.
 The grammar accepts any option token. Only `-C` and `-c` consume the next shell
@@ -73,9 +93,9 @@ subcommand.
 
 These custom packs guard the command grammar documented here and exercised by
 `tests/corpus` and `test/cases`. They do not parse every POSIX spelling of the
-same argument vector. dcg 0.10 resolves the executable for scoped rules. Custom
-pack patterns still receive raw shell text. Fragmented quoting, escaping, and
-unlisted wrapper commands or client options can bypass a rule.
+same argument vector. Custom pack patterns receive raw shell text. Fragmented
+quoting, escaping, and unlisted wrapper commands or client options can bypass a
+rule.
 
 Arguments use a shell-operator-bounded token class rather than `.*` or `\S+`.
 One command cannot satisfy a rule or exception in its neighbour.
@@ -88,10 +108,12 @@ Assignment chains cover every active rule and every help or heredoc allowlist
 pattern. Wrapper chains cover every active rule and every help allowlist
 pattern.
 Git-option chains cover every Git rule and both Git-specific help forms. Each
-chain has 65 entries, and each Git option has a value.
+chain has 65 entries, and each Git option has a value. The assignment and
+wrapper chains repeat at 128 entries against every rule, past the evaluator's
+scope-resolution ceiling.
 
 The matrix runs with dcg's enforced budget set to 200 ms. That is stricter than
-dcg 0.10's 1,000 ms default.
+dcg 0.14's 1,000 ms default.
 
 The chains stay independent because dcg's launcher analysis fails closed on
 some combined synthetic prefixes before custom matching. It also fails closed
@@ -105,16 +127,19 @@ current directory.
 
 | Operation                                                       | Policy                                             |
 | --------------------------------------------------------------- | -------------------------------------------------- |
-| `gh repo edit --visibility`                                     | Blocked                                            |
 | `gh secret set`                                                 | Blocked                                            |
 | npm, pnpm, Yarn, Poetry, or Cargo publish                       | Blocked unless a supported dry-run flag is present |
 | `twine upload`                                                  | Blocked                                            |
 | `gem push`                                                      | Blocked                                            |
 | all `gh pr` commands, including `gh pr create` without `--repo` | Allowed                                            |
 | `gh secret list` and `gh repo edit` without `--visibility`      | Allowed                                            |
+| `gh repo edit --visibility`                                     | Blocked by `platform.github`, not by this pack     |
 
-dcg's built-in GitHub pack already covers `gh repo delete`. The custom pack
-does not duplicate that rule.
+dcg's built-in GitHub pack covers repository deletion and the visibility
+change. The custom pack does not duplicate either rule. It carried its own
+`gh-repo-visibility-change` until dcg shipped
+`platform.github:gh-repo-visibility-change`; the corpus cases stayed and now
+assert the upstream rule ID.
 
 The registry grammar intentionally enumerates leading client options. It is
 not a general parser for each package manager.
@@ -135,21 +160,33 @@ publish as safe. Widen a client grammar only with matching deny and dry-run
 evidence.
 
 `allowlist.toml` accepts a single-quoted `EOF` heredoc from
-`gh pr create --body-file -`. dcg 0.10 does not register this GitHub CLI form
-as a structured standard-input data sink. Its legacy launcher detector
-therefore reads Markdown code spans that resemble shell commands as local
-commands. The exception rejects command substitution before the heredoc. It
-also rejects an unquoted delimiter.
+`gh pr create --body-file -`. dcg's legacy launcher detector reads Markdown
+code spans that resemble shell commands as local commands, and a body line
+that *begins* with a code span is read as a command substitution in command
+position. The exception rejects command substitution before the heredoc, and
+it rejects an unquoted delimiter.
 
-Keep PR creation as the only command in that shell tool call. dcg 0.10 does
-not inspect a command after a heredoc's end delimiter. `allowlist.toml`
-requires the first `EOF` delimiter to end the input. It cannot repair the
-separate upstream fail-open.
+dcg 0.14 registers `gh pr create --body-file -` as a structured standard-input
+data sink on its own, so that exception is now redundant for the form it names.
+It is not redundant for the neighbouring forms: `gh pr edit`, `gh issue create`,
+and `gh release create --notes-file -` all still deny on a body whose line
+begins with a code span, and the allowlist does not cover them.
 
-Every destructive rule declares its executable scope. The `keywords` list
-also contains every executable name because dcg evaluates that pre-filter
-before any pattern. A missing executable silently makes its ecosystem ALLOW,
-even when the regex itself is correct.
+Those denials come from the all-dialect analysis, which is the `dcg test`
+default. The Bash hook evaluates the posix dialect and allows them, which is
+why `dcg test` prints a `posix_would_allow` note on this shape and `dcg hook
+--batch` answers `allow`. Reach for an allowlist entry only if a harness
+actually runs the all-dialect path.
+
+Keep PR creation as the only command in that shell tool call. `allowlist.toml`
+requires the first `EOF` delimiter to end the input. dcg 0.10 did not inspect a
+command after a heredoc's end delimiter; 0.11 onwards does, so that anchor is
+now defence in depth rather than the only thing standing between a heredoc and
+a trailing destructive command.
+
+The `keywords` list contains every executable name because dcg evaluates that
+pre-filter before any pattern. A missing executable silently makes its
+ecosystem ALLOW, even when the regex itself is correct.
 
 This omission previously disabled the `twine upload` and `gem push` branches
 of the registry rule. Neither command contained a listed keyword, while

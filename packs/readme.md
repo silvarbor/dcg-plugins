@@ -143,8 +143,12 @@ built-in rule takes attribution, so the corpus asserts
 token as a safe pattern since dcg 0.14.1: `gh repo edit --description --help
 --visibility public` passes the built-in rule while `gh` reads that `--help` as
 the description's value and changes visibility. A pack's safe patterns suppress
-only its own rules, so this rule closes that shape, and
-`test/cases/worktree_isolated.tsv` pins it.
+only its own rules, so the denial comes from this rule;
+`test/cases/custom_pack.tsv` asserts that attribution and
+`test/cases/worktree_isolated.tsv` pins the verdict. The rule's token walk is
+bounded and stops at a shell metacharacter, quoted or not, so an intervening
+argument such as `--homepage "a&b"` before the `--help` value escapes both
+rules; `test/cases/known_limits.tsv` keeps that residue visible.
 
 The registry grammar intentionally enumerates leading client options. It is
 not a general parser for each package manager.

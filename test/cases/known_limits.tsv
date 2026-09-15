@@ -1,8 +1,13 @@
-# Executable documentation of intentionally unsupported client prefixes
+# Executable documentation of intentionally unsupported shapes
 #
-# These ALLOW results do not classify publication as safe. They keep the
-# enumerated registry grammar and its current gaps visible in verification.
+# These ALLOW results do not classify the action as safe. They keep the
+# enumerated registry grammar, the bounded token walk, and their current gaps
+# visible in verification.
 ALLOW	registry_gap_npm	npm --registry=https://example.invalid publish
 ALLOW	registry_gap_pnpm	pnpm --registry=https://example.invalid publish
 ALLOW	registry_gap_yarn	yarn --registry https://example.invalid publish
 ALLOW	registry_gap_poetry	poetry --no-interaction publish
+# The visibility rule walks intervening tokens with a bounded class that stops
+# at a shell metacharacter, quoted or not. A quoted metacharacter before the
+# --help value therefore reaches neither the custom rule nor the built-in one.
+ALLOW	visibility_gap_quoted_metachar	gh repo edit --homepage "a&b" --description --help --visibility public

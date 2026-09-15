@@ -1,6 +1,11 @@
 # Isolate the custom Git pack so built-in core.git precedence cannot mask a
-# missing custom match in rule-attribution tests.
+# missing custom match in rule-attribution tests. The access pack loads with
+# platform.github left enabled: its attribution case is a shape the built-in
+# pack allows, so the denial can only come from the custom rule.
 
 [packs]
-custom_paths = ["packs/silvarbor.git_safety.worktree_isolated.yaml"]
+custom_paths = [
+  "packs/silvarbor.git_safety.worktree_isolated.yaml",
+  "packs/silvarbor.access_boundary.yaml",
+]
 disabled = ["core.git"]

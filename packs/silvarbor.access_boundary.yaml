@@ -43,8 +43,10 @@ description: |
   `--help` token as a safe pattern, so `gh repo edit --description --help
   --visibility public` — where gh reads `--help` as the description's value
   and changes visibility — passes the built-in rule. This rule matches the
-  command shape and ignores `--help`, so it closes that gap; a pack's safe
-  patterns suppress only that pack's own rules.
+  command shape and ignores `--help`, and a pack's safe patterns suppress
+  only that pack's own rules, so the denial comes from here. Its token walk
+  is bounded: an intervening argument carrying a shell metacharacter, quoted
+  or not, stops the walk, and that shape escapes both rules.
 
   Covered:
     - `gh repo edit --visibility`
@@ -85,7 +87,11 @@ destructive_patterns:
     # and scraper caches before it can be made private again. Kept alongside
     # the built-in rule because the built-in pack's `--help` safe pattern
     # (dcg 0.14.1) swallows `--help` in an option-value position; see the
-    # pack description. test/cases/worktree_isolated.tsv pins that shape.
+    # pack description. test/cases/custom_pack.tsv asserts that this rule is
+    # the one that denies that shape; test/cases/worktree_isolated.tsv pins
+    # the effective verdict. The token walk is bounded and stops at a shell
+    # metacharacter, so a quoted one before the `--help` value escapes both
+    # rules; test/cases/known_limits.tsv keeps that residue visible.
     pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?gh\s+repo\s+edit\s+(?:[^\s&;|`()<>]+\s+)*--visibility\b
     severity: critical
     description: "`gh repo edit --visibility` blocked — a repository made public stays public in every cache that saw it"

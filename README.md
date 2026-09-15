@@ -55,8 +55,11 @@ ID. The custom rule stays because the built-in pack treats every `--help` token
 as a safe pattern since dcg 0.14.1, which lets `gh repo edit --description
 --help --visibility public` through while `gh` reads that `--help` as the
 description's value and changes visibility. A pack's safe patterns suppress
-only its own rules, so the custom rule closes that shape; the policy suite pins
-it.
+only its own rules, so the denial comes from the custom rule; the policy suite
+asserts that attribution. The rule's token walk is bounded and stops at a shell
+metacharacter, quoted or not, so an intervening argument carrying one before
+the `--help` value escapes both rules; the known-limits suite keeps that
+residue visible.
 
 The custom policy does not block pull-request commands. In particular, `gh pr
 create` does not require `--repo`. GitHub CLI can infer repository context from

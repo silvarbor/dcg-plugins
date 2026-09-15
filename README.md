@@ -57,9 +57,10 @@ as a safe pattern since dcg 0.14.1, which lets `gh repo edit --description
 description's value and changes visibility. A pack's safe patterns suppress
 only its own rules, so the denial comes from the custom rule; the policy suite
 asserts that attribution. The rule's token walk is bounded and stops at a shell
-metacharacter, quoted or not, so an intervening argument carrying one before
-the `--help` value escapes both rules; the known-limits suite keeps that
-residue visible.
+metacharacter, quoted or not, so an intervening argument carrying one escapes
+the custom rule. The built-in rule still denies that shape on its own; only
+the combination of such an argument and a `--help` value escapes both rules,
+and the known-limits suite keeps that residue visible.
 
 The custom policy does not block pull-request commands. In particular, `gh pr
 create` does not require `--repo`. GitHub CLI can infer repository context from

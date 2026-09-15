@@ -147,8 +147,10 @@ only its own rules, so the denial comes from this rule;
 `test/cases/custom_pack.tsv` asserts that attribution and
 `test/cases/worktree_isolated.tsv` pins the verdict. The rule's token walk is
 bounded and stops at a shell metacharacter, quoted or not, so an intervening
-argument such as `--homepage "a&b"` before the `--help` value escapes both
-rules; `test/cases/known_limits.tsv` keeps that residue visible.
+argument such as `--homepage "a&b"` escapes this rule. The built-in rule still
+denies that shape on its own; only the combination of such an argument and a
+`--help` value escapes both rules, and `test/cases/known_limits.tsv` keeps that
+residue visible.
 
 The registry grammar intentionally enumerates leading client options. It is
 not a general parser for each package manager.

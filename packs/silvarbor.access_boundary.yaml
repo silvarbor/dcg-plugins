@@ -46,7 +46,9 @@ description: |
   command shape and ignores `--help`, and a pack's safe patterns suppress
   only that pack's own rules, so the denial comes from here. Its token walk
   is bounded: an intervening argument carrying a shell metacharacter, quoted
-  or not, stops the walk, and that shape escapes both rules.
+  or not, stops the walk. The built-in rule still denies that shape on its
+  own, so only the combination of a quoted metacharacter argument and a
+  `--help` value escapes both rules.
 
   Covered:
     - `gh repo edit --visibility`

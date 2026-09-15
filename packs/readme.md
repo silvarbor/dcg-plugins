@@ -133,13 +133,18 @@ current directory.
 | `gem push`                                                      | Blocked                                            |
 | all `gh pr` commands, including `gh pr create` without `--repo` | Allowed                                            |
 | `gh secret list` and `gh repo edit` without `--visibility`      | Allowed                                            |
-| `gh repo edit --visibility`                                     | Blocked by `platform.github`, not by this pack     |
+| `gh repo edit --visibility`                                     | Blocked                                            |
 
-dcg's built-in GitHub pack covers repository deletion and the visibility
-change. The custom pack does not duplicate either rule. It carried its own
-`gh-repo-visibility-change` until dcg shipped
-`platform.github:gh-repo-visibility-change`; the corpus cases stayed and now
-assert the upstream rule ID.
+dcg's built-in GitHub pack covers repository deletion, which this pack does not
+duplicate. It also covers the visibility change, and on the plain command the
+built-in rule takes attribution, so the corpus asserts
+`platform.github:gh-repo-visibility-change`. This pack keeps its own
+`gh-repo-visibility-change` because the built-in pack treats every `--help`
+token as a safe pattern since dcg 0.14.1: `gh repo edit --description --help
+--visibility public` passes the built-in rule while `gh` reads that `--help` as
+the description's value and changes visibility. A pack's safe patterns suppress
+only its own rules, so this rule closes that shape, and
+`test/cases/worktree_isolated.tsv` pins it.
 
 The registry grammar intentionally enumerates leading client options. It is
 not a general parser for each package manager.

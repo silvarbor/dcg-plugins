@@ -41,17 +41,22 @@ changes. It also allows `git push --force-with-lease` and
 
 ## Access boundary
 
-The access pack blocks two classes of outward action:
+The access pack blocks three classes of outward action:
 
+- `gh repo edit --visibility`
 - `gh secret set`
 - package publication through npm, pnpm, Yarn, Poetry, Cargo, Twine, or RubyGems
 
 The pack allows supported registry dry runs.
 
-It carried a third rule for `gh repo edit --visibility` until dcg shipped
-`platform.github:gh-repo-visibility-change`. The corpus keeps those cases and
-asserts the upstream rule ID, so the coverage stays pinned without two rules
-producing two messages for one action.
+dcg ships `platform.github:gh-repo-visibility-change`, and on the plain command
+that built-in rule takes attribution, so the corpus asserts the upstream rule
+ID. The custom rule stays because the built-in pack treats every `--help` token
+as a safe pattern since dcg 0.14.1, which lets `gh repo edit --description
+--help --visibility public` through while `gh` reads that `--help` as the
+description's value and changes visibility. A pack's safe patterns suppress
+only its own rules, so the custom rule closes that shape; the policy suite pins
+it.
 
 The custom policy does not block pull-request commands. In particular, `gh pr
 create` does not require `--repo`. GitHub CLI can infer repository context from

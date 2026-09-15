@@ -20,7 +20,7 @@
 # The split is forced, not stylistic. `dcg corpus` does not apply
 # allowlist.toml and has no --config flag (and ignores DCG_CONFIG), so it
 # cannot express allowlist-dependent ALLOWs or isolated attribution. Verified
-# against dcg 0.14.0. The runner also checks rule IDs independently because
+# against dcg 0.14.3. The runner also checks rule IDs independently because
 # dcg 0.14 still marks a wrong-rule denial as passed.
 #
 # Test data lives in files rather than inline because dcg hooks the shell it

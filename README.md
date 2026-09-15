@@ -152,7 +152,7 @@ reset and the shared help policy require this suite. Its performance matrix
 also enforces a 200 ms evaluation budget on 65-entry stress chains, and pins
 matching again at 128 entries, past the evaluator's scope-resolution ceiling.
 
-The active and disabled pack files validate without warnings under dcg 0.14.0.
+The active and disabled pack files validate without warnings under dcg 0.14.3.
 CI pins that version and its release checksum. CI also asserts that dcg loads
 both active pack IDs. An empty `custom_paths` glob removes all custom
 protection while dcg still reports healthy.

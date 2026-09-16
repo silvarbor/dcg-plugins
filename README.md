@@ -41,17 +41,26 @@ changes. It also allows `git push --force-with-lease` and
 
 ## Access boundary
 
-The access pack blocks two classes of outward action:
+The access pack blocks three classes of outward action:
 
+- `gh repo edit --visibility`
 - `gh secret set`
 - package publication through npm, pnpm, Yarn, Poetry, Cargo, Twine, or RubyGems
 
 The pack allows supported registry dry runs.
 
-It carried a third rule for `gh repo edit --visibility` until dcg shipped
-`platform.github:gh-repo-visibility-change`. The corpus keeps those cases and
-asserts the upstream rule ID, so the coverage stays pinned without two rules
-producing two messages for one action.
+dcg ships `platform.github:gh-repo-visibility-change`, and on the plain command
+that built-in rule takes attribution, so the corpus asserts the upstream rule
+ID. The custom rule stays because the built-in pack treats every `--help` token
+as a safe pattern since dcg 0.14.1, which lets `gh repo edit --description
+--help --visibility public` through while `gh` reads that `--help` as the
+description's value and changes visibility. A pack's safe patterns suppress
+only its own rules, so the denial comes from the custom rule; the policy suite
+asserts that attribution. The rule's token walk is bounded and stops at a shell
+metacharacter, quoted or not, so an intervening argument carrying one escapes
+the custom rule. The built-in rule still denies that shape on its own; only
+the combination of such an argument and a `--help` value escapes both rules,
+and the known-limits suite keeps that residue visible.
 
 The custom policy does not block pull-request commands. In particular, `gh pr
 create` does not require `--repo`. GitHub CLI can infer repository context from
@@ -147,7 +156,7 @@ reset and the shared help policy require this suite. Its performance matrix
 also enforces a 200 ms evaluation budget on 65-entry stress chains, and pins
 matching again at 128 entries, past the evaluator's scope-resolution ceiling.
 
-The active and disabled pack files validate without warnings under dcg 0.14.0.
+The active and disabled pack files validate without warnings under dcg 0.14.3.
 CI pins that version and its release checksum. CI also asserts that dcg loads
 both active pack IDs. An empty `custom_paths` glob removes all custom
 protection while dcg still reports healthy.

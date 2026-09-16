@@ -79,6 +79,7 @@ DENY	help_neighbour	gh repo edit --help; gh repo edit --visibility public
 DENY	help_option_value	gh secret set TOKEN --body --help
 DENY	help_description_value	gh repo edit --description --help --visibility public
 DENY	help_secret_app_value	gh secret set TOKEN --app --help
+DENY	quoted_metachar_visibility	gh repo edit --homepage "a&b" --visibility public
 DENY	help_publish_tag_value	npm publish --tag --help
 DENY	help_quoted_data	gh secret set TOKEN --body '--help'
 DENY	help_substitution_data	gh secret set TOKEN --body $(printf -- --help)

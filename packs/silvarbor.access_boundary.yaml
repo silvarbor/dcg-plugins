@@ -23,31 +23,42 @@ id: silvarbor.access_boundary
 
 name: Access Boundary — Harnessed Agents
 
-version: 2.0.0
+version: 2.1.0
 
 description: |
-  Blocks outward actions that a harnessed agent cannot undo: publishing to a
-  package registry and writing a repository secret.
+  Blocks outward actions that a harnessed agent cannot undo: changing
+  repository visibility, writing a repository secret, and publishing to a
+  package registry.
 
-  Both are reversible in state and irreversible in effect. Unpublishing a
-  package is time-limited on npm and impossible on PyPI. A secret exposed to
-  a workflow cannot be made unknown again.
+  Each is reversible in state and irreversible in effect. A private repository
+  made public is crawled before it is made private again. A secret exposed to
+  a workflow cannot be made unknown again. Unpublishing a package is
+  time-limited on npm and impossible on PyPI.
 
-  `gh repo delete` and `gh repo edit --visibility` are NOT here.
-  platform.github:gh-repo-delete and platform.github:gh-repo-visibility-change
-  cover them, and duplicating a built-in rule means two messages for one
-  action. The visibility rule shipped upstream after this pack was written;
-  tests/corpus asserts the upstream rule ID so a regression there is visible
-  here.
+  `gh repo delete` is NOT here. platform.github:gh-repo-delete covers it, and
+  duplicating a built-in rule means two messages for one action.
+
+  `gh repo edit --visibility` IS here although platform.github ships
+  gh-repo-visibility-change. Since dcg 0.14.1 the built-in pack treats every
+  `--help` token as a safe pattern, so `gh repo edit --description --help
+  --visibility public` — where gh reads `--help` as the description's value
+  and changes visibility — passes the built-in rule. This rule matches the
+  command shape and ignores `--help`, and a pack's safe patterns suppress
+  only that pack's own rules, so the denial comes from here. Its token walk
+  is bounded: an intervening argument carrying a shell metacharacter, quoted
+  or not, stops the walk. The built-in rule still denies that shape on its
+  own, so only the combination of a quoted metacharacter argument and a
+  `--help` value escapes both rules.
 
   Covered:
+    - `gh repo edit --visibility`
     - `gh secret set`
     - npm / pnpm / yarn / poetry / cargo publish, twine upload, gem push
 
   Allowed (not matched):
     - `gh pr create`, `gh pr list`, `gh pr view`, `gh pr merge`
     - package publish commands with a supported `--dry-run` option
-    - `gh secret list`
+    - `gh secret list`, `gh repo edit` without `--visibility`
 
 # Keywords are a PRE-FILTER, not documentation: a command containing none of
 # them never reaches this pack's patterns. `twine upload` and `gem push` were
@@ -72,6 +83,33 @@ keywords:
   - gem
 
 destructive_patterns:
+  - name: gh-repo-visibility-change
+    # `gh repo edit --visibility`. Reversible in one call and permanent in
+    # fact: a repository made public is in the events firehose, GHArchive,
+    # and scraper caches before it can be made private again. Kept alongside
+    # the built-in rule because the built-in pack's `--help` safe pattern
+    # (dcg 0.14.1) swallows `--help` in an option-value position; see the
+    # pack description. test/cases/custom_pack.tsv asserts that this rule is
+    # the one that denies that shape; test/cases/worktree_isolated.tsv pins
+    # the effective verdict. The token walk is bounded and stops at a shell
+    # metacharacter, so a quoted one before the `--help` value escapes both
+    # rules; test/cases/known_limits.tsv keeps that residue visible.
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?gh\s+repo\s+edit\s+(?:[^\s&;|`()<>]+\s+)*--visibility\b
+    severity: critical
+    description: "`gh repo edit --visibility` blocked — a repository made public stays public in every cache that saw it"
+    explanation: |
+      Flipping visibility is one call each way, so it reads as reversible. It
+      is not. GitHub's public events firehose, GHArchive, forks, and scrapers
+      ingest a public repository within seconds, and reverting the flag
+      removes none of that.
+
+      The same reasoning applies in the other direction for a repository other
+      people depend on, but the public direction is the one that cannot be
+      walked back.
+
+      Change visibility from the web UI, deliberately, or have the operator
+      run the command.
+
   - name: gh-secret-write
     # `gh secret set`. Writing a secret is not itself destructive, but it
     # places credential material into a repository's Actions environment,

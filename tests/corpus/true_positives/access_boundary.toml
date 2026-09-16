@@ -8,9 +8,11 @@
 # NOTE: `dcg corpus` evaluates PACK MATCHING and does not apply allowlist.toml.
 # Every case here is allowlist-independent.
 
-# Upstream platform.github owns the visibility change. This pack carried its
-# own rule until dcg shipped one; these cases assert the upstream rule ID so a
-# regression upstream shows up here.
+# This pack carries its own gh-repo-visibility-change alongside the upstream
+# platform.github rule. On the plain command the built-in rule takes
+# attribution, so these cases assert the upstream rule ID and a regression
+# upstream shows up here. The custom rule's own attribution is asserted in
+# test/cases/custom_pack.tsv on the shape the built-in rule allows.
 [[case]]
 description = "gh repo edit --visibility is covered upstream"
 command = "gh repo edit --visibility public"

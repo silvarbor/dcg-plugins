@@ -1,4 +1,8 @@
 {
+  "enabledPlugins": {
+    "spec-tree@outcomeeng": true,
+    "prose@outcomeeng": true
+  },
   "extraKnownMarketplaces": {
     "outcomeeng": {
       "source": {
@@ -6,8 +10,5 @@
         "repo": "outcomeeng/plugins"
       }
     }
-  },
-  "enabledPlugins": {
-    "spec-tree@outcomeeng": true
   }
 }

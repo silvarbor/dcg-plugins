@@ -38,8 +38,8 @@ jobs:
       # Pinned together with tests/baseline.json, which records the binary that
       # produced it. A newer dcg can change a built-in pack's verdict with no
       # change in this repo.
-      DCG_VERSION: v0.14.0
-      DCG_SHA256: 7337a611c280af6098c807678dc50a70ba4d58245c25714d73ab95830f126325
+      DCG_VERSION: v0.14.3
+      DCG_SHA256: 63712fd7dc549f608640c41545be3d8686c14e8b989e51194b54a990b4255f69
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 

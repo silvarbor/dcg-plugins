@@ -13,15 +13,18 @@
 #   tests/corpus/  - run by `dcg corpus`, the official harness. Asserts pack
 #                    MATCHING, with rule_id per case and a diffable baseline.
 #
-#   test/cases/    - run by the loops below against `dcg explain` and an
-#                    isolated `dcg test --config`. Asserts EFFECTIVE POLICY
-#                    and custom-pack rule attribution.
+#   test/cases/    - run by the loops below against `dcg explain` and against
+#                    `dcg test --config` with the custom-only config and the
+#                    posix dialect. Asserts EFFECTIVE POLICY, resolved modes,
+#                    and which rule claims each custom-pack case.
 #
-# The split is forced, not stylistic. `dcg corpus` does not apply
-# allowlist.toml and has no --config flag (and ignores DCG_CONFIG), so it
-# cannot express allowlist-dependent ALLOWs or isolated attribution. Verified
-# against dcg 0.14.4. The runner also checks rule IDs independently because
-# dcg 0.14 still marks a wrong-rule denial as passed.
+# The split is forced, not stylistic. `dcg corpus` applies neither
+# allowlist.toml nor [policy.rules], records every match as "deny", and has
+# no --config flag (it ignores DCG_CONFIG), so it cannot express an
+# allowlist-dependent ALLOW, a resolved WARN, or attribution under a chosen
+# config and dialect. Verified against dcg 0.14.4. The runner also checks
+# rule IDs independently because dcg 0.14 still marks a wrong-rule denial as
+# passed.
 #
 # Test data lives in files rather than inline because dcg hooks the shell it
 # protects: a command line containing a guarded command is blocked even when
@@ -91,7 +94,7 @@ fi
 
 # ---------------------------------------------------------------- policy ----
 if [ "$WHICH" = all ] || [ "$WHICH" = policy ]; then
-  for suite in worktree_isolated known_limits; do
+  for suite in worktree_isolated resolved_modes known_limits; do
     tsv="$CASES/$suite.tsv"
     [ -f "$tsv" ] || { echo "missing suite file: $tsv" >&2; exit 2; }
 

@@ -20,9 +20,11 @@ mkdir -p "$cfg_dir"
 # `[policy.rules]` table are copied verbatim out of example/config.toml so the
 # policy cases run against the same built-in packs and the same per-rule modes
 # they were recorded against, and so a change to the example is a change to
-# what CI evaluates. The policy table matters because test/cases pins resolved
-# modes, and a per-rule override is the one thing that moves a rule between
-# DENY, WARN and LOG. An example without the table carries no overrides.
+# what CI evaluates. The policy table matters because
+# test/cases/resolved_modes.tsv pins the table's one entry as a WARN, and a
+# per-rule override is the one thing that moves a rule between DENY, WARN and
+# LOG. An example without the table carries no overrides, and that row then
+# reports a DENY.
 {
   printf '[packs]\ncustom_paths = ["%s/packs/*.yaml"]\n' "$root"
   awk '/^enabled = \[/,/^\]/' "$root/example/config.toml"

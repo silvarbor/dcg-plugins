@@ -1,0 +1,31 @@
+# resolved_modes - POLICY-RESOLVED mode cases
+#
+# Format: <expected>\t<label>\t<command>     (TAB separated, exactly 3 columns)
+#   expected : ALLOW, WARN or DENY (the Decision line of `dcg explain`)
+#   command  : the command line handed to `dcg explain`.
+#
+# Blank lines and lines starting with # are ignored.
+#
+# WHY THESE CASES LIVE HERE
+#
+# A rule's severity sets its default mode: critical and high deny, medium
+# warns, low logs. A WARN goes to stderr and the command runs. The only thing
+# that moves a rule between those modes is a `[policy.rules]` entry in
+# config.toml. `dcg corpus` applies no policy and records every match as
+# "deny", so it cannot see a mode. Before dcg 0.14.4, `dcg explain` reported
+# the rule default too, so an explain-based check read DENY while the hook
+# let the command through. Each row below pins the resolved mode so a policy
+# change in either direction shows up here.
+#
+# core.git:stash-drop is severity medium. This policy accepts the default.
+# A custom rule cannot harden it: dcg stops at the first matching rule,
+# resolves that rule's mode, and never reaches a later critical match.
+# stash clear is critical and denies without any override.
+WARN	stash_drop	git stash drop
+DENY	stash_clear	git stash clear
+
+# core.filesystem:redirect-truncate-dynamic-path is critical by default. The
+# `[policy.rules]` entry in example/config.toml relaxes it to WARN, and the
+# CI config copies that table, so this row pins the entry itself: dropping it
+# from the example turns the row into a DENY.
+WARN	redirect_truncate_dynamic	printf '%s\n' "$body" > "$dir/notes.md"

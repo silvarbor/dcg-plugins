@@ -1,11 +1,16 @@
-# Isolate the custom Git pack so built-in core.git precedence cannot mask a
-# missing custom match in rule-attribution tests. The access pack loads with
+# Attribution config for `dcg test --config`. The access pack loads with
 # platform.github left enabled: its attribution case is a shape the built-in
 # pack allows, so the denial can only come from the custom rule.
+#
+# core.git cannot be switched off. dcg reinserts the `core` category after it
+# applies `disabled`, so a `disabled = ["core.git"]` entry here is inert and
+# built-in core.git rules still run first. The Git attribution rows hold
+# because test/run.sh compares the reported rule ID with the expected one, and
+# because under `--dialect posix` the quoted-global-option shapes do not match a
+# core.git rule before the custom rule. A row attributed to core.git fails.
 
 [packs]
 custom_paths = [
   "packs/silvarbor.git_safety.worktree_isolated.yaml",
   "packs/silvarbor.access_boundary.yaml",
 ]
-disabled = ["core.git"]

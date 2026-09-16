@@ -1,7 +1,7 @@
 # silvarbor.git_safety.worktree_isolated - ALLOWLIST-DEPENDENT cases only
 #
 # Format: <expected>\t<label>\t<command>     (TAB separated, exactly 3 columns)
-#   expected : ALLOW or DENY
+#   expected : ALLOW, WARN or DENY (the Decision line of `dcg explain`)
 #   command  : the command line handed to `dcg explain`.
 #              A literal \n in this column becomes a real newline.
 #              @fixture:<name> loads a multiline command from test/fixtures/.
@@ -99,8 +99,18 @@ ALLOW	gh_payload_is_data	gh issue create --body 'never run gh repo edit --visibi
 ALLOW	git_payload_is_data	git commit -m 'never run git worktree remove ../peer'
 
 # The custom Git pack no longer guards recoverable configuration, normal
-# maintenance, or stash pop. Upstream core.git still guards stash drop/clear
-# and plain force pushes.
+# maintenance, or stash pop. Upstream core.git guards stash clear and plain
+# force pushes at critical severity, so the hook denies them.
+#
+# core.git:stash-drop is severity medium, and a medium rule resolves to WARN
+# in the hook: the warning goes to stderr and the command runs. This policy
+# accepts that default. A `[policy.rules]` override in config.toml is the
+# only way to turn it into a denial; a custom rule cannot, because dcg stops
+# at the first matching rule, resolves that rule's mode, and never reaches a
+# later critical match. Before dcg 0.14.4, `dcg explain` reported the rule
+# default, DENY, while the hook let the command through. The row pins the
+# resolved mode so a config change in either direction shows up here.
+WARN	stash_drop	git stash drop
 ALLOW	git_remote_remove	git remote remove origin
 ALLOW	git_remote_set_url	git remote set-url origin git@example.invalid:x/y.git
 ALLOW	git_stash_pop	git stash pop

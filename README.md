@@ -29,8 +29,9 @@ remote refs:
 - a leading `+` push refspec
 - `git push --mirror`
 
-The built-in `core.git` pack continues to cover ordinary force pushes, stash
-deletion, and destructive worktree-local commands. The companion allowlist
+The built-in `core.git` pack continues to cover ordinary force pushes,
+`git stash clear`, and destructive worktree-local commands; it warns on
+`git stash drop` and lets it run. The companion allowlist
 permits reset, path checkout, restore, and branch deletion because those
 operations cannot cross the worktree boundary.
 
@@ -108,9 +109,9 @@ The glob does not descend into `packs/disabled/`.
 Install `example/allowlist.toml` as well. Without it, dcg's built-in Git rules
 still deny worktree-local operations that this policy intentionally permits.
 Keep the `[policy.rules]` table from `example/config.toml` too. Its one entry
-relaxes `core.filesystem:redirect-truncate-dynamic-path` to a warning, and the
-policy suite pins resolved modes, so the table is part of what the suite
-asserts. The table is also the only place a built-in rule's mode changes: dcg
+relaxes `core.filesystem:redirect-truncate-dynamic-path` to a warning, and
+`test/cases/resolved_modes.tsv` pins that entry: without it the row is a
+denial. The table is also the only place a built-in rule's mode changes: dcg
 resolves a medium-severity rule such as `core.git:stash-drop` to a warning
 that lets the command run, this policy accepts that default, and a custom pack
 cannot raise a built-in rule's severity. An override to `deny` in that table

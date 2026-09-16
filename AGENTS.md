@@ -552,11 +552,13 @@ Two suites, because one tool cannot express both:
   marks a wrong-rule denial as passed, so `test/run.sh` independently compares every
   expected rule ID with the current run's actual rule ID. A rejection fixture
   verifies that check. `tests/baseline.json` records the full result.
-- **`test/cases/`** covers effective policy through `dcg explain` and custom
-  pack attribution through `dcg test --config`. `dcg corpus` evaluates pack
-  matching *without* applying `allowlist.toml` or `[policy.rules]` and has no
-  `--config` flag, so neither allowlist-dependent ALLOWs, policy-dependent
-  DENYs, nor attribution fit there.
+- **`test/cases/`** covers effective policy and resolved modes through
+  `dcg explain`, and which rule claims each custom-pack case through
+  `dcg test --config` with the custom-only config and the posix dialect.
+  `dcg corpus` evaluates pack matching *without* applying `allowlist.toml` or
+  `[policy.rules]`, records every match as `deny`, and has no `--config`
+  flag, so an allowlist-dependent ALLOW, a resolved WARN, and attribution
+  under a chosen config and dialect do not fit there.
 
 That second point matters if you adopt these packs: **a corpus run alone will
 not tell you the allowlist is installed**, and without it the git pack does not

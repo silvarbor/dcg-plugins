@@ -16,13 +16,18 @@ cfg_dir="${DCG_CONFIG_DIR:-$HOME/.config/dcg}"
 
 mkdir -p "$cfg_dir"
 
-# custom_paths points at this checkout only. The `enabled` list is copied
-# verbatim out of example/config.toml so the policy cases run against the same
-# built-in packs they were recorded against, and so a change to the example is
-# a change to what CI evaluates.
+# custom_paths points at this checkout only. The `enabled` list and the
+# `[policy.rules]` table are copied verbatim out of example/config.toml so the
+# policy cases run against the same built-in packs and the same per-rule modes
+# they were recorded against, and so a change to the example is a change to
+# what CI evaluates. The policy table matters because test/cases pins resolved
+# modes, and a per-rule override is the one thing that moves a rule between
+# DENY, WARN and LOG. An example without the table carries no overrides.
 {
   printf '[packs]\ncustom_paths = ["%s/packs/*.yaml"]\n' "$root"
   awk '/^enabled = \[/,/^\]/' "$root/example/config.toml"
+  printf '\n'
+  awk '/^\[policy\.rules\]/,0' "$root/example/config.toml"
 } > "$cfg_dir/config.toml"
 
 if ! grep -q '^enabled = \[' "$cfg_dir/config.toml"; then

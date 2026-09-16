@@ -3,6 +3,8 @@
 # Format: <expected>\t<label>\t<command>     (TAB separated, exactly 3 columns)
 #   expected : ALLOW, WARN or DENY (the Decision line of `dcg explain`)
 #   command  : the command line handed to `dcg explain`.
+#              A literal \n in this column becomes a real newline.
+#              @fixture:<name> loads a multiline command from test/fixtures/.
 #
 # Blank lines and lines starting with # are ignored.
 #
@@ -28,4 +30,4 @@ DENY	stash_clear	git stash clear
 # `[policy.rules]` entry in example/config.toml relaxes it to WARN, and the
 # CI config copies that table, so this row pins the entry itself: dropping it
 # from the example turns the row into a DENY.
-WARN	redirect_truncate_dynamic	printf '%s\n' "$body" > "$dir/notes.md"
+WARN	redirect_truncate_dynamic	printf '%s' "$body" > "$dir/notes.md"

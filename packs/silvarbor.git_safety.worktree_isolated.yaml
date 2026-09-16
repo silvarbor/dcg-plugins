@@ -36,8 +36,9 @@ description: |
   expiration, ref deletion through update-ref, and remote force updates that
   do not use the ordinary force flags.
 
-  The built-in core.git pack handles plain force pushes, stash deletion, and
-  destructive commands inside one worktree. The user allowlist permits the
+  The built-in core.git pack denies plain force pushes, git stash clear, and
+  destructive commands inside one worktree, and warns on git stash drop, which
+  then runs. The user allowlist permits the
   worktree-local commands that cannot cross this pack's boundary.
 
   Covered:

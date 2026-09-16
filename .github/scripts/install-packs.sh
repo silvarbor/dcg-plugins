@@ -25,6 +25,12 @@ mkdir -p "$cfg_dir"
 # per-rule override is the one thing that moves a rule between DENY, WARN and
 # LOG. An example without the table carries no overrides, and that row then
 # reports a DENY.
+#
+# example/config.toml is generated: bin/publish-examples in the config repo
+# writes it from the maintainer's live config, and the live config is where
+# the [policy.rules] entry originates. The example carries it because the
+# source does, so a republish reproduces it; a republish that drops it turns
+# the resolved_modes row into a DENY here, which is the signal wanted.
 {
   printf '[packs]\ncustom_paths = ["%s/packs/*.yaml"]\n' "$root"
   awk '/^enabled = \[/,/^\]/' "$root/example/config.toml"

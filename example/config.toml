@@ -61,3 +61,14 @@ enabled = [
     # Monitoring
     # "monitoring.splunk",
 ]
+
+# core.filesystem:redirect-truncate-dynamic-path denies every truncating
+# redirect whose target holds a variable. dcg 0.14.3 folds a literal assignment
+# and a bare $(mktemp -d), and nothing else: a mktemp template, a second
+# assignment hop, a pipeline in a sibling assignment, or an export prefix all
+# defeat the fold, and the rule refuses exempt_target_globs by design. Agents
+# write their scratch files through exactly those shapes, so every such write
+# cost an allow-once round trip. Warn keeps the finding on stderr and drops the
+# stop. $HOME and ~ targets stay denied by redirect-truncate-root-home.
+[policy.rules]
+"core.filesystem:redirect-truncate-dynamic-path" = "warn"

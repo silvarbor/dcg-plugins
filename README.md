@@ -107,7 +107,11 @@ The glob does not descend into `packs/disabled/`.
 
 Install `example/allowlist.toml` as well. Without it, dcg's built-in Git rules
 still deny worktree-local operations that this policy intentionally permits.
-`example/config.toml` shows the complete setup.
+Keep the `[policy.rules]` table from `example/config.toml` too. dcg resolves
+a medium-severity rule to a warning that lets the command run, and a custom
+pack cannot raise a built-in rule's severity; the table is the one place a
+rule such as `core.git:stash-drop` can become a denial. `example/config.toml`
+shows the complete setup.
 
 ## Matching design
 
@@ -150,9 +154,13 @@ test/run.sh
 
 `tests/corpus/` uses dcg's native regression harness. The runner independently
 checks every expected and actual rule ID because dcg 0.14 still reports a
-wrong-rule denial as passed. `test/cases/` exercises effective policy and isolates the custom Git
-pack to avoid built-in-rule precedence. Allowlist-driven results such as Git
-reset and the shared help policy require this suite. Its performance matrix
+wrong-rule denial as passed. `test/cases/` exercises effective policy and
+asserts which rule claims each custom-pack case. Allowlist-driven results such
+as Git reset, the shared help policy, and resolved modes such as the `WARN` on
+`git stash drop` require this suite: the corpus applies neither
+`allowlist.toml` nor `[policy.rules]`, and a medium-severity built-in rule such
+as `core.git:stash-drop` warns in the hook and lets the command run unless the
+config overrides it to `deny`. Its performance matrix
 also enforces a 200 ms evaluation budget on 65-entry stress chains, and pins
 matching again at 128 entries, past the evaluator's scope-resolution ceiling.
 

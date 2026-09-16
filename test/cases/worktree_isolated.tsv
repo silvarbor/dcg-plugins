@@ -1,7 +1,7 @@
 # silvarbor.git_safety.worktree_isolated - ALLOWLIST-DEPENDENT cases only
 #
 # Format: <expected>\t<label>\t<command>     (TAB separated, exactly 3 columns)
-#   expected : ALLOW or DENY
+#   expected : ALLOW, WARN or DENY (the Decision line of `dcg explain`)
 #   command  : the command line handed to `dcg explain`.
 #              A literal \n in this column becomes a real newline.
 #              @fixture:<name> loads a multiline command from test/fixtures/.
@@ -99,8 +99,9 @@ ALLOW	gh_payload_is_data	gh issue create --body 'never run gh repo edit --visibi
 ALLOW	git_payload_is_data	git commit -m 'never run git worktree remove ../peer'
 
 # The custom Git pack no longer guards recoverable configuration, normal
-# maintenance, or stash pop. Upstream core.git still guards stash drop/clear
-# and plain force pushes.
+# maintenance, or stash pop. Upstream core.git denies stash clear and plain
+# force pushes at critical severity and warns on stash drop; resolved_modes.tsv
+# pins those modes.
 ALLOW	git_remote_remove	git remote remove origin
 ALLOW	git_remote_set_url	git remote set-url origin git@example.invalid:x/y.git
 ALLOW	git_stash_pop	git stash pop

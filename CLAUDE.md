@@ -263,7 +263,7 @@ warnings emitted       : 0        <- nothing on stdout or stderr
 dcg doctor             : "Checking pattern packs... OK"
 
 git worktree remove ../peer  ->  ALLOW
-git stash drop               ->  ALLOW
+git gc --prune=now           ->  ALLOW
 git reflog expire --all      ->  ALLOW
 ```
 
@@ -292,17 +292,35 @@ Two suites, because one tool cannot express both:
   marks a wrong-rule denial as passed, so `test/run.sh` independently compares every
   expected rule ID with the current run's actual rule ID. A rejection fixture
   verifies that check. `tests/baseline.json` records the full result.
-- **`test/cases/`** covers effective policy through `dcg explain` and custom
-  pack attribution through `dcg test --config`. `dcg corpus` evaluates pack
-  matching *without* applying `allowlist.toml` and has no `--config` flag, so
-  neither allowlist-dependent ALLOWs nor isolated attribution fit there.
+- **`test/cases/`** covers effective policy and resolved modes through
+  `dcg explain`, and which rule claims each custom-pack case through
+  `dcg test --config` with the custom-only config and the posix dialect.
+  `dcg corpus` evaluates pack matching *without* applying `allowlist.toml` or
+  `[policy.rules]`, records every match as `deny`, and has no `--config`
+  flag, so an allowlist-dependent ALLOW, a resolved WARN, and attribution
+  under a chosen config and dialect do not fit there.
 
 That second point matters if you adopt these packs: **a corpus run alone will
 not tell you the allowlist is installed**, and without it the git pack does not
-behave as this repo documents.
+behave as this repo documents. It also will not tell you what the hook does
+with a medium-severity rule. A medium rule resolves to WARN — the warning goes
+to stderr and the command runs — and the corpus still records `deny` for it.
+`core.git:stash-drop` is that rule. This policy accepts the default, and the
+`stash_drop` policy row pins `WARN` so a `[policy.rules]` change in either
+direction shows up. Before dcg 0.14.4 `dcg explain` reported the rule default
+instead of the resolved mode, so an `explain`-based check read DENY while the
+hook let the command through.
+
+Attribution under `dcg test --config` does not come from disabling
+`core.git`: dcg reinserts the core packs after it applies `disabled`. It comes
+from `test/run.sh` comparing the reported rule ID with the expected one, so a
+row that a built-in rule claims first fails. A custom rule cannot harden a
+built-in either: dcg resolves the mode of the first matching rule and never
+reaches a later match, so a critical custom `git stash drop` rule sits behind
+the medium built-in and changes nothing.
 
 `dcg pack validate` proves a pack parses, not that a rule still matches. Always
-run the matrices. Verified against dcg 0.14.3.
+run the matrices. Verified against dcg 0.14.4.
 
 CI runs both suites on every push and pull request. It pins the dcg version and
 the release tarball's checksum in

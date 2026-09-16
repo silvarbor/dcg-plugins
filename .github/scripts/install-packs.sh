@@ -16,13 +16,26 @@ cfg_dir="${DCG_CONFIG_DIR:-$HOME/.config/dcg}"
 
 mkdir -p "$cfg_dir"
 
-# custom_paths points at this checkout only. The `enabled` list is copied
-# verbatim out of example/config.toml so the policy cases run against the same
-# built-in packs they were recorded against, and so a change to the example is
-# a change to what CI evaluates.
+# custom_paths points at this checkout only. The `enabled` list and the
+# `[policy.rules]` table are copied verbatim out of example/config.toml so the
+# policy cases run against the same built-in packs and the same per-rule modes
+# they were recorded against, and so a change to the example is a change to
+# what CI evaluates. The policy table matters because
+# test/cases/resolved_modes.tsv pins the table's one entry as a WARN, and a
+# per-rule override is the one thing that moves a rule between DENY, WARN and
+# LOG. An example without the table carries no overrides, and that row then
+# reports a DENY.
+#
+# example/config.toml is generated: bin/publish-examples in the config repo
+# writes it from the maintainer's live config, and the live config is where
+# the [policy.rules] entry originates. The example carries it because the
+# source does, so a republish reproduces it; a republish that drops it turns
+# the resolved_modes row into a DENY here, which is the signal wanted.
 {
   printf '[packs]\ncustom_paths = ["%s/packs/*.yaml"]\n' "$root"
   awk '/^enabled = \[/,/^\]/' "$root/example/config.toml"
+  printf '\n'
+  awk '/^\[policy\.rules\]/,0' "$root/example/config.toml"
 } > "$cfg_dir/config.toml"
 
 if ! grep -q '^enabled = \[' "$cfg_dir/config.toml"; then

@@ -29,8 +29,9 @@ remote refs:
 - a leading `+` push refspec
 - `git push --mirror`
 
-The built-in `core.git` pack continues to cover ordinary force pushes, stash
-deletion, and destructive worktree-local commands. The companion allowlist
+The built-in `core.git` pack continues to cover ordinary force pushes,
+`git stash clear`, and destructive worktree-local commands; it warns on
+`git stash drop` and lets it run. The companion allowlist
 permits reset, path checkout, restore, and branch deletion because those
 operations cannot cross the worktree boundary.
 
@@ -107,7 +108,14 @@ The glob does not descend into `packs/disabled/`.
 
 Install `example/allowlist.toml` as well. Without it, dcg's built-in Git rules
 still deny worktree-local operations that this policy intentionally permits.
-`example/config.toml` shows the complete setup.
+Keep the `[policy.rules]` table from `example/config.toml` too. Its one entry
+relaxes `core.filesystem:redirect-truncate-dynamic-path` to a warning, and
+`test/cases/resolved_modes.tsv` pins that entry: without it the row is a
+denial. The table is also the only place a built-in rule's mode changes: dcg
+resolves a medium-severity rule such as `core.git:stash-drop` to a warning
+that lets the command run, this policy accepts that default, and a custom pack
+cannot raise a built-in rule's severity. An override to `deny` in that table
+is the one way to change it. `example/config.toml` shows the complete setup.
 
 ## Matching design
 
@@ -150,13 +158,17 @@ test/run.sh
 
 `tests/corpus/` uses dcg's native regression harness. The runner independently
 checks every expected and actual rule ID because dcg 0.14 still reports a
-wrong-rule denial as passed. `test/cases/` exercises effective policy and isolates the custom Git
-pack to avoid built-in-rule precedence. Allowlist-driven results such as Git
-reset and the shared help policy require this suite. Its performance matrix
+wrong-rule denial as passed. `test/cases/` exercises effective policy and
+asserts which rule claims each custom-pack case. Allowlist-driven results such
+as Git reset, the shared help policy, and resolved modes such as the `WARN` on
+`git stash drop` require this suite: the corpus applies neither
+`allowlist.toml` nor `[policy.rules]`, and a medium-severity built-in rule such
+as `core.git:stash-drop` warns in the hook and lets the command run unless the
+config overrides it to `deny`. Its performance matrix
 also enforces a 200 ms evaluation budget on 65-entry stress chains, and pins
 matching again at 128 entries, past the evaluator's scope-resolution ceiling.
 
-The active and disabled pack files validate without warnings under dcg 0.14.3.
+The active and disabled pack files validate without warnings under dcg 0.14.4.
 CI pins that version and its release checksum. CI also asserts that dcg loads
 both active pack IDs. An empty `custom_paths` glob removes all custom
 protection while dcg still reports healthy.

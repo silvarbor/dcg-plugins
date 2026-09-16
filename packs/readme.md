@@ -27,8 +27,10 @@ also refuses to delete or force-move a branch checked out in another
 worktree. A two-worktree test repository verified these properties.
 
 The custom pack is intentionally smaller than a general Git safety pack.
-Built-in `core.git` rules continue to cover plain force pushes, stash deletion,
-and `git clean -f`.
+Built-in `core.git` rules continue to cover plain force pushes, `git stash
+clear`, and `git clean -f`. `git stash drop` matches `core.git:stash-drop` at
+medium severity, which the hook resolves to a warning that lets the command
+run; this policy accepts that default.
 
 ### Scope
 
@@ -42,7 +44,7 @@ and `git clean -f`.
 | `git push +<refspec>` or `--mirror`                    | Blocked              | Force-updates remote refs without a lease                                    |
 | `git worktree prune`                                   | Allowed              | Removes stale administrative records, not a worktree directory               |
 | `git remote remove`, `rm`, or `set-url`                | Allowed              | Recoverable configuration; guarding it caused excessive friction             |
-| `git stash pop`                                        | Allowed              | Routine workflow; upstream still guards drop and clear                       |
+| `git stash pop`                                        | Allowed              | Routine workflow; upstream denies clear and warns on drop                    |
 | `git reset`, path checkout, and restore                | Allowed by allowlist | Affect only the calling worktree                                             |
 | `git branch -d` or `-D`                                | Allowed by allowlist | Git protects branches checked out elsewhere and records deletion in a reflog |
 | `git push --force-with-lease` or `--force-if-includes` | Allowed              | Verifies remote state before the rewrite                                     |

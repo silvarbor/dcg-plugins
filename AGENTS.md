@@ -562,7 +562,7 @@ not tell you the allowlist is installed**, and without it the git pack does not
 behave as this repo documents.
 
 `dcg pack validate` proves a pack parses, not that a rule still matches. Always
-run the matrices. Verified against dcg 0.14.3.
+run the matrices. Verified against dcg 0.14.4.
 
 CI runs both suites on every push and pull request. It pins the dcg version and
 the release tarball's checksum in

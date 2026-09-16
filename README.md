@@ -107,11 +107,14 @@ The glob does not descend into `packs/disabled/`.
 
 Install `example/allowlist.toml` as well. Without it, dcg's built-in Git rules
 still deny worktree-local operations that this policy intentionally permits.
-Keep the `[policy.rules]` table from `example/config.toml` too. dcg resolves
-a medium-severity rule to a warning that lets the command run, and a custom
-pack cannot raise a built-in rule's severity; the table is the one place a
-rule such as `core.git:stash-drop` can become a denial. `example/config.toml`
-shows the complete setup.
+Keep the `[policy.rules]` table from `example/config.toml` too. Its one entry
+relaxes `core.filesystem:redirect-truncate-dynamic-path` to a warning, and the
+policy suite pins resolved modes, so the table is part of what the suite
+asserts. The table is also the only place a built-in rule's mode changes: dcg
+resolves a medium-severity rule such as `core.git:stash-drop` to a warning
+that lets the command run, this policy accepts that default, and a custom pack
+cannot raise a built-in rule's severity. An override to `deny` in that table
+is the one way to change it. `example/config.toml` shows the complete setup.
 
 ## Matching design
 

@@ -51,7 +51,7 @@ description: |
   Allowed:
     - git worktree add, list, prune, and prune --dry-run
     - git remote remove, rm, and set-url
-    - git stash pop; core.git still guards stash drop and clear
+    - git stash pop; core.git denies stash clear and warns on stash drop
     - git push --force-with-lease and --force-if-includes
     - worktree-local reset, checkout, restore, and branch deletion
 

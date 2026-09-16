@@ -263,7 +263,7 @@ warnings emitted       : 0        <- nothing on stdout or stderr
 dcg doctor             : "Checking pattern packs... OK"
 
 git worktree remove ../peer  ->  ALLOW
-git stash drop               ->  ALLOW
+git gc --prune=now           ->  ALLOW
 git reflog expire --all      ->  ALLOW
 ```
 

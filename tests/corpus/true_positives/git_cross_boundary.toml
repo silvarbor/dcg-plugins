@@ -122,7 +122,7 @@ expected = "deny"
 rule_id = "core.git:stash-clear"
 
 [[case]]
-description = "stash drop is covered upstream"
+description = "stash drop matches upstream at medium severity; the hook resolves it to WARN, which the policy suite pins"
 command = "git stash drop"
 expected = "deny"
 rule_id = "core.git:stash-drop"

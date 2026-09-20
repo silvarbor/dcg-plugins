@@ -28,13 +28,13 @@ id: silvarbor.git_safety
 
 name: Git Safety - Worktree-Isolated Agents
 
-version: 2.0.0
+version: 2.1.0
 
 description: |
   Protects resources that remain shared when each agent uses a separate Git
-  worktree. The pack blocks peer worktree removal, immediate object or reflog
-  expiration, ref deletion through update-ref, and remote force updates that
-  do not use the ordinary force flags.
+  worktree. The pack blocks forced peer worktree removal, immediate object or
+  reflog expiration, ref deletion through update-ref, and remote force updates
+  that do not use the ordinary force flags.
 
   The built-in core.git pack denies plain force pushes, git stash clear, and
   destructive commands inside one worktree, and warns on git stash drop, which
@@ -42,7 +42,7 @@ description: |
   worktree-local commands that cannot cross this pack's boundary.
 
   Covered:
-    - git worktree remove
+    - git worktree remove --force, -f, or an abbreviation of --force
     - git gc --prune=now or --prune=all
     - git prune, except dry runs
     - git reflog expire with immediate expiration
@@ -50,6 +50,8 @@ description: |
     - git push +<refspec> or --mirror
 
   Allowed:
+    - git worktree remove without a force flag; Git refuses a dirty or locked
+      worktree in that form
     - git worktree add, list, prune, and prune --dry-run
     - git remote remove, rm, and set-url
     - git stash pop; core.git denies stash clear and warns on stash drop
@@ -61,18 +63,23 @@ keywords:
 
 destructive_patterns:
   - name: git-worktree-remove
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*worktree\s+remove\b
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*worktree\s+remove\s+(?:[^\s&;|`()<>]+\s+)*(?:--f(?:o|or|orc|orce)?\b|-[A-Za-z]*f[A-Za-z]*\b)
     severity: critical
-    description: git worktree remove blocked - can delete another agent's worktree and its uncommitted files
+    description: forced git worktree remove blocked - deletes another agent's worktree together with its uncommitted files
     explanation: |
-      `git worktree remove --force <path>` deletes the target directory. Files
-      that were never committed do not exist in the object store or a reflog.
+      `git worktree remove --force <path>` deletes the target directory even
+      when it holds uncommitted or untracked files, or is locked. Files that
+      were never committed do not exist in the object store or a reflog.
+
+      Without `--force`, Git refuses to remove a dirty or locked worktree, so
+      that form cannot delete uncommitted files and is allowed.
 
       Inspect the target first:
         - git worktree list
         - git -C <path> status --short
 
-      Ask the user to remove a worktree after they confirm that it is idle.
+      Ask the user to force-remove a worktree after they confirm that it is
+      idle.
 
   - name: git-shared-recovery-data-destroy
     pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*(?:gc\s+(?:[^\s&;|`()<>]+\s+)*--prune=(?:now|all)\b|prune\b(?!-)(?!(?:\s+[^\s&;|`()<>]+)*\s+(?:-n|--dry-run)\b)|reflog\s+expire\s+(?:[^\s&;|`()<>]+\s+)*--expire(?:-unreachable)?(?:=|\s+)(?:now|all)\b)

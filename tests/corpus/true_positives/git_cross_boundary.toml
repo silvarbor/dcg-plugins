@@ -79,14 +79,32 @@ expected = "deny"
 rule_id = "silvarbor.git_safety:git-ref-delete-plumbing"
 
 [[case]]
-description = "worktree remove can delete a peer worktree"
-command = "git worktree remove ../peer"
+description = "forced worktree removal can delete uncommitted peer files"
+command = "git worktree remove --force ../peer"
 expected = "deny"
 rule_id = "silvarbor.git_safety:git-worktree-remove"
 
 [[case]]
-description = "forced worktree removal can delete uncommitted peer files"
-command = "git worktree remove --force ../peer"
+description = "the short force flag deletes uncommitted peer files too"
+command = "git worktree remove -f ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "a force flag after the path still forces the removal"
+command = "git worktree remove ../peer --force"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "a doubled force flag removes a locked peer worktree"
+command = "git worktree remove --force --force ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "Git accepts an unambiguous abbreviation of --force"
+command = "git worktree remove --fo ../peer"
 expected = "deny"
 rule_id = "silvarbor.git_safety:git-worktree-remove"
 

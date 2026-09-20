@@ -41,6 +41,21 @@ command = "git commit -m 'never run git worktree remove ../peer'"
 expected = "allow"
 
 [[case]]
+description = "worktree remove without --force is refused by Git on a dirty or locked worktree"
+command = "git worktree remove ../peer"
+expected = "allow"
+
+[[case]]
+description = "a global option does not turn an unforced worktree remove into a forced one"
+command = "git -C /r worktree remove ../peer"
+expected = "allow"
+
+[[case]]
+description = "--no-force is the opposite of --force"
+command = "git worktree remove --no-force ../peer"
+expected = "allow"
+
+[[case]]
 description = "worktree add may use remove as a branch-name value"
 command = "git worktree add -b remove ../peer"
 expected = "allow"

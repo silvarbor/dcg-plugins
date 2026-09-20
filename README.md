@@ -19,7 +19,7 @@ Each agent gets a separate Git worktree. HEAD, the index, and the working tree
 belong to that agent; the common Git directory and remotes remain shared.
 
 The custom pack blocks only six forms. They can destroy shared recovery data,
-delete a peer worktree, bypass Git's worktree-aware ref checks, or force-update
+force-delete a peer worktree, bypass Git's worktree-aware ref checks, or force-update
 remote refs:
 
 - `git worktree remove --force`

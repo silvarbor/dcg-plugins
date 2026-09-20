@@ -36,7 +36,8 @@ run; this policy accepts that default.
 
 | Operation                                              | Policy               | Reason                                                                       |
 | ------------------------------------------------------ | -------------------- | ---------------------------------------------------------------------------- |
-| `git worktree remove`                                  | Blocked              | Can delete a peer worktree and uncommitted files                             |
+| `git worktree remove --force`                          | Blocked              | Deletes a peer worktree together with its uncommitted files                  |
+| `git worktree remove` without `--force`                | Allowed              | Git refuses a dirty or locked worktree, so nothing uncommitted is lost       |
 | `git gc --prune=now` or `--prune=all`                  | Blocked              | Immediately destroys shared recovery objects                                 |
 | `git prune` without `--dry-run`                        | Blocked              | Removes unreachable objects from the shared store                            |
 | immediate `git reflog expire`                          | Blocked              | Removes shared recovery history                                              |

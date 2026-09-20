@@ -22,7 +22,7 @@ The custom pack blocks only six forms. They can destroy shared recovery data,
 delete a peer worktree, bypass Git's worktree-aware ref checks, or force-update
 remote refs:
 
-- `git worktree remove`
+- `git worktree remove --force`
 - immediate object or reflog expiration
 - non-dry-run `git prune`
 - `git update-ref -d` and `git update-ref --stdin`

@@ -262,7 +262,7 @@ silvarbor packs listed : 0
 warnings emitted       : 0        <- nothing on stdout or stderr
 dcg doctor             : "Checking pattern packs... OK"
 
-git worktree remove ../peer  ->  ALLOW
+git worktree remove --force ../peer  ->  ALLOW
 git gc --prune=now           ->  ALLOW
 git reflog expire --all      ->  ALLOW
 ```
@@ -331,7 +331,7 @@ checksum and the baseline together.
 
 ## Three things that will trip you up
 
-**dcg hooks your own shell.** A command line containing `git worktree remove`
+**dcg hooks your own shell.** A command line containing `git worktree remove --force`
 is blocked *for you*, including when testing the rule that blocks it. That is
 why cases live in files and reach dcg through a variable.
 `dcg test --stdin` exists for the same reason. Same for prose: in shell

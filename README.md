@@ -19,10 +19,10 @@ Each agent gets a separate Git worktree. HEAD, the index, and the working tree
 belong to that agent; the common Git directory and remotes remain shared.
 
 The custom pack blocks only six forms. They can destroy shared recovery data,
-delete a peer worktree, bypass Git's worktree-aware ref checks, or force-update
+force-delete a peer worktree, bypass Git's worktree-aware ref checks, or force-update
 remote refs:
 
-- `git worktree remove`
+- `git worktree remove --force`
 - immediate object or reflog expiration
 - non-dry-run `git prune`
 - `git update-ref -d` and `git update-ref --stdin`
@@ -86,7 +86,7 @@ pattern cannot override a rule from another pack. The policy supports:
 - help piped to `less`, `more`, or `cat`, or followed by a final `&`
 
 Known value-taking options consume a following `--help` token as data. For
-example, `git -C --help worktree remove` remains guarded.
+example, `git -C --help worktree remove --force ../peer` remains guarded.
 
 Redirects are not part of the help allowlist. The rest of dcg therefore still
 evaluates their destination; a help command cannot use the broad exception to

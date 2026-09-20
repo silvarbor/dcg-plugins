@@ -6,9 +6,9 @@
 # point where dcg's evaluator-side `executables` resolution gives up: with that
 # scope declared, every rule here answered ALLOW beyond it. test/run.sh
 # enforces a 200 ms analysis budget for every case.
-DENY	env_git_worktree	silvarbor.git_safety:git-worktree-remove	env	git worktree remove ../peer
-DENY	wrappers_git_worktree	silvarbor.git_safety:git-worktree-remove	wrappers	git worktree remove ../peer
-DENY	options_git_worktree	silvarbor.git_safety:git-worktree-remove	git-options	worktree remove ../peer
+DENY	env_git_worktree	silvarbor.git_safety:git-worktree-remove	env	git worktree remove --force ../peer
+DENY	wrappers_git_worktree	silvarbor.git_safety:git-worktree-remove	wrappers	git worktree remove --force ../peer
+DENY	options_git_worktree	silvarbor.git_safety:git-worktree-remove	git-options	worktree remove --force ../peer
 DENY	env_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	env	git gc --prune=now
 DENY	wrappers_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	wrappers	git gc --prune=now
 DENY	options_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	git-options	gc --prune=now
@@ -41,8 +41,8 @@ ALLOW	env_git_global_help	-	env	git --no-optional-locks help worktree remove
 ALLOW	wrappers_git_global_help	-	wrappers	git --no-optional-locks help worktree remove
 ALLOW	options_git_global_help	-	git-options	help worktree remove
 ALLOW	env_gh_heredoc	-	env	@fixture:gh-pr-create-quoted-heredoc.txt
-DENY	xlong_env_git_worktree	silvarbor.git_safety:git-worktree-remove	env-long	git worktree remove ../peer
-DENY	xlong_wrappers_git_worktree	silvarbor.git_safety:git-worktree-remove	wrappers-long	git worktree remove ../peer
+DENY	xlong_env_git_worktree	silvarbor.git_safety:git-worktree-remove	env-long	git worktree remove --force ../peer
+DENY	xlong_wrappers_git_worktree	silvarbor.git_safety:git-worktree-remove	wrappers-long	git worktree remove --force ../peer
 DENY	xlong_env_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	env-long	git gc --prune=now
 DENY	xlong_wrappers_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	wrappers-long	git gc --prune=now
 DENY	xlong_env_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	env-long	git update-ref -d refs/heads/x

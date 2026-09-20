@@ -73,8 +73,8 @@ ALLOW	help_poetry_publish	poetry publish --help
 ALLOW	help_cargo_publish	cargo publish --help
 ALLOW	help_twine_upload	twine upload --help
 ALLOW	help_gem_push	gem push --help
-DENY	help_C_value	git -C help worktree remove ../peer
-DENY	help_C_long_value	git -C --help worktree remove ../peer
+DENY	help_C_value	git -C help worktree remove --force ../peer
+DENY	help_C_long_value	git -C --help worktree remove --force ../peer
 DENY	help_neighbour	gh repo edit --help; gh repo edit --visibility public
 DENY	help_option_value	gh secret set TOKEN --body --help
 DENY	help_description_value	gh repo edit --description --help --visibility public
@@ -118,8 +118,14 @@ ALLOW	process_gh_run_watch	gh run watch 123
 # custom pack. These catch a fail-open regex timeout even when corpus matching
 # and allowlist validation remain individually green.
 DENY	canary_access_boundary	gh repo edit --visibility public
-DENY	canary_git_safety	git worktree remove ../peer
-DENY	canary_git_global_option	git --no-optional-locks worktree remove ../peer
-DENY	canary_git_quoted_path	git -C '/tmp/path with spaces' worktree remove ../peer
+DENY	canary_git_safety	git worktree remove --force ../peer
+DENY	canary_git_short_force	git worktree remove -f ../peer
+DENY	canary_git_double_force	git worktree remove --force --force ../peer
+DENY	canary_git_quoted_force	git worktree remove '--force' ../peer
+DENY	canary_git_quoted_short_force	git worktree remove "-f" ../peer
+ALLOW	worktree_remove_unforced	git worktree remove ../peer
+ALLOW	worktree_remove_quoted_path	git worktree remove '/tmp/path with spaces'
+DENY	canary_git_global_option	git --no-optional-locks worktree remove --force ../peer
+DENY	canary_git_quoted_path	git -C '/tmp/path with spaces' worktree remove --force ../peer
 DENY	canary_git_split_expire	git reflog expire --all --expire-unreachable now
-DENY	canary_git_long	git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b worktree remove ../peer
+DENY	canary_git_long	git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b worktree remove --force ../peer

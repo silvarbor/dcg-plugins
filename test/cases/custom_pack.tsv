@@ -1,6 +1,6 @@
 # Custom-pack attribution cases
 #
 # Format: <expected>\t<label>\t<rule_id>\t<command>
-DENY	quoted_global_C	silvarbor.git_safety:git-worktree-remove	git -C '/tmp/path with spaces' worktree remove ../peer
-DENY	quoted_global_c	silvarbor.git_safety:git-worktree-remove	git -c 'policy.note=value with spaces' worktree remove ../peer
+DENY	quoted_global_C	silvarbor.git_safety:git-worktree-remove	git -C '/tmp/path with spaces' worktree remove --force ../peer
+DENY	quoted_global_c	silvarbor.git_safety:git-worktree-remove	git -c 'policy.note=value with spaces' worktree remove --force ../peer
 DENY	help_description_value	silvarbor.access_boundary:gh-repo-visibility-change	gh repo edit --description --help --visibility public

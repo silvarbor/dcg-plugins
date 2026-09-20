@@ -34,20 +34,21 @@ run; this policy accepts that default.
 
 ### Scope
 
-| Operation                                              | Policy               | Reason                                                                       |
-| ------------------------------------------------------ | -------------------- | ---------------------------------------------------------------------------- |
-| `git worktree remove`                                  | Blocked              | Can delete a peer worktree and uncommitted files                             |
-| `git gc --prune=now` or `--prune=all`                  | Blocked              | Immediately destroys shared recovery objects                                 |
-| `git prune` without `--dry-run`                        | Blocked              | Removes unreachable objects from the shared store                            |
-| immediate `git reflog expire`                          | Blocked              | Removes shared recovery history                                              |
-| `git update-ref -d` or `--stdin`                       | Blocked              | Can bypass worktree-aware porcelain checks                                   |
-| `git push +<refspec>` or `--mirror`                    | Blocked              | Force-updates remote refs without a lease                                    |
-| `git worktree prune`                                   | Allowed              | Removes stale administrative records, not a worktree directory               |
-| `git remote remove`, `rm`, or `set-url`                | Allowed              | Recoverable configuration; guarding it caused excessive friction             |
-| `git stash pop`                                        | Allowed              | Routine workflow; upstream denies clear and warns on drop                    |
-| `git reset`, path checkout, and restore                | Allowed by allowlist | Affect only the calling worktree                                             |
-| `git branch -d` or `-D`                                | Allowed by allowlist | Git protects branches checked out elsewhere and records deletion in a reflog |
-| `git push --force-with-lease` or `--force-if-includes` | Allowed              | Verifies remote state before the rewrite                                     |
+| Operation                                              | Policy               | Reason                                                                                                         |
+| ------------------------------------------------------ | -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `git worktree remove --force`                          | Blocked              | Deletes a peer worktree together with its uncommitted files                                                    |
+| `git worktree remove` without `--force`                | Allowed              | Git refuses modified, untracked, or locked worktrees; a clean worktree and its ignored files are still removed |
+| `git gc --prune=now` or `--prune=all`                  | Blocked              | Immediately destroys shared recovery objects                                                                   |
+| `git prune` without `--dry-run`                        | Blocked              | Removes unreachable objects from the shared store                                                              |
+| immediate `git reflog expire`                          | Blocked              | Removes shared recovery history                                                                                |
+| `git update-ref -d` or `--stdin`                       | Blocked              | Can bypass worktree-aware porcelain checks                                                                     |
+| `git push +<refspec>` or `--mirror`                    | Blocked              | Force-updates remote refs without a lease                                                                      |
+| `git worktree prune`                                   | Allowed              | Removes stale administrative records, not a worktree directory                                                 |
+| `git remote remove`, `rm`, or `set-url`                | Allowed              | Recoverable configuration; guarding it caused excessive friction                                               |
+| `git stash pop`                                        | Allowed              | Routine workflow; upstream denies clear and warns on drop                                                      |
+| `git reset`, path checkout, and restore                | Allowed by allowlist | Affect only the calling worktree                                                                               |
+| `git branch -d` or `-D`                                | Allowed by allowlist | Git protects branches checked out elsewhere and records deletion in a reflog                                   |
+| `git push --force-with-lease` or `--force-if-includes` | Allowed              | Verifies remote state before the rewrite                                                                       |
 
 The upstream pack blocks `git clean -f` even though it is worktree-local.
 Untracked files have no object-store recovery path.
@@ -238,8 +239,8 @@ neighbouring commands, so other dcg rules can still inspect those operations.
 
 The allowlist matches Git global options with declared arity before it
 recognizes help. For example, `git -C /repo worktree remove --help` is help. In
-`git -C --help worktree remove`, the `-C` option consumes `--help`, so dcg
-continues to guard the command.
+`git -C --help worktree remove --force ../peer`, the `-C` option consumes
+`--help`, so dcg continues to guard the command.
 
 ## Related files
 

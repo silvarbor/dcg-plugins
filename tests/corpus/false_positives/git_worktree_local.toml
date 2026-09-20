@@ -56,6 +56,11 @@ command = "git worktree remove --no-force ../peer"
 expected = "allow"
 
 [[case]]
+description = "a quoted path is not a quoted force flag"
+command = "git worktree remove '/tmp/path with spaces'"
+expected = "allow"
+
+[[case]]
 description = "worktree add may use remove as a branch-name value"
 command = "git worktree add -b remove ../peer"
 expected = "allow"

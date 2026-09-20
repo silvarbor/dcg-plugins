@@ -7,7 +7,7 @@
 # Each agent runs in its own Git worktree. HEAD, the index, and the working
 # tree belong to that worktree. The common Git directory and remotes remain
 # shared. This pack blocks only operations that can destroy those shared
-# resources or delete a peer worktree.
+# resources or force-delete a peer worktree.
 #
 # Destructive patterns carry their own command-position anchor and do NOT
 # declare `executables`. dcg resolves that scope in the evaluator, and the
@@ -50,8 +50,9 @@ description: |
     - git push +<refspec> or --mirror
 
   Allowed:
-    - git worktree remove without a force flag; Git refuses a dirty or locked
-      worktree in that form
+    - git worktree remove without a force flag; Git refuses a worktree that
+      holds modified tracked files, untracked files, or a lock, and still
+      removes a clean worktree together with its ignored files
     - git worktree add, list, prune, and prune --dry-run
     - git remote remove, rm, and set-url
     - git stash pop; core.git denies stash clear and warns on stash drop
@@ -63,7 +64,7 @@ keywords:
 
 destructive_patterns:
   - name: git-worktree-remove
-    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*worktree\s+remove\s+(?:[^\s&;|`()<>]+\s+)*(?:--f(?:o|or|orc|orce)?\b|-[A-Za-z]*f[A-Za-z]*\b)
+    pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?git\s+(?:(?:-(?:C|c)\s+(?:[^\s&;|`()<>"']+|'[^']*'|"(?:[^"\\]|\\.)*")\s+)|(?:-[^\s&;|`()<>]+\s+))*worktree\s+remove\s+(?:[^\s&;|`()<>]+\s+)*['"]?(?:--['"]?f(?:o|or|orc|orce)?\b|-['"]?[A-Za-z]*f[A-Za-z]*\b)
     severity: critical
     description: forced git worktree remove blocked - deletes another agent's worktree together with its uncommitted files
     explanation: |
@@ -71,8 +72,10 @@ destructive_patterns:
       when it holds uncommitted or untracked files, or is locked. Files that
       were never committed do not exist in the object store or a reflog.
 
-      Without `--force`, Git refuses to remove a dirty or locked worktree, so
-      that form cannot delete uncommitted files and is allowed.
+      Without a force flag, Git refuses a worktree that holds modified tracked
+      files, untracked files, or a lock. It still removes a clean worktree
+      together with its ignored files. This policy accepts that loss and
+      allows the unforced form.
 
       Inspect the target first:
         - git worktree list

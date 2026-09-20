@@ -121,7 +121,10 @@ DENY	canary_access_boundary	gh repo edit --visibility public
 DENY	canary_git_safety	git worktree remove --force ../peer
 DENY	canary_git_short_force	git worktree remove -f ../peer
 DENY	canary_git_double_force	git worktree remove --force --force ../peer
+DENY	canary_git_quoted_force	git worktree remove '--force' ../peer
+DENY	canary_git_quoted_short_force	git worktree remove "-f" ../peer
 ALLOW	worktree_remove_unforced	git worktree remove ../peer
+ALLOW	worktree_remove_quoted_path	git worktree remove '/tmp/path with spaces'
 DENY	canary_git_global_option	git --no-optional-locks worktree remove --force ../peer
 DENY	canary_git_quoted_path	git -C '/tmp/path with spaces' worktree remove --force ../peer
 DENY	canary_git_split_expire	git reflog expire --all --expire-unreachable now

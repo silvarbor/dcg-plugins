@@ -95,3 +95,27 @@ description = "three wrappers must not hide worktree removal"
 command = "command nohup sudo git worktree remove --force ../peer"
 expected = "deny"
 rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "a single-quoted force flag reaches the pattern verbatim and must not hide the force"
+command = "git worktree remove '--force' ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "a double-quoted short force flag must not hide the force"
+command = "git worktree remove \"-f\" ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "a quoted force flag after the path must not hide the force"
+command = "git worktree remove ../peer '-f'"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"
+
+[[case]]
+description = "a quote inside the force flag must not hide the force"
+command = "git worktree remove --\"force\" ../peer"
+expected = "deny"
+rule_id = "silvarbor.git_safety:git-worktree-remove"

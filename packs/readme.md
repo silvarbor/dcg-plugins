@@ -239,8 +239,8 @@ neighbouring commands, so other dcg rules can still inspect those operations.
 
 The allowlist matches Git global options with declared arity before it
 recognizes help. For example, `git -C /repo worktree remove --help` is help. In
-`git -C --help worktree remove`, the `-C` option consumes `--help`, so dcg
-continues to guard the command.
+`git -C --help worktree remove --force ../peer`, the `-C` option consumes
+`--help`, so dcg continues to guard the command.
 
 ## Related files
 

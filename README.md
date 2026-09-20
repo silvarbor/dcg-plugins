@@ -86,7 +86,7 @@ pattern cannot override a rule from another pack. The policy supports:
 - help piped to `less`, `more`, or `cat`, or followed by a final `&`
 
 Known value-taking options consume a following `--help` token as data. For
-example, `git -C --help worktree remove` remains guarded.
+example, `git -C --help worktree remove --force ../peer` remains guarded.
 
 Redirects are not part of the help allowlist. The rest of dcg therefore still
 evaluates their destination; a help command cannot use the broad exception to

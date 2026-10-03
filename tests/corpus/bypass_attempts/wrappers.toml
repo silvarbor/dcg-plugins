@@ -10,7 +10,7 @@ rule_id = "silvarbor.git_safety:git-worktree-remove"
 description = "an assignment must not hide immediate reflog expiration"
 command = "GIT_DIR=/r git reflog expire --expire=now --all"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+rule_id = "core.git:reflog-expire-now"
 
 [[case]]
 description = "sudo must not hide worktree removal"
@@ -34,7 +34,7 @@ rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 description = "an unlisted zero-argument Git option must not hide ref deletion"
 command = "git --no-optional-locks update-ref -d refs/heads/x"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-ref-delete-plumbing"
+rule_id = "core.git:update-ref-delete"
 
 [[case]]
 description = "an unlisted zero-argument Git option must not hide a mirror push"
@@ -76,7 +76,7 @@ rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 description = "seventeen global options must not hide ref deletion"
 command = "git -c a01=b -c a02=b -c a03=b -c a04=b -c a05=b -c a06=b -c a07=b -c a08=b -c a09=b -c a10=b -c a11=b -c a12=b -c a13=b -c a14=b -c a15=b -c a16=b -c a17=b update-ref -d refs/heads/x"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-ref-delete-plumbing"
+rule_id = "core.git:update-ref-delete"
 
 [[case]]
 description = "seventeen global options must not hide a mirror push"

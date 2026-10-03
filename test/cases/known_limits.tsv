@@ -1,15 +1,8 @@
 # Executable documentation of intentionally unsupported shapes
 #
 # These ALLOW results do not classify the action as safe. They keep the
-# enumerated registry grammar, the bounded token walk, and their current gaps
-# visible in verification.
+# enumerated registry grammar and its current gaps visible in verification.
 ALLOW	registry_gap_npm	npm --registry=https://example.invalid publish
 ALLOW	registry_gap_pnpm	pnpm --registry=https://example.invalid publish
 ALLOW	registry_gap_yarn	yarn --registry https://example.invalid publish
 ALLOW	registry_gap_poetry	poetry --no-interaction publish
-# The custom visibility rule walks intervening tokens with a bounded class that
-# stops at a shell metacharacter, quoted or not. The built-in rule crosses a
-# quoted one but treats any --help token as a safe pattern. Only the
-# combination escapes both: a quoted metacharacter argument and a --help value.
-# The plain quoted-metacharacter shape is a DENY in worktree_isolated.tsv.
-ALLOW	visibility_gap_quoted_metachar_help_value	gh repo edit --homepage "a&b" --description --help --visibility public

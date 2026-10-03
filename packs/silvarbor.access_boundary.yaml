@@ -39,16 +39,16 @@ description: |
   duplicating a built-in rule means two messages for one action.
 
   `gh repo edit --visibility` IS here although platform.github ships
-  gh-repo-visibility-change. Since dcg 0.14.1 the built-in pack treats every
-  `--help` token as a safe pattern, so `gh repo edit --description --help
-  --visibility public` — where gh reads `--help` as the description's value
-  and changes visibility — passes the built-in rule. This rule matches the
-  command shape and ignores `--help`, and a pack's safe patterns suppress
-  only that pack's own rules, so the denial comes from here. Its token walk
-  is bounded: an intervening argument carrying a shell metacharacter, quoted
-  or not, stops the walk. The built-in rule still denies that shape on its
-  own, so only the combination of a quoted metacharacter argument and a
-  `--help` value escapes both rules.
+  gh-repo-visibility-change. In dcg 0.14.1 through 0.14.4 the built-in pack
+  treats every `--help` token as a safe pattern, so `gh repo edit
+  --description --help --visibility public` — where gh reads `--help` as the
+  description's value and changes visibility — passes the built-in rule.
+  This rule matches the command shape and ignores `--help`, and a pack's safe
+  patterns suppress only that pack's own rules, so on those versions the
+  denial comes from here. dcg 0.15.2 denies that shape in the built-in rule,
+  also after an intervening argument carrying a shell metacharacter, and the
+  built-in rule takes attribution. This rule's token walk is bounded: such an
+  argument, quoted or not, stops the walk.
 
   Covered:
     - `gh repo edit --visibility`
@@ -88,12 +88,11 @@ destructive_patterns:
     # fact: a repository made public is in the events firehose, GHArchive,
     # and scraper caches before it can be made private again. Kept alongside
     # the built-in rule because the built-in pack's `--help` safe pattern
-    # (dcg 0.14.1) swallows `--help` in an option-value position; see the
-    # pack description. test/cases/custom_pack.tsv asserts that this rule is
-    # the one that denies that shape; test/cases/worktree_isolated.tsv pins
-    # the effective verdict. The token walk is bounded and stops at a shell
-    # metacharacter, so a quoted one before the `--help` value escapes both
-    # rules; test/cases/known_limits.tsv keeps that residue visible.
+    # swallows `--help` in an option-value position in dcg 0.14.1 through
+    # 0.14.4; see the pack description. test/cases/custom_pack.tsv asserts
+    # that this rule denies that shape on its own;
+    # test/cases/worktree_isolated.tsv pins the effective verdict. The token
+    # walk is bounded and stops at a shell metacharacter, quoted or not.
     pattern: (?:^|[\n;&|(]|\b(?:then|else|do)\s+)\s*(?:[A-Za-z_][A-Za-z0-9_]*=(?:[^\s&;|`()<>"']*|'[^']*'|"(?:[^"\\]|\\.)*")\s+)*(?:(?:sudo|command|nohup|time)\s+)*(?:[^\s&;|`()<>]*/)?gh\s+repo\s+edit\s+(?:[^\s&;|`()<>]+\s+)*--visibility\b
     severity: critical
     description: "`gh repo edit --visibility` blocked — a repository made public stays public in every cache that saw it"

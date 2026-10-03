@@ -548,7 +548,7 @@ Two suites, because one tool cannot express both:
 
 - **`tests/corpus/`** runs under `dcg corpus`, dcg's own regression
   harness, in the upstream `true_positives` / `false_positives` /
-  `bypass_attempts` taxonomy. Each case asserts a `rule_id`. dcg 0.14 still
+  `bypass_attempts` taxonomy. Each case asserts a `rule_id`. dcg 0.15.2 still
   marks a wrong-rule denial as passed, so `test/run.sh` independently compares every
   expected rule ID with the current run's actual rule ID. A rejection fixture
   verifies that check. `tests/baseline.json` records the full result.
@@ -580,7 +580,7 @@ reaches a later match, so a critical custom `git stash drop` rule sits behind
 the medium built-in and changes nothing.
 
 `dcg pack validate` proves a pack parses, not that a rule still matches. Always
-run the matrices. Verified against dcg 0.14.4.
+run the matrices. Verified against dcg 0.15.2.
 
 CI runs both suites on every push and pull request. It pins the dcg version and
 the release tarball's checksum in

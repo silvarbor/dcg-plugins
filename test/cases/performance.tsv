@@ -12,16 +12,16 @@ DENY	options_git_worktree	silvarbor.git_safety:git-worktree-remove	git-options	w
 DENY	env_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	env	git gc --prune=now
 DENY	wrappers_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	wrappers	git gc --prune=now
 DENY	options_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	git-options	gc --prune=now
-DENY	env_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	env	git update-ref -d refs/heads/x
+DENY	env_git_ref_delete	core.git:update-ref-delete	env	git update-ref -d refs/heads/x
 DENY	wrappers_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	wrappers	git update-ref -d refs/heads/x
-DENY	options_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	git-options	update-ref -d refs/heads/x
-DENY	env_git_push	silvarbor.git_safety:git-push-refspec-force	env	git push origin +main:main
+DENY	options_git_ref_delete	core.git:update-ref-delete	git-options	update-ref -d refs/heads/x
+DENY	env_git_push	core.git:push-force-refspec	env	git push origin +main:main
 DENY	wrappers_git_push	silvarbor.git_safety:git-push-refspec-force	wrappers	git push origin +main:main
-DENY	options_git_push	silvarbor.git_safety:git-push-refspec-force	git-options	push origin +main:main
+DENY	options_git_push	core.git:push-force-refspec	git-options	push origin +main:main
 DENY	env_gh_visibility	platform.github:gh-repo-visibility-change	env	gh repo edit --visibility public
 DENY	wrappers_gh_visibility	platform.github:gh-repo-visibility-change	wrappers	gh repo edit --visibility public
-DENY	env_gh_visibility_help_value	silvarbor.access_boundary:gh-repo-visibility-change	env	gh repo edit --description --help --visibility public
-DENY	wrappers_gh_visibility_help_value	silvarbor.access_boundary:gh-repo-visibility-change	wrappers	gh repo edit --description --help --visibility public
+DENY	env_gh_visibility_help_value	platform.github:gh-repo-visibility-change	env	gh repo edit --description --help --visibility public
+DENY	wrappers_gh_visibility_help_value	platform.github:gh-repo-visibility-change	wrappers	gh repo edit --description --help --visibility public
 DENY	env_gh_secret	silvarbor.access_boundary:gh-secret-write	env	gh secret set TOKEN --body value
 DENY	wrappers_gh_secret	silvarbor.access_boundary:gh-secret-write	wrappers	gh secret set TOKEN --body value
 DENY	env_npm_publish	silvarbor.access_boundary:registry-publish	env	npm publish
@@ -45,14 +45,14 @@ DENY	xlong_env_git_worktree	silvarbor.git_safety:git-worktree-remove	env-long	gi
 DENY	xlong_wrappers_git_worktree	silvarbor.git_safety:git-worktree-remove	wrappers-long	git worktree remove --force ../peer
 DENY	xlong_env_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	env-long	git gc --prune=now
 DENY	xlong_wrappers_git_gc	silvarbor.git_safety:git-shared-recovery-data-destroy	wrappers-long	git gc --prune=now
-DENY	xlong_env_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	env-long	git update-ref -d refs/heads/x
+DENY	xlong_env_git_ref_delete	core.git:update-ref-delete	env-long	git update-ref -d refs/heads/x
 DENY	xlong_wrappers_git_ref_delete	silvarbor.git_safety:git-ref-delete-plumbing	wrappers-long	git update-ref -d refs/heads/x
-DENY	xlong_env_git_push	silvarbor.git_safety:git-push-refspec-force	env-long	git push origin +main:main
+DENY	xlong_env_git_push	core.git:push-force-refspec	env-long	git push origin +main:main
 DENY	xlong_wrappers_git_push	silvarbor.git_safety:git-push-refspec-force	wrappers-long	git push origin +main:main
 DENY	xlong_env_gh_visibility	platform.github:gh-repo-visibility-change	env-long	gh repo edit --visibility public
 DENY	xlong_wrappers_gh_visibility	platform.github:gh-repo-visibility-change	wrappers-long	gh repo edit --visibility public
-DENY	xlong_env_gh_visibility_help_value	silvarbor.access_boundary:gh-repo-visibility-change	env-long	gh repo edit --description --help --visibility public
-DENY	xlong_wrappers_gh_visibility_help_value	silvarbor.access_boundary:gh-repo-visibility-change	wrappers-long	gh repo edit --description --help --visibility public
+DENY	xlong_env_gh_visibility_help_value	platform.github:gh-repo-visibility-change	env-long	gh repo edit --description --help --visibility public
+DENY	xlong_wrappers_gh_visibility_help_value	platform.github:gh-repo-visibility-change	wrappers-long	gh repo edit --description --help --visibility public
 DENY	xlong_env_gh_secret	silvarbor.access_boundary:gh-secret-write	env-long	gh secret set TOKEN --body value
 DENY	xlong_wrappers_gh_secret	silvarbor.access_boundary:gh-secret-write	wrappers-long	gh secret set TOKEN --body value
 DENY	xlong_env_npm_publish	silvarbor.access_boundary:registry-publish	env-long	npm publish

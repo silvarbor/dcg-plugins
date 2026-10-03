@@ -9,12 +9,10 @@
 # permits reset, path checkout, restore, and branch deletion, but dcg's built-in
 # core.git pack blocks all four and a custom pack cannot un-block them.
 
-# No [general] section: hook_timeout_ms was pinned to 500 while the default was
-# 200ms, because dcg 0.7.1's shell-grammar parser costs ~7-8x on command lines
-# with nested $(...) and long agent commands were exceeding the budget. dcg
-# 0.8.0 raised the default to 1000, so the override is redundant and pinning it
-# would only cap us below the shipped default. Env override if ever needed:
-# DCG_HOOK_TIMEOUT_MS
+[general]
+# Deny commands that exceed the evaluation deadline or command-size limit.
+unverified_decision = "deny"
+# Keep the shipped timeout budget; override with DCG_HOOK_TIMEOUT_MS if needed.
 
 [packs]
 custom_paths = [

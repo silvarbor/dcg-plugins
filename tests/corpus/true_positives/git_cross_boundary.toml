@@ -22,13 +22,13 @@ rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 description = "immediate reflog expiration destroys shared recovery data"
 command = "git reflog expire --expire=now --all"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+rule_id = "core.git:reflog-expire-now"
 
 [[case]]
 description = "immediate unreachable reflog expiration destroys shared recovery data"
 command = "git reflog expire --expire-unreachable=now --all"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+rule_id = "core.git:reflog-expire-now"
 
 [[case]]
 description = "split immediate reflog expiration destroys shared recovery data"
@@ -46,7 +46,7 @@ rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 description = "all-valued reflog expiration destroys shared recovery data"
 command = "git reflog expire --expire=all --all"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+rule_id = "core.git:reflog-expire-now"
 
 [[case]]
 description = "split all-valued reflog expiration destroys shared recovery data"
@@ -58,7 +58,7 @@ rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 description = "all-valued unreachable expiration destroys shared recovery data"
 command = "git reflog expire --expire-unreachable=all --all"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
+rule_id = "core.git:reflog-expire-now"
 
 [[case]]
 description = "split all-valued unreachable expiration destroys shared recovery data"
@@ -70,7 +70,7 @@ rule_id = "silvarbor.git_safety:git-shared-recovery-data-destroy"
 description = "update-ref -d deletes a shared ref"
 command = "git update-ref -d refs/heads/x"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-ref-delete-plumbing"
+rule_id = "core.git:update-ref-delete"
 
 [[case]]
 description = "update-ref --stdin can delete shared refs in a transaction"
@@ -118,7 +118,7 @@ rule_id = "silvarbor.git_safety:git-push-refspec-force"
 description = "leading plus force-updates a remote refspec"
 command = "git push origin +main:main"
 expected = "deny"
-rule_id = "silvarbor.git_safety:git-push-refspec-force"
+rule_id = "core.git:push-force-refspec"
 
 # Upstream core.git owns these common destructive forms.
 [[case]]

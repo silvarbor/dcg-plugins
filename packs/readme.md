@@ -142,18 +142,16 @@ dcg's built-in GitHub pack covers repository deletion, which this pack does not
 duplicate. It also covers the visibility change, and on the plain command the
 built-in rule takes attribution, so the corpus asserts
 `platform.github:gh-repo-visibility-change`. This pack keeps its own
-`gh-repo-visibility-change` because the built-in pack treats every `--help`
-token as a safe pattern since dcg 0.14.1: `gh repo edit --description --help
---visibility public` passes the built-in rule while `gh` reads that `--help` as
-the description's value and changes visibility. A pack's safe patterns suppress
-only its own rules, so the denial comes from this rule;
-`test/cases/custom_pack.tsv` asserts that attribution and
-`test/cases/worktree_isolated.tsv` pins the verdict. The rule's token walk is
-bounded and stops at a shell metacharacter, quoted or not, so an intervening
-argument such as `--homepage "a&b"` escapes this rule. The built-in rule still
-denies that shape on its own; only the combination of such an argument and a
-`--help` value escapes both rules, and `test/cases/known_limits.tsv` keeps that
-residue visible.
+`gh-repo-visibility-change` because in dcg 0.14.1 through 0.14.4 the built-in
+pack treats every `--help` token as a safe pattern: `gh repo edit --description
+--help --visibility public` passes the built-in rule while `gh` reads that
+`--help` as the description's value and changes visibility. A pack's safe
+patterns suppress only its own rules, so on those versions the denial comes from
+this rule; `test/cases/custom_pack.tsv` asserts that this rule denies the shape
+on its own and `test/cases/worktree_isolated.tsv` pins the verdict. dcg 0.15.2
+denies that shape in the built-in rule, which then takes attribution, also when
+an intervening argument such as `--homepage "a&b"` stops this rule's bounded
+token walk.
 
 The registry grammar intentionally enumerates leading client options. It is
 not a general parser for each package manager.

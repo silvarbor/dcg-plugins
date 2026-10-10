@@ -45,7 +45,7 @@ description: |
   description's value and changes visibility — passes the built-in rule.
   This rule matches the command shape and ignores `--help`, and a pack's safe
   patterns suppress only that pack's own rules, so on those versions the
-  denial comes from here. dcg 0.15.2 denies that shape in the built-in rule,
+  denial comes from here. dcg 0.15.3 denies that shape in the built-in rule,
   also after an intervening argument carrying a shell metacharacter, and the
   built-in rule takes attribution. This rule's token walk is bounded: such an
   argument, quoted or not, stops the walk.

@@ -148,7 +148,7 @@ pack treats every `--help` token as a safe pattern: `gh repo edit --description
 `--help` as the description's value and changes visibility. A pack's safe
 patterns suppress only its own rules, so on those versions the denial comes from
 this rule; `test/cases/custom_pack.tsv` asserts that this rule denies the shape
-on its own and `test/cases/worktree_isolated.tsv` pins the verdict. dcg 0.15.2
+on its own and `test/cases/worktree_isolated.tsv` pins the verdict. dcg 0.15.3
 denies that shape in the built-in rule, which then takes attribution, also when
 an intervening argument such as `--homepage "a&b"` stops this rule's bounded
 token walk.

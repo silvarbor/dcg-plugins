@@ -58,7 +58,7 @@ pack treats every `--help` token as a safe pattern, which lets `gh repo edit
 `--help` as the description's value and changes visibility. A pack's safe
 patterns suppress only its own rules, so on those versions the denial comes
 from the custom rule; the policy suite asserts that the custom rule denies the
-shape on its own. dcg 0.15.2 denies that shape in the built-in rule, which then
+shape on its own. dcg 0.15.3 denies that shape in the built-in rule, which then
 takes attribution, also when an intervening argument carrying a shell
 metacharacter stops the custom rule's bounded token walk.
 
@@ -156,7 +156,7 @@ test/run.sh
 ```
 
 `tests/corpus/` uses dcg's native regression harness. The runner independently
-checks every expected and actual rule ID because dcg 0.15.2 still reports a
+checks every expected and actual rule ID because dcg 0.15.3 still reports a
 wrong-rule denial as passed. `test/cases/` exercises effective policy and
 asserts which rule claims each custom-pack case. Allowlist-driven results such
 as Git reset, the shared help policy, and resolved modes such as the `WARN` on
@@ -167,7 +167,7 @@ config overrides it to `deny`. Its performance matrix
 also enforces a 200 ms evaluation budget on 65-entry stress chains, and pins
 matching again at 128 entries, past the evaluator's scope-resolution ceiling.
 
-The active and disabled pack files validate without warnings under dcg 0.15.2.
+The active and disabled pack files validate without warnings under dcg 0.15.3.
 CI pins that version and its release checksum. CI also asserts that dcg loads
 both active pack IDs. An empty `custom_paths` glob removes all custom
 protection while dcg still reports healthy.

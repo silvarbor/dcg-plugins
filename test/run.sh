@@ -22,8 +22,8 @@
 # allowlist.toml nor [policy.rules], records every match as "deny", and has
 # no --config flag (it ignores DCG_CONFIG), so it cannot express an
 # allowlist-dependent ALLOW, a resolved WARN, or attribution under a chosen
-# config and dialect. Verified against dcg 0.15.2. The runner also checks
-# rule IDs independently because dcg 0.15.2 still marks a wrong-rule denial as
+# config and dialect. Verified against dcg 0.15.3. The runner also checks
+# rule IDs independently because dcg 0.15.3 still marks a wrong-rule denial as
 # passed.
 #
 # Test data lives in files rather than inline because dcg hooks the shell it

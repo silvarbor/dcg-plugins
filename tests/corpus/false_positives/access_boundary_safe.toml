@@ -122,6 +122,11 @@ command = "git commit -m do not npm publish from a laptop"
 expected = "allow"
 
 [[case]]
+description = "a prowl payload mentioning a guarded gh command is data"
+command = "prowl send agent --prompt 'run gh secret set TOKEN --body value'"
+expected = "allow"
+
+[[case]]
 description = "a guarded gh executable name inside another gh argument is data"
 command = "gh issue create --body 'never run gh repo edit --visibility public'"
 expected = "allow"

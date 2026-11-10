@@ -28,7 +28,7 @@ jobs:
     # Tracks `main` to match outcomeeng/plugins and outcomeeng/spx while the
     # reusable workflows are in beta. Keep the ref aligned with the automatic
     # review workflow.
-    uses: outcomeeng/gh-actions/.github/workflows/spec-tree.yml@main
+    uses: outcomeeng/gh-actions/.github/workflows/product-tree.yml@main
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 

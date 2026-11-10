@@ -288,7 +288,7 @@ Two suites, because one tool cannot express both:
 
 - **`tests/corpus/`** runs under `dcg corpus`, dcg's own regression
   harness, in the upstream `true_positives` / `false_positives` /
-  `bypass_attempts` taxonomy. Each case asserts a `rule_id`. dcg 0.15.3 still
+  `bypass_attempts` taxonomy. Each case asserts a `rule_id`. dcg 0.16.0 still
   marks a wrong-rule denial as passed, so `test/run.sh` independently compares every
   expected rule ID with the current run's actual rule ID. A rejection fixture
   verifies that check. `tests/baseline.json` records the full result.
@@ -320,14 +320,14 @@ reaches a later match, so a critical custom `git stash drop` rule sits behind
 the medium built-in and changes nothing.
 
 `dcg pack validate` proves a pack parses, not that a rule still matches. Always
-run the matrices. Verified against dcg 0.15.3.
+run the matrices. Verified against dcg 0.16.0.
 
-CI runs both suites on every push and pull request. It pins the dcg version and
-the release tarball's checksum in
+CI runs both suites on every push and pull request, on Linux x86_64 and macOS
+arm64. It pins the dcg version and each target's release tarball checksum in
 `.github/workflows/deterministic-verification.yml`, because a newer dcg can
 change a built-in pack's verdict with no change in this repo, and because
-`tests/baseline.json` records the binary that produced it. Bump the version, the
-checksum and the baseline together.
+`tests/baseline.json` records the binary that produced it. Bump the version,
+every checksum and the baseline together.
 
 ## Three things that will trip you up
 

@@ -26,6 +26,12 @@ expected = "deny"
 rule_id = "platform.github:gh-repo-visibility-change"
 
 [[case]]
+description = "a quoted visibility command in a prowl payload is denied by the built-in rule"
+command = "prowl send agent --prompt 'run gh repo edit --visibility public'"
+expected = "deny"
+rule_id = "platform.github:gh-repo-visibility-change"
+
+[[case]]
 description = "gh secret set"
 command = "gh secret set TOKEN --body value"
 expected = "deny"

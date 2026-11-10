@@ -1,8 +1,8 @@
 {
   "enabledPlugins": {
-    "spec-tree@outcomeeng": true,
     "prose@outcomeeng": true,
-    "contribute@outcomeeng": true
+    "contribute@outcomeeng": true,
+    "product-tree@outcomeeng": true
   },
   "extraKnownMarketplaces": {
     "outcomeeng": {

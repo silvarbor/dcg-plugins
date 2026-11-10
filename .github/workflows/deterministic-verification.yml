@@ -7,9 +7,13 @@ name: Deterministic Verification
 # way README.md tells an adopter to, asserts they loaded, and then runs both
 # case matrices against the real binary.
 #
-# Runner selection goes through the org-level `RUNNER_X2` variable so a provider
-# outage is a variable flip, not a pull request. Unset it to fall back to
-# GitHub-hosted `ubuntu-latest`.
+# The matrices run on Linux x86_64 and macOS arm64. The maintainer's live guard
+# is the macOS build, and CI's historical target is the Linux build, so a verdict
+# that differs between them fails one leg.
+#
+# The Linux leg selects its runner through the org-level `RUNNER_X2` variable so
+# a provider outage is a variable flip, not a pull request. Unset it to fall
+# back to GitHub-hosted `ubuntu-latest`.
 
 on:
   push:
@@ -30,16 +34,27 @@ permissions: {}
 
 jobs:
   verify:
-    name: Verification
-    runs-on: ${{ vars.RUNNER_X2 || 'ubuntu-latest' }}
+    name: Verification (${{ matrix.target }})
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            runner: ${{ vars.RUNNER_X2 || 'ubuntu-latest' }}
+            sha256: e7d860eba7f99cb5d5535b00942196aae3d6ca22ec049491d74c97aab556b642
+          - target: aarch64-apple-darwin
+            runner: macos-latest
+            sha256: 06cd609b19b988d267ebfac3e6736e511ba42c7a1746f4ec2af5295a8b300fe0
     env:
       # Pinned together with tests/baseline.json, which records the binary that
       # produced it. A newer dcg can change a built-in pack's verdict with no
-      # change in this repo.
-      DCG_VERSION: v0.15.3
-      DCG_SHA256: dc7dcec9679f74ac3e6990959771ca0c84168eba658eff64fe9e63f917a84cc4
+      # change in this repo. Each target pins the checksum of its own tarball.
+      DCG_VERSION: v0.16.0
+      DCG_TARGET: ${{ matrix.target }}
+      DCG_SHA256: ${{ matrix.sha256 }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 

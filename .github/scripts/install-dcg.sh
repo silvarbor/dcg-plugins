@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 # Install a pinned dcg release binary.
 #
-#   DCG_VERSION=v0.15.3 DCG_SHA256=<hex> .github/scripts/install-dcg.sh [dest]
+#   DCG_VERSION=v0.16.0 DCG_TARGET=<target> DCG_SHA256=<hex> \
+#     .github/scripts/install-dcg.sh [dest]
 #
 # The version is pinned because tests/baseline.json records the binary that
 # produced it, and a newer dcg can change a built-in pack's verdict without any
-# change in this repo. Bump both the version and the checksum together, then
-# regenerate the baseline.
+# change in this repo. The checksum belongs to one target's tarball. Bump the
+# version and every target's checksum together, then regenerate the baseline.
 
 set -euo pipefail
 
 : "${DCG_VERSION:?DCG_VERSION is required}"
 : "${DCG_SHA256:?DCG_SHA256 is required}"
-: "${DCG_TARGET:=x86_64-unknown-linux-musl}"
+: "${DCG_TARGET:?DCG_TARGET is required}"
 
 dest="${1:-$HOME/.local/bin}"
 repo=Dicklesworthstone/destructive_command_guard
@@ -27,7 +28,11 @@ curl -fsSL --retry 3 -o "$tmp/$tarball" "$url"
 # The checksum is pinned here rather than read from the release's own .sha256
 # asset. A checksum served from the same place as the artifact proves transport
 # integrity and nothing more.
-printf '%s  %s\n' "$DCG_SHA256" "$tmp/$tarball" | sha256sum -c -
+if command -v sha256sum >/dev/null; then
+  printf '%s  %s\n' "$DCG_SHA256" "$tmp/$tarball" | sha256sum -c -
+else
+  printf '%s  %s\n' "$DCG_SHA256" "$tmp/$tarball" | shasum -a 256 -c -
+fi
 
 tar -xJf "$tmp/$tarball" -C "$tmp"
 mkdir -p "$dest"

@@ -44,15 +44,15 @@ jobs:
         include:
           - target: x86_64-unknown-linux-musl
             runner: ${{ vars.RUNNER_X2 || 'ubuntu-latest' }}
-            sha256: e7d860eba7f99cb5d5535b00942196aae3d6ca22ec049491d74c97aab556b642
+            sha256: 5040fd95bba68a6152445d71e682b2da4e5076ca4f51961468a2c77a26fef95a
           - target: aarch64-apple-darwin
             runner: macos-latest
-            sha256: 06cd609b19b988d267ebfac3e6736e511ba42c7a1746f4ec2af5295a8b300fe0
+            sha256: 90dcfc55c4c9f4a5d9485baf51a5ba61dd53eb152a2980e5a297828ec37f5628
     env:
       # Pinned together with tests/baseline.json, which records the binary that
       # produced it. A newer dcg can change a built-in pack's verdict with no
       # change in this repo. Each target pins the checksum of its own tarball.
-      DCG_VERSION: v0.16.0
+      DCG_VERSION: v0.17.0
       DCG_TARGET: ${{ matrix.target }}
       DCG_SHA256: ${{ matrix.sha256 }}
     steps:

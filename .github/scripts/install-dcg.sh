@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Install a pinned dcg release binary.
 #
-#   DCG_VERSION=v0.16.0 DCG_TARGET=<target> DCG_SHA256=<hex> \
+#   DCG_VERSION=v0.17.0 DCG_TARGET=<target> DCG_SHA256=<hex> \
 #     .github/scripts/install-dcg.sh [dest]
 #
 # The version is pinned because tests/baseline.json records the binary that
